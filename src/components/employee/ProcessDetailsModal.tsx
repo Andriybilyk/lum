@@ -1,0 +1,291 @@
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Briefcase, Edit2, Save, X, Trash2 } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { useData } from '@/contexts/DataContext';
+import { useUser } from '@/contexts/UserContext';
+
+interface ProcessDetailsModalProps {
+  open: boolean;
+  onClose: () => void;
+  month: string;
+  year: string;
+}
+
+export default function ProcessDetailsModal({ open, onClose, month, year }: ProcessDetailsModalProps) {
+  const { toast } = useToast();
+  const { processes, updateProcess, deleteProcess, loadFromGoogleSheets } = useData();
+  const { user } = useUser();
+  
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [editingProcess, setEditingProcess] = useState<string | null>(null);
+  const [editProcessData, setEditProcessData] = useState<any>({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Фільтруємо процеси для поточного користувача та місяця
+  const monthStr = `${year}-${month.padStart(2, '0')}`;
+  const userProcesses = processes.filter(p => 
+    p.userId === user?.id && p.date.startsWith(monthStr)
+  );
+
+  const totalProcesses = userProcesses.length;
+  const totalEarnings = userProcesses.reduce((sum, p) => sum + p.salary, 0);
+
+  const months = [
+    'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень',
+    'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'
+  ];
+
+  const handleEditProcess = (entry: any) => {
+    setEditingProcess(entry.id);
+    setEditProcessData({
+      date: entry.date,
+      processName: entry.processName,
+      volume: entry.volume,
+      unit: entry.unit,
+      rate: entry.salary / entry.volume
+    });
+  };
+
+  const handleSaveProcess = async (entryId: string) => {
+    setIsLoading(true);
+    try {
+      const volume = typeof editProcessData.volume === 'string' 
+        ? parseFloat(editProcessData.volume) 
+        : editProcessData.volume;
+      const rate = typeof editProcessData.rate === 'string' 
+        ? parseFloat(editProcessData.rate) 
+        : editProcessData.rate;
+      
+      const salary = volume * rate;
+      
+      await updateProcess(entryId, {
+        date: editProcessData.date,
+        processName: editProcessData.processName,
+        volume,
+        unit: editProcessData.unit,
+        salary
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      await loadFromGoogleSheets();
+      
+      toast({
+        title: 'Успішно',
+        description: 'Запис процесу оновлено'
+      });
+      
+      setEditingProcess(null);
+    } catch (error) {
+      toast({
+        title: 'Помилка',
+        description: 'Не вдалося оновити запис',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteConfirm) return;
+
+    setIsLoading(true);
+    try {
+      await deleteProcess(deleteConfirm);
+      
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      await loadFromGoogleSheets();
+      
+      toast({ 
+        title: 'Успішно', 
+        description: 'Запис процесу видалено'
+      });
+      
+      setDeleteConfirm(null);
+    } catch (error) {
+      toast({
+        title: 'Помилка',
+        description: 'Не вдалося видалити запис',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-purple-600" />
+              Виконані Процеси - {months[parseInt(month) - 1]} {year}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Загальна статистика */}
+            <div className="grid grid-cols-2 gap-3">
+              <Card className="p-4 bg-gradient-to-br from-purple-500 to-pink-400 text-white">
+                <p className="text-xs opacity-80">Всього Процесів</p>
+                <p className="text-2xl font-bold">{totalProcesses}</p>
+              </Card>
+              <Card className="p-4 bg-gradient-to-br from-green-500 to-emerald-400 text-white">
+                <p className="text-xs opacity-80">Заробіток</p>
+                <p className="text-2xl font-bold">₴{totalEarnings.toFixed(0)}</p>
+              </Card>
+            </div>
+
+            {/* Деталі по процесах */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Деталі по Процесах
+              </h3>
+              {userProcesses.length === 0 ? (
+                <p className="text-center text-slate-500 py-8">Немає записів процесів</p>
+              ) : (
+                userProcesses.map((entry) => (
+                  <Card key={entry.id} className="p-3">
+                    {editingProcess === entry.id ? (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label className="text-xs">Дата</Label>
+                            <Input
+                              type="date"
+                              value={editProcessData.date}
+                              onChange={(e) => setEditProcessData({...editProcessData, date: e.target.value})}
+                              className="h-8"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs">Процес</Label>
+                            <Input
+                              value={editProcessData.processName}
+                              onChange={(e) => setEditProcessData({...editProcessData, processName: e.target.value})}
+                              className="h-8"
+                            />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <Label className="text-xs">Обсяг</Label>
+                            <Input
+                              type="number"
+                              value={editProcessData.volume}
+                              onChange={(e) => setEditProcessData({...editProcessData, volume: parseFloat(e.target.value)})}
+                              className="h-8"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs">Одиниця</Label>
+                            <Input
+                              value={editProcessData.unit}
+                              onChange={(e) => setEditProcessData({...editProcessData, unit: e.target.value})}
+                              className="h-8"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs">Ставк��</Label>
+                            <Input
+                              type="number"
+                              value={editProcessData.rate}
+                              onChange={(e) => setEditProcessData({...editProcessData, rate: parseFloat(e.target.value)})}
+                              className="h-8"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            onClick={() => handleSaveProcess(entry.id)}
+                            disabled={isLoading}
+                            className="flex-1"
+                          >
+                            <Save className="w-3 h-3 mr-1" />
+                            Зберегти
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => setEditingProcess(null)}
+                            disabled={isLoading}
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-slate-800 dark:text-white">
+                            {entry.processName}
+                          </p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            {entry.date} • {entry.volume} {entry.unit} × ₴{(entry.salary / entry.volume).toFixed(0)}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold text-green-600 dark:text-green-400">
+                            ₴{entry.salary.toFixed(0)}
+                          </p>
+                          <div className="flex gap-1">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleEditProcess(entry)}
+                              disabled={isLoading}
+                            >
+                              <Edit2 className="w-3 h-3" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="text-red-600"
+                              onClick={() => setDeleteConfirm(entry.id)}
+                              disabled={isLoading}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </Card>
+                ))
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Підтвердження Видалення</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ви впевнені, що хочете видалити цей запис? Цю дію неможливо скасувати.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoading}>Скасувати</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete} 
+              className="bg-red-600 hover:bg-red-700"
+              disabled={isLoading}
+            >
+              Видалити
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
