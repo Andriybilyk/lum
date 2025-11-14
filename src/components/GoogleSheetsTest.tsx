@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 export default function GoogleSheetsTest() {
-  const { levels, objects, processTypes, isLoading, isConfigured, loadFromGoogleSheets } = useData();
+  const { users, hours, processes, levels, objects, processTypes, isLoading, isConfigured, loadFromGoogleSheets } = useData();
   const [config, setConfig] = useState({
     spreadsheetId: '',
     apiKey: '',
@@ -80,8 +80,53 @@ export default function GoogleSheetsTest() {
 
         <Card className="p-6 bg-white">
           <h3 className="text-xl font-bold mb-4">📋 Завантажені дані</h3>
-          
+
           <div className="space-y-4">
+            <div className="p-4 border rounded-lg">
+              <h4 className="font-semibold text-lg mb-2">Користувачі ({users.length})</h4>
+              {users.length === 0 ? (
+                <p className="text-slate-500">Немає користувачів</p>
+              ) : (
+                <ul className="space-y-1">
+                  {users.map(user => (
+                    <li key={user.id} className="text-sm">
+                      • {user.name} ({user.role}) - ₴{user.hourlyRate}/год
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="p-4 border rounded-lg">
+              <h4 className="font-semibold text-lg mb-2">Години ({hours.length})</h4>
+              {hours.length === 0 ? (
+                <p className="text-slate-500">Немає записів годин</p>
+              ) : (
+                <ul className="space-y-1 max-h-64 overflow-y-auto">
+                  {hours.map(hour => (
+                    <li key={hour.id} className="text-sm">
+                      • {hour.date}: {hour.hours} год на {hour.object} = ₴{hour.salary}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="p-4 border rounded-lg">
+              <h4 className="font-semibold text-lg mb-2">Процеси ({processes.length})</h4>
+              {processes.length === 0 ? (
+                <p className="text-slate-500">Немає записів процесів</p>
+              ) : (
+                <ul className="space-y-1 max-h-64 overflow-y-auto">
+                  {processes.map(process => (
+                    <li key={process.id} className="text-sm">
+                      • {process.date}: {process.processName} на {process.object || 'N/A'} ({process.volume} {process.unit}) = ₴{process.salary}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
             <div className="p-4 border rounded-lg">
               <h4 className="font-semibold text-lg mb-2">Рівні ({levels.length})</h4>
               {levels.length === 0 ? (

@@ -6,40 +6,35 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Clock, Briefcase, DollarSign, Edit2, Save, X, Trash2 } from 'lucide-react';
+import { Clock, Briefcase, DollarSign, Edit2, Save, X, Trash2, RefreshCw } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useData } from '@/contexts/DataContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import type { User, EditHourData, EditProcessData } from '@/types';
 
 interface EmployeeDetailsModalProps {
   open: boolean;
   onClose: () => void;
-  employee: {
-    id: string;
-    name: string;
-    level: string;
-    rate: number;
-  };
+  employee: User;
 }
 
 export default function EmployeeDetailsModal({ open, onClose, employee }: EmployeeDetailsModalProps) {
   const { toast } = useToast();
-  const { hours, processes, objects, updateHours, deleteHours, updateProcess, deleteProcess, loadFromGoogleSheets } = useData();
+  const { hours, processes, objects, processTypes, updateHours, deleteHours, updateProcess, deleteProcess, loadFromGoogleSheets } = useData();
   
-  // Фільтруємо дані для конкретного працівника
-  const personHours = hours.filter(h => h.userId === employee.id);
-  const personProcesses = processes.filter(p => p.userId === employee.id);
-
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'hour' | 'process', id: string } | null>(null);
   const [editingHour, setEditingHour] = useState<string | null>(null);
   const [editingProcess, setEditingProcess] = useState<string | null>(null);
-  const [editHourData, setEditHourData] = useState<any>({});
-  const [editProcessData, setEditProcessData] = useState<any>({});
+  const [editHourData, setEditHourData] = useState<EditHourData>({ date: '', hours: 0, object: '', isBusinessTrip: false });
+  const [editProcessData, setEditProcessData] = useState<EditProcessData>({ date: '', processName: '', object: '', volume: 0, unit: '', rate: 0 });
   const [isLoading, setIsLoading] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
-  const totalHours = personHours.reduce((sum, h) => sum + h.hours, 0);
-  const totalHourEarnings = personHours.reduce((sum, h) => sum + h.salary, 0);
-  const totalProcessEarnings = personProcesses.reduce((sum, p) => sum + p.salary, 0);
+  const empHours = hours.filter(h => h.userId === employee.id);
+  const empProcesses = processes.filter(p => p.userId === employee.id);
+  const totalHours = empHours.reduce((sum, h) => sum + h.hours, 0);
+  const totalHourEarnings = empHours.reduce((sum, h) => sum + h.salary, 0);
+  const totalProcessEarnings = empProcesses.reduce((sum, p) => sum + p.salary, 0);
   const totalEarnings = totalHourEarnings + totalProcessEarnings;
 
   const handleEditHour = (entry: any) => {
@@ -55,16 +50,11 @@ export default function EmployeeDetailsModal({ open, onClose, employee }: Employ
   const handleSaveHour = async (entryId: string) => {
     setIsLoading(true);
     try {
-      const hours = typeof editHourData.hours === 'string' 
-        ? parseFloat(editHourData.hours) 
-        : editHourData.hours;
-      
-      const rate = typeof employee.rate === 'string'
-        ? parseFloat(employee.rate)
-        : employee.rate;
-      
+      const hours = editHourData.hours;
+      const rate = employee.hourlyRate;
+
       const salary = hours * rate * (editHourData.isBusinessTrip ? 1.2 : 1);
-      
+
       await updateHours(entryId, {
         date: editHourData.date,
         hours,
@@ -73,15 +63,15 @@ export default function EmployeeDetailsModal({ open, onClose, employee }: Employ
         salary
       });
 
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      await loadFromGoogleSheets();
-      
+      // Даємо час на запис в Google Sheets (запит вже відправлено)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      setEditingHour(null);
+
       toast({
         title: 'Успішно',
-        description: 'Запис годин оновлено'
+        description: 'Запис годин оновлено та синхронізовано'
       });
-      
-      setEditingHour(null);
     } catch (error) {
       toast({
         title: 'Помилка',
@@ -98,41 +88,39 @@ export default function EmployeeDetailsModal({ open, onClose, employee }: Employ
     setEditProcessData({
       date: entry.date,
       processName: entry.processName,
+      object: entry.object || '',
       volume: entry.volume,
       unit: entry.unit,
-      rate: entry.salary / entry.volume // Розраховуємо ставку з salary та volume
+      rate: entry.salary / entry.volume
     });
   };
 
   const handleSaveProcess = async (entryId: string) => {
     setIsLoading(true);
     try {
-      const volume = typeof editProcessData.volume === 'string' 
-        ? parseFloat(editProcessData.volume) 
-        : editProcessData.volume;
-      const rate = typeof editProcessData.rate === 'string' 
-        ? parseFloat(editProcessData.rate) 
-        : editProcessData.rate;
-      
+      const volume = editProcessData.volume;
+      const rate = editProcessData.rate;
+
       const salary = volume * rate;
-      
+
       await updateProcess(entryId, {
         date: editProcessData.date,
         processName: editProcessData.processName,
+        object: editProcessData.object,
         volume,
         unit: editProcessData.unit,
         salary
       });
 
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      await loadFromGoogleSheets();
-      
+      // Даємо час на запис в Google Sheets (запит вже відправлено)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      setEditingProcess(null);
+
       toast({
         title: 'Успішно',
-        description: 'Запис процесу оновлено'
+        description: 'Запис процесу оновлено та синхронізовано'
       });
-      
-      setEditingProcess(null);
     } catch (error) {
       toast({
         title: 'Помилка',
@@ -149,23 +137,23 @@ export default function EmployeeDetailsModal({ open, onClose, employee }: Employ
 
     setIsLoading(true);
     try {
+      const type = deleteConfirm.type;
+
       if (deleteConfirm.type === 'hour') {
         await deleteHours(deleteConfirm.id);
-        toast({ 
-          title: 'Успішно', 
-          description: 'Запис годин видалено'
-        });
       } else {
         await deleteProcess(deleteConfirm.id);
-        toast({ 
-          title: 'Успішно', 
-          description: 'Запис процесу видалено' 
-        });
       }
-      
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      await loadFromGoogleSheets();
+
+      // Даємо час на запис в Google Sheets (запит вже відправлено)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       setDeleteConfirm(null);
+
+      toast({
+        title: 'Успішно',
+        description: `Запис ${type === 'hour' ? 'годин' : 'процесу'} видалено та синхронізовано`
+      });
     } catch (error) {
       toast({
         title: 'Помилка',
@@ -177,14 +165,55 @@ export default function EmployeeDetailsModal({ open, onClose, employee }: Employ
     }
   };
 
+  const handleManualSync = async () => {
+    if (editingHour || editingProcess) {
+      toast({
+        title: 'Увага',
+        description: 'Завершіть редагування перед синхронізацією',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsSyncing(true);
+    try {
+      await loadFromGoogleSheets();
+      toast({
+        title: 'Синхронізовано',
+        description: 'Дані успішно оновлено з Google Sheets'
+      });
+    } catch (error) {
+      toast({
+        title: 'Помилка',
+        description: 'Не вдалося синхронізувати дані',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl">
-              Детальна Інформація - {employee.name}
-            </DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-xl">
+                Детальна Інформація - {employee.name}
+              </DialogTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleManualSync}
+                disabled={isSyncing || !!editingHour || !!editingProcess}
+                className="gap-2"
+                title={editingHour || editingProcess ? 'Завершіть редагування перед синхронізацією' : 'Оновити дані з Google Sheets'}
+              >
+                <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                {isSyncing ? 'Синхронізація...' : 'Оновити'}
+              </Button>
+            </div>
           </DialogHeader>
 
           {/* Загальна статистика */}
@@ -196,7 +225,7 @@ export default function EmployeeDetailsModal({ open, onClose, employee }: Employ
             </Card>
             <Card className="p-3 bg-gradient-to-br from-purple-500 to-pink-400 text-white">
               <Briefcase className="w-4 h-4 mb-1 opacity-80" />
-              <p className="text-2xl font-bold">{personProcesses.length}</p>
+              <p className="text-2xl font-bold">{empProcesses.length}</p>
               <p className="text-xs opacity-80">Процесів</p>
             </Card>
             <Card className="p-3 bg-gradient-to-br from-green-500 to-emerald-400 text-white">
@@ -213,10 +242,10 @@ export default function EmployeeDetailsModal({ open, onClose, employee }: Employ
             </TabsList>
 
             <TabsContent value="hours" className="space-y-2 mt-4">
-              {personHours.length === 0 ? (
+              {empHours.length === 0 ? (
                 <p className="text-center text-slate-500 py-8">Немає записів годин</p>
               ) : (
-                personHours.map((entry) => {
+                empHours.map((entry) => {
                   const selectedObject = objects.find(o => o.name === editHourData.object);
                   const isBusinessTrip = selectedObject?.isBusinessTrip || false;
 
@@ -347,10 +376,10 @@ export default function EmployeeDetailsModal({ open, onClose, employee }: Employ
             </TabsContent>
 
             <TabsContent value="processes" className="space-y-2 mt-4">
-              {personProcesses.length === 0 ? (
+              {empProcesses.length === 0 ? (
                 <p className="text-center text-slate-500 py-8">Немає записів процесів</p>
               ) : (
-                personProcesses.map((entry) => (
+                empProcesses.map((entry) => (
                   <Card key={entry.id} className="p-3">
                     {editingProcess === entry.id ? (
                       <div className="space-y-3">
@@ -365,13 +394,60 @@ export default function EmployeeDetailsModal({ open, onClose, employee }: Employ
                             />
                           </div>
                           <div>
-                            <Label className="text-xs">Процес</Label>
-                            <Input
-                              value={editProcessData.processName}
-                              onChange={(e) => setEditProcessData({...editProcessData, processName: e.target.value})}
-                              className="h-8"
-                            />
+                            <Label className="text-xs">Об'єкт</Label>
+                            <Select
+                              value={editProcessData.object}
+                              onValueChange={(value) => setEditProcessData({
+                                ...editProcessData,
+                                object: value,
+                                processName: '',
+                                unit: '',
+                                rate: 0
+                              })}
+                            >
+                              <SelectTrigger className="h-8 mt-1">
+                                <SelectValue placeholder="Оберіть об'єкт" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {objects.map((obj) => (
+                                  <SelectItem key={obj.id} value={obj.name}>
+                                    {obj.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
+                        </div>
+                        <div>
+                          <Label className="text-xs">Процес</Label>
+                          <Select
+                            value={editProcessData.processName}
+                            onValueChange={(value) => {
+                              const process = processTypes.find(p => p.name === value);
+                              if (process) {
+                                setEditProcessData({
+                                  ...editProcessData,
+                                  processName: value,
+                                  unit: process.unit,
+                                  rate: process.rate
+                                });
+                              }
+                            }}
+                            disabled={!editProcessData.object}
+                          >
+                            <SelectTrigger className="h-8 mt-1">
+                              <SelectValue placeholder={editProcessData.object ? "Оберіть процес" : "Спочатку оберіть об'єкт"} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {processTypes
+                                .filter(p => !editProcessData.object || p.object === editProcessData.object)
+                                .map((process) => (
+                                  <SelectItem key={process.id} value={process.name}>
+                                    {process.name} - ₴{process.rate}/{process.unit}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="grid grid-cols-3 gap-2">
                           <div>
@@ -387,8 +463,8 @@ export default function EmployeeDetailsModal({ open, onClose, employee }: Employ
                             <Label className="text-xs">Одиниця</Label>
                             <Input
                               value={editProcessData.unit}
-                              onChange={(e) => setEditProcessData({...editProcessData, unit: e.target.value})}
-                              className="h-8"
+                              readOnly
+                              className="h-8 bg-slate-50 dark:bg-slate-800"
                             />
                           </div>
                           <div>
@@ -396,8 +472,8 @@ export default function EmployeeDetailsModal({ open, onClose, employee }: Employ
                             <Input
                               type="number"
                               value={editProcessData.rate}
-                              onChange={(e) => setEditProcessData({...editProcessData, rate: parseFloat(e.target.value)})}
-                              className="h-8"
+                              readOnly
+                              className="h-8 bg-slate-50 dark:bg-slate-800"
                             />
                           </div>
                         </div>
@@ -425,9 +501,11 @@ export default function EmployeeDetailsModal({ open, onClose, employee }: Employ
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <p className="text-sm font-medium text-slate-800 dark:text-white">{entry.processName}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">{entry.date}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            {entry.date}{entry.object ? ` • ${entry.object}` : ''}
+                          </p>
                           <p className="text-sm font-semibold text-slate-800 dark:text-white mt-1">
-                            {entry.volume} {entry.unit} × ₴{entry.rate} = ₴{entry.salary}
+                            {entry.volume} {entry.unit} × ₴{entry.rate?.toFixed(2) || (entry.volume ? (entry.salary / entry.volume).toFixed(2) : 0)} = ₴{entry.salary}
                           </p>
                         </div>
                         <div className="flex gap-2">

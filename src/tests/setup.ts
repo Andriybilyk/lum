@@ -50,7 +50,7 @@ class MockIDBObjectStore {
 
 if (typeof window !== 'undefined') {
   (window as any).indexedDB = {
-    open: vi.fn((dbName: string, version: number) => {
+    open: vi.fn((_dbName: string, _version: number) => {
       const mockRequest = {
         onerror: null as ((event: Event) => void) | null,
         onsuccess: null as ((event: Event) => void) | null,

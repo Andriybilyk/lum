@@ -13,7 +13,7 @@ interface Reminder {
   type: 'today' | 'tomorrow' | 'upcoming';
   assignedBy: string;
   assignedTo: string;
-  status: 'pending' | 'confirmed' | 'declined';
+  status: 'pending' | 'confirmed' | 'declined' | 'employee_confirmed' | 'manager_confirmed';
   notes: string;
   employeeConfirmed: boolean;
   managerConfirmed: boolean;

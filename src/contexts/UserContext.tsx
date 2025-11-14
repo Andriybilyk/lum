@@ -1,13 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
-export interface User {
-  id: string;
-  name: string;
-  role: 'employee' | 'manager';
-  level?: string;
-  hourlyRate?: number;
-  teamInfo?: string;
-}
+import type { User } from '../types';
 
 interface UserContextType {
   user: User | null;

@@ -1,14 +1,15 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Clock, Edit2, Save, X, Trash2 } from 'lucide-react';
+import { Clock, Save, X } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useData } from '@/contexts/DataContext';
 import { useUser } from '@/contexts/UserContext';
+import MemoizedHoursCard from '@/components/memoized/MemoizedHoursCard';
 
 interface HoursDetailsModalProps {
   open: boolean;
@@ -28,8 +29,8 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
   const [isLoading, setIsLoading] = useState(false);
 
   // Фільтруємо години для поточного користувача та місяця
-  const monthStr = `${year}-${month.padStart(2, '0')}`;
-  const userHours = hours.filter(h => 
+  const monthStr = `${year}-${month}`;
+  const userHours = hours.filter(h =>
     h.userId === user?.id && h.date.startsWith(monthStr)
   );
 
@@ -41,7 +42,7 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
     'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'
   ];
 
-  const handleEditHour = (entry: any) => {
+  const handleEditHour = useCallback((entry: any) => {
     setEditingHour(entry.id);
     setEditHourData({
       date: entry.date,
@@ -49,7 +50,11 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
       object: entry.object,
       isBusinessTrip: entry.isBusinessTrip
     });
-  };
+  }, []);
+
+  const handleDeleteHour = useCallback((hoursId: string) => {
+    setDeleteConfirm(hoursId);
+  }, []);
 
   const handleSaveHour = async (entryId: string) => {
     setIsLoading(true);
@@ -123,7 +128,7 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-blue-600" />
-              Відпрацьовані Години - {months[parseInt(month) - 1]} {year}
+              Відпрацьовані Години - {months[parseInt(month) - 1]} {year.padStart(4, '0')}
             </DialogTitle>
           </DialogHeader>
 
@@ -149,8 +154,8 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
                 <p className="text-center text-slate-500 py-8">Немає записів годин</p>
               ) : (
                 userHours.map((entry) => (
-                  <Card key={entry.id} className="p-3">
-                    {editingHour === entry.id ? (
+                  editingHour === entry.id ? (
+                    <Card key={entry.id} className="p-3">
                       <div className="space-y-3">
                         <div className="grid grid-cols-2 gap-2">
                           <div>
@@ -192,8 +197,8 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
                           <Label className="text-xs">Відрядження (1.2x)</Label>
                         </div>
                         <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             onClick={() => handleSaveHour(entry.id)}
                             disabled={isLoading}
                             className="flex-1"
@@ -201,8 +206,8 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
                             <Save className="w-3 h-3 mr-1" />
                             Зберегти
                           </Button>
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             variant="outline"
                             onClick={() => setEditingHour(null)}
                             disabled={isLoading}
@@ -211,44 +216,16 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
                           </Button>
                         </div>
                       </div>
-                    ) : (
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-slate-800 dark:text-white">
-                            {entry.object}
-                            {entry.isBusinessTrip && (
-                              <span className="ml-2 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded">
-                                Відрядження 1.2x
-                              </span>
-                            )}
-                          </p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">{entry.date}</p>
-                          <p className="text-sm font-semibold text-slate-800 dark:text-white mt-1">
-                            {entry.hours} год • ₴{entry.salary.toFixed(2)}
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleEditHour(entry)}
-                            disabled={isLoading}
-                          >
-                            <Edit2 className="w-3 h-3" />
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="text-red-600"
-                            onClick={() => setDeleteConfirm(entry.id)}
-                            disabled={isLoading}
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </Card>
+                    </Card>
+                  ) : (
+                    <MemoizedHoursCard
+                      key={entry.id}
+                      hours={entry}
+                      onEdit={handleEditHour}
+                      onDelete={handleDeleteHour}
+                      isLoading={isLoading}
+                    />
+                  )
                 ))
               )}
             </div>

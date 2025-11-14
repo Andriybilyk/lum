@@ -6,8 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useUser } from '@/contexts/UserContext';
 import { useData } from '@/contexts/DataContext';
-import { useToast } from '@/components/ui/use-toast';
+import { useNotification } from '@/contexts/NotificationContext';
 import { AlertCircle } from 'lucide-react';
+import { calculateEarnings, calculateDailyHours, getCurrentDate } from '@/utils/calculations';
+import { WORK_HOURS, MESSAGES } from '@/utils/constants';
 
 interface LogHoursModalProps {
   open: boolean;
@@ -16,93 +18,68 @@ interface LogHoursModalProps {
 
 export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
   const { user } = useUser();
-  const { objects, hours, addHours } = useData();
-  const { toast } = useToast();
-  
+  const { objects, hours, addHours, loadFromGoogleSheets } = useData();
+  const { error, success } = useNotification();
+
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
+    date: getCurrentDate(),
     hours: '',
     object: ''
   });
 
-  // Визначаємо чи об'єкт є відрядженням
   const selectedObject = objects.find(o => o.name === formData.object);
   const isBusinessTrip = selectedObject?.isBusinessTrip || false;
 
-  // Підрахунок годин вже відпрацьованих сьогодні
-  const hoursWorkedToday = hours
-    .filter(h => h.userId === user?.id && h.date === formData.date)
-    .reduce((sum, h) => sum + h.hours, 0);
+  const hoursWorkedToday = calculateDailyHours(hours, user?.id || '', formData.date);
 
-  const calculateEarnings = () => {
-    const hoursValue = parseFloat(formData.hours);
-    if (isNaN(hoursValue) || !formData.object) return { total: 0, normalHours: 0, overtimeHours: 0, baseCoefficient: 1 };
+  const hoursValue = parseFloat(formData.hours) || 0;
+  const earnings = calculateEarnings({
+    hours: hoursValue,
+    hourlyRate: user?.hourlyRate || 0,
+    hoursWorkedToday,
+    isBusinessTrip
+  });
 
-    const rate = user?.hourlyRate || 0;
-    const baseCoefficient = isBusinessTrip ? 1.2 : 1.0;
-
-    // Розрахунок понаднормових годин
-    const totalHoursToday = hoursWorkedToday + hoursValue;
-    let normalHours = hoursValue;
-    let overtimeHours = 0;
-
-    if (totalHoursToday > 8) {
-      const normalLimit = Math.max(0, 8 - hoursWorkedToday);
-      normalHours = Math.min(hoursValue, normalLimit);
-      overtimeHours = hoursValue - normalHours;
-    }
-
-    // Розрахунок заробітку
-    const normalEarnings = normalHours * rate * baseCoefficient;
-    const overtimeEarnings = overtimeHours * rate * baseCoefficient * 1.5;
-
-    return {
-      total: normalEarnings + overtimeEarnings,
-      normalHours,
-      overtimeHours,
-      baseCoefficient
-    };
-  };
-
-  const earnings = calculateEarnings();
-  const totalHoursToday = hoursWorkedToday + (parseFloat(formData.hours) || 0);
+  const totalHoursToday = hoursWorkedToday + hoursValue;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const hoursValue = parseFloat(formData.hours);
-    
-    if (totalHoursToday > 12) {
-      toast({
-        title: 'Помилка',
-        description: 'Максимум 12 годин на день в сумі по всіх об\'єктах',
-        variant: 'destructive'
-      });
+
+    if (totalHoursToday > WORK_HOURS.MAX_DAILY_HOURS) {
+      error('Помилка', MESSAGES.ERROR.MAX_HOURS_EXCEEDED);
       return;
     }
 
-    await addHours({
-      userId: user?.id || '',
-      date: formData.date,
-      hours: hoursValue,
-      object: formData.object,
-      isBusinessTrip: isBusinessTrip,
-      salary: earnings.total
-    });
+    try {
+      await addHours({
+        userId: user?.id || '',
+        date: formData.date,
+        hours: hoursValue,
+        object: formData.object,
+        isBusinessTrip: isBusinessTrip,
+        salary: earnings.total
+      });
 
-    toast({
-      title: 'Успішно',
-      description: `Записано ${hoursValue} годин. Заробіток: ₴${earnings.total.toFixed(2)}${
-        earnings.overtimeHours > 0 ? ` (${earnings.overtimeHours} год понаднормових)` : ''
-      }`
-    });
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-    setFormData({
-      date: new Date().toISOString().split('T')[0],
-      hours: '',
-      object: ''
-    });
-    onClose();
+      const overtime = earnings.overtimeHours > 0
+        ? ` (${earnings.overtimeHours.toFixed(1)} год понаднормових)`
+        : '';
+
+      success(
+        'Успішно',
+        `Записано ${hoursValue} годин. Заробіток: ₴${earnings.total.toFixed(2)}${overtime}`
+      );
+
+      setFormData({
+        date: getCurrentDate(),
+        hours: '',
+        object: ''
+      });
+      onClose();
+    } catch (err) {
+      error('Помилка', 'Не вдалося зберегти записи. Спробуйте ще раз.');
+    }
   };
 
   return (
@@ -164,26 +141,13 @@ export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
             )}
           </div>
 
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="businessTrip"
-              checked={isBusinessTrip}
-              onChange={(e) => setFormData({ ...formData, isBusinessTrip: e.target.checked })}
-              className="w-4 h-4 rounded"
-            />
-            <Label htmlFor="businessTrip" className="cursor-pointer">
-              Відрядження (коефіцієнт 1.2x)
-            </Label>
-          </div>
-
           <div>
             <Label htmlFor="hours">Відпрацьовано Годин</Label>
             <Input
               id="hours"
               type="number"
-              step="0.5"
-              max={12 - hoursWorkedToday}
+              step={WORK_HOURS.HOUR_STEP}
+              max={WORK_HOURS.MAX_DAILY_HOURS - hoursWorkedToday}
               value={formData.hours}
               onChange={(e) => setFormData({ ...formData, hours: e.target.value })}
               placeholder="4.0"
@@ -191,11 +155,11 @@ export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
               className="mt-1.5"
             />
             <p className="text-xs text-slate-500 mt-1">
-              Доступно: {(12 - hoursWorkedToday).toFixed(1)} год (макс. 12 год/день)
+              Доступно: {(WORK_HOURS.MAX_DAILY_HOURS - hoursWorkedToday).toFixed(1)} год (макс. {WORK_HOURS.MAX_DAILY_HOURS} год/день)
             </p>
           </div>
 
-          {formData.hours && formData.object && totalHoursToday <= 12 && (
+          {formData.hours && formData.object && totalHoursToday <= WORK_HOURS.MAX_DAILY_HOURS && (
             <div className="space-y-2">
               <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border">
                 <div className="space-y-1 text-sm">
@@ -218,16 +182,16 @@ export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
                 </p>
                 <p className="text-xs text-green-600 dark:text-green-400 mt-1">
                   Всього за день: {totalHoursToday.toFixed(1)} год
-                  {totalHoursToday > 8 && ` (${(totalHoursToday - 8).toFixed(1)} год понаднормових)`}
+                  {totalHoursToday > WORK_HOURS.NORMAL_HOURS_LIMIT && ` (${(totalHoursToday - WORK_HOURS.NORMAL_HOURS_LIMIT).toFixed(1)} год понаднормових)`}
                 </p>
               </div>
             </div>
           )}
 
-          {totalHoursToday > 12 && (
+          {totalHoursToday > WORK_HOURS.MAX_DAILY_HOURS && (
             <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
               <p className="text-sm font-medium text-red-800 dark:text-red-200">
-                Перевищено ліміт! Максимум 12 годин на день
+                Перевищено ліміт! Максимум {WORK_HOURS.MAX_DAILY_HOURS} годин на день
               </p>
             </div>
           )}
@@ -236,10 +200,10 @@ export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
             <Button type="button" variant="outline" onClick={onClose} className="flex-1">
               Скасувати
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-500"
-              disabled={totalHoursToday > 12}
+              disabled={totalHoursToday > WORK_HOURS.MAX_DAILY_HOURS}
             >
               Зберегти
             </Button>

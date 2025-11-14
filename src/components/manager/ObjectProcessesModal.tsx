@@ -44,7 +44,7 @@ export default function ObjectProcessesModal({
   const [selectedStandardProcess, setSelectedStandardProcess] = useState<string>('');
 
   // Фільтруємо процеси які відносяться до цього об'єкта
-  const objectProcesses = processTypes.filter(p => p.name.includes(objectName));
+  const objectProcesses = processTypes.filter(p => p.object === objectName);
   
   // Стандартні процеси (без прив'язки до об'єкта)
   const standardProcesses = processTypes.filter(p => !p.name.includes(' - '));
@@ -68,11 +68,12 @@ export default function ObjectProcessesModal({
     }
 
     await addProcessType({
-      name: `${objectName} - ${newProcess.name}`,
+      name: newProcess.name,
+      object: objectName,
       rate: parseFloat(newProcess.rate),
       unit: newProcess.unit,
       plannedVolume: parseFloat(newProcess.plannedVolume)
-    } as any);
+    });
 
     toast({
       title: 'Успішно',
@@ -99,11 +100,12 @@ export default function ObjectProcessesModal({
     const totalSum = standardProcess.rate * plannedVolume;
 
     await addProcessType({
-      name: `${objectName} - ${standardProcess.name}`,
+      name: standardProcess.name,
+      object: objectName,
       rate: standardProcess.rate,
       unit: standardProcess.unit,
       plannedVolume: plannedVolume
-    } as any);
+    });
 
     toast({
       title: 'Успішно',
@@ -130,7 +132,7 @@ export default function ObjectProcessesModal({
   const handleStartEdit = (process: any) => {
     setEditingId(process.id);
     setEditingProcess({
-      name: process.name.replace(`${objectName} - `, ''),
+      name: process.name,
       rate: process.rate.toString(),
       unit: process.unit,
       plannedVolume: (process.plannedVolume || 0).toString()
@@ -148,7 +150,8 @@ export default function ObjectProcessesModal({
     }
 
     await updateProcessType(editingId!, {
-      name: `${objectName} - ${editingProcess.name}`,
+      name: editingProcess.name,
+      object: objectName,
       rate: parseFloat(editingProcess.rate),
       unit: editingProcess.unit,
       plannedVolume: parseFloat(editingProcess.plannedVolume)
@@ -271,7 +274,7 @@ export default function ObjectProcessesModal({
                           <div className="flex items-start gap-2">
                             <div className="flex-1">
                               <div className="font-medium text-slate-800 dark:text-white">
-                                {process.name.replace(`${objectName} - `, '')}
+                                {process.name}
                               </div>
                               <div className="text-sm text-slate-600 dark:text-slate-400">
                                 ₴{process.rate} за {process.unit}
@@ -294,9 +297,9 @@ export default function ObjectProcessesModal({
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => setDeleteConfirm({ 
-                                id: process.id, 
-                                name: process.name.replace(`${objectName} - `, '') 
+                              onClick={() => setDeleteConfirm({
+                                id: process.id,
+                                name: process.name
                               })}
                               className="text-red-600 hover:text-red-700 hover:bg-red-50"
                               title="Видалити"

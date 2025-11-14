@@ -10,6 +10,7 @@ import WorkReminders from './WorkReminders';
 import HoursDetailsModal from './HoursDetailsModal';
 import ProcessDetailsModal from './ProcessDetailsModal';
 import EarningsDetailsModal from './EarningsDetailsModal';
+import { useEmployeeStats } from '@/hooks/useEmployeeStats';
 
 export default function EmployeeStats() {
   const { user, logout } = useUser();
@@ -20,14 +21,10 @@ export default function EmployeeStats() {
   const [showProcessDetails, setShowProcessDetails] = useState(false);
   const [showEarningsDetails, setShowEarningsDetails] = useState(false);
 
-  // Поточний місяць та рік
-  const currentMonth = new Date().getMonth().toString();
-  const currentYear = new Date().getFullYear().toString();
+  const stats = useEmployeeStats(user?.id || '');
 
-  // Mock data - in real app, this would come from Google Sheets
-  const todayHours = 6.5;
-  const monthlyEarnings = 12000;
-  const completedProcesses = 12;
+  const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0');
+  const currentYear = new Date().getFullYear().toString();
 
   const handleLogout = () => {
     logout();
@@ -65,31 +62,31 @@ export default function EmployeeStats() {
           <div className="flex items-center justify-between mb-2">
             <Clock className="w-5 h-5 opacity-80" />
           </div>
-          <div className="text-3xl font-bold mb-1">{todayHours}год</div>
+          <div className="text-3xl font-bold mb-1">{stats.todayHours.toFixed(1)}год</div>
           <div className="text-xs opacity-90">Годин Сьогодні</div>
           <div className="text-xs opacity-70 mt-1">Натисніть для деталей</div>
         </Card>
 
-        <Card 
+        <Card
           className="p-4 bg-gradient-to-br from-green-500 to-green-600 text-white border-0 shadow-lg cursor-pointer hover:scale-105 transition-transform"
           onClick={() => setShowEarningsDetails(true)}
         >
           <div className="flex items-center justify-between mb-2">
             <DollarSign className="w-5 h-5 opacity-80" />
           </div>
-          <div className="text-3xl font-bold mb-1">₴{monthlyEarnings}</div>
+          <div className="text-3xl font-bold mb-1">₴{stats.totalEarnings.toLocaleString()}</div>
           <div className="text-xs opacity-90">Заробіток за Місяць</div>
           <div className="text-xs opacity-70 mt-1">Натисніть для деталей</div>
         </Card>
 
-        <Card 
+        <Card
           className="p-4 bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 shadow-lg col-span-2 cursor-pointer hover:scale-105 transition-transform"
           onClick={() => setShowProcessDetails(true)}
         >
           <div className="flex items-center justify-between mb-2">
             <Briefcase className="w-5 h-5 opacity-80" />
           </div>
-          <div className="text-3xl font-bold mb-1">{completedProcesses}</div>
+          <div className="text-3xl font-bold mb-1">{stats.completedProcesses}</div>
           <div className="text-xs opacity-90">Завершених Процесів Цього Місяця</div>
           <div className="text-xs opacity-70 mt-1">Натисніть для деталей</div>
         </Card>

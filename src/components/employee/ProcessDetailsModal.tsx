@@ -1,14 +1,15 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Briefcase, Edit2, Save, X, Trash2 } from 'lucide-react';
+import { Briefcase, Save, X } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useData } from '@/contexts/DataContext';
 import { useUser } from '@/contexts/UserContext';
+import MemoizedProcessCard from '@/components/memoized/MemoizedProcessCard';
 
 interface ProcessDetailsModalProps {
   open: boolean;
@@ -28,8 +29,8 @@ export default function ProcessDetailsModal({ open, onClose, month, year }: Proc
   const [isLoading, setIsLoading] = useState(false);
 
   // Фільтруємо процеси для поточного користувача та місяця
-  const monthStr = `${year}-${month.padStart(2, '0')}`;
-  const userProcesses = processes.filter(p => 
+  const monthStr = `${year}-${month}`;
+  const userProcesses = processes.filter(p =>
     p.userId === user?.id && p.date.startsWith(monthStr)
   );
 
@@ -41,16 +42,20 @@ export default function ProcessDetailsModal({ open, onClose, month, year }: Proc
     'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'
   ];
 
-  const handleEditProcess = (entry: any) => {
+  const handleEditProcess = useCallback((entry: any) => {
     setEditingProcess(entry.id);
     setEditProcessData({
       date: entry.date,
       processName: entry.processName,
       volume: entry.volume,
       unit: entry.unit,
-      rate: entry.salary / entry.volume
+      rate: entry.rate
     });
-  };
+  }, []);
+
+  const handleDeleteProcess = useCallback((processId: string) => {
+    setDeleteConfirm(processId);
+  }, []);
 
   const handleSaveProcess = async (entryId: string) => {
     setIsLoading(true);
@@ -69,6 +74,7 @@ export default function ProcessDetailsModal({ open, onClose, month, year }: Proc
         processName: editProcessData.processName,
         volume,
         unit: editProcessData.unit,
+        rate,
         salary
       });
 
@@ -126,7 +132,7 @@ export default function ProcessDetailsModal({ open, onClose, month, year }: Proc
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Briefcase className="w-5 h-5 text-purple-600" />
-              Виконані Процеси - {months[parseInt(month) - 1]} {year}
+              Виконані Процеси - {months[parseInt(month) - 1]} {year.padStart(4, '0')}
             </DialogTitle>
           </DialogHeader>
 
@@ -152,8 +158,8 @@ export default function ProcessDetailsModal({ open, onClose, month, year }: Proc
                 <p className="text-center text-slate-500 py-8">Немає записів процесів</p>
               ) : (
                 userProcesses.map((entry) => (
-                  <Card key={entry.id} className="p-3">
-                    {editingProcess === entry.id ? (
+                  editingProcess === entry.id ? (
+                    <Card key={entry.id} className="p-3">
                       <div className="space-y-3">
                         <div className="grid grid-cols-2 gap-2">
                           <div>
@@ -222,43 +228,16 @@ export default function ProcessDetailsModal({ open, onClose, month, year }: Proc
                           </Button>
                         </div>
                       </div>
-                    ) : (
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-slate-800 dark:text-white">
-                            {entry.processName}
-                          </p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
-                            {entry.date} • {entry.volume} {entry.unit} × ₴{(entry.salary / entry.volume).toFixed(0)}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-semibold text-green-600 dark:text-green-400">
-                            ₴{entry.salary.toFixed(0)}
-                          </p>
-                          <div className="flex gap-1">
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleEditProcess(entry)}
-                              disabled={isLoading}
-                            >
-                              <Edit2 className="w-3 h-3" />
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="text-red-600"
-                              onClick={() => setDeleteConfirm(entry.id)}
-                              disabled={isLoading}
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </Card>
+                    </Card>
+                  ) : (
+                    <MemoizedProcessCard
+                      key={entry.id}
+                      process={entry}
+                      onEdit={handleEditProcess}
+                      onDelete={handleDeleteProcess}
+                      isLoading={isLoading}
+                    />
+                  )
                 ))
               )}
             </div>

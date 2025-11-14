@@ -1,41 +1,78 @@
-import { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./components/home";
+import { Suspense, lazy } from "react";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { UserProvider } from "./contexts/UserContext";
 import { DataProvider } from "./contexts/DataContext";
+import { AuthProvider } from "./contexts/AuthContext";
+import { HoursProvider } from "./contexts/HoursContext";
+import { ProcessProvider } from "./contexts/ProcessContext";
+import { ReportProvider } from "./contexts/ReportContext";
+import { MetaProvider } from "./contexts/MetaContext";
+import { NotificationProvider, useNotification } from "./contexts/NotificationContext";
+import ErrorBoundary from "./components/ErrorBoundary";
+import NotificationContainer from "./components/providers/NotificationContainer";
 import WelcomeScreen from "./pages/WelcomeScreen";
-import EmployeeDashboard from "./pages/EmployeeDashboard";
-import ManagerDashboard from "./pages/ManagerDashboard";
+import LoadingScreen from "./components/LoadingScreen";
 import { Toaster } from '@/components/ui/toaster';
 
-// Lazy load storyboard
-const GoogleSheetsTestStoryboard = lazy(() => import("./tempobook/storyboards/9d2ead53-c5b1-4f02-ab30-02fd151d2717/index"));
+const EmployeeDashboard = lazy(() => import("./pages/EmployeeDashboard"));
+const ManagerDashboard = lazy(() => import("./pages/ManagerDashboard"));
+
+function AppContent() {
+  const { notifications } = useNotification();
+
+  return (
+    <>
+      <Routes>
+        <Route path="/" element={<WelcomeScreen />} />
+        <Route
+          path="/employee"
+          element={
+            <Suspense fallback={<LoadingScreen />}>
+              <EmployeeDashboard />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/manager"
+          element={
+            <Suspense fallback={<LoadingScreen />}>
+              <ManagerDashboard />
+            </Suspense>
+          }
+        />
+      </Routes>
+      <NotificationContainer notifications={notifications} />
+      <Toaster />
+    </>
+  );
+}
 
 function App() {
   return (
-    <BrowserRouter>
-      <ThemeProvider>
-        <UserProvider>
-          <DataProvider>
-            <Routes>
-              <Route path="/" element={<WelcomeScreen />} />
-              <Route path="/employee" element={<EmployeeDashboard />} />
-              <Route path="/manager" element={<ManagerDashboard />} />
-              <Route 
-                path="/tempobook/storyboards/9d2ead53-c5b1-4f02-ab30-02fd151d2717" 
-                element={
-                  <Suspense fallback={<div>Loading...</div>}>
-                    <GoogleSheetsTestStoryboard />
-                  </Suspense>
-                } 
-              />
-            </Routes>
-            <Toaster />
-          </DataProvider>
-        </UserProvider>
-      </ThemeProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <ThemeProvider>
+          <NotificationProvider>
+            <UserProvider>
+              <MetaProvider>
+                <AuthProvider>
+                  <HoursProvider>
+                    <ProcessProvider>
+                      <ReportProvider>
+                        <DataProvider>
+                          <AppContent />
+                        </DataProvider>
+                      </ReportProvider>
+                    </ProcessProvider>
+                  </HoursProvider>
+                </AuthProvider>
+              </MetaProvider>
+            </UserProvider>
+          </NotificationProvider>
+        </ThemeProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

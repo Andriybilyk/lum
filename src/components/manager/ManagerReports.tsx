@@ -1,20 +1,25 @@
 import { useState } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { useData } from '@/contexts/DataContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Clock, DollarSign, User, Eye } from 'lucide-react';
+import { Clock, DollarSign, Eye, Download } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { FeatureErrorBoundary } from '@/components/providers/FeatureErrorBoundary';
 import EmployeeReportDetailsModal from './EmployeeReportDetailsModal';
+import { exportTeamReport } from '@/services/reportExport';
 
 export default function ManagerReports() {
   const { user } = useUser();
-  const { getTeamReport, users } = useData();
-  
+  const { getTeamReport, users, hours, processes } = useData();
+  const { toast } = useToast();
+
   // Встановлюємо поточний місяць за замовчуванням
   const currentMonth = new Date().toISOString().slice(0, 7);
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const [selectedEmployee, setSelectedEmployee] = useState<{ id: string; name: string } | null>(null);
+  const [isExportingTeam, setIsExportingTeam] = useState(false);
 
   // Отримуємо звіт команди
   const reportData = getTeamReport(selectedMonth);
@@ -28,12 +33,67 @@ export default function ManagerReports() {
   const totalTeamHours = teamReport.reduce((sum, emp) => sum + emp.hours, 0);
   const totalTeamEarnings = teamReport.reduce((sum, emp) => sum + emp.earnings, 0);
 
+  const handleExportTeamReport = async () => {
+    setIsExportingTeam(true);
+    try {
+      const teamData = teamReport.map(emp => {
+        const empUser = users.find(u => u.id === emp.employeeId);
+        const empHours = hours.filter(h => h.userId === emp.employeeId && h.date.startsWith(selectedMonth));
+        const empProcesses = processes.filter(p => p.userId === emp.employeeId && p.date.startsWith(selectedMonth));
+
+        return {
+          employeeName: emp.name,
+          hours: empHours.map(h => ({
+            date: h.date,
+            object: h.object,
+            hours: h.hours,
+            businessTrip: h.isBusinessTrip,
+            earnings: h.salary
+          })),
+          processes: empProcesses.map(p => ({
+            date: p.date,
+            name: p.processName,
+            object: p.object || '',
+            volume: p.volume,
+            unit: p.unit,
+            rate: p.salary / p.volume,
+            earnings: p.salary
+          }))
+        };
+      });
+
+      await exportTeamReport(teamData, selectedMonth);
+
+      toast({
+        title: 'Успішно',
+        description: 'Звіт команди експортовано в Google Sheets'
+      });
+    } catch (error) {
+      toast({
+        title: 'Помилка',
+        description: 'Не вдалося експортувати звіт',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsExportingTeam(false);
+    }
+  };
+
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex items-center justify-between">
+    <FeatureErrorBoundary featureName="ManagerReports">
+      <div className="p-4 space-y-4">
+        <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-slate-800 dark:text-white">
           📊 Звіти Команди
         </h2>
+        <Button
+          onClick={handleExportTeamReport}
+          disabled={isExportingTeam || teamReport.length === 0}
+          className="gap-2 bg-gradient-to-r from-blue-600 to-cyan-500"
+        >
+          <Download className="w-4 h-4" />
+          {isExportingTeam ? 'Експортування...' : 'Експортувати'}
+        </Button>
       </div>
 
       <Card className="p-4">
@@ -134,7 +194,6 @@ export default function ManagerReports() {
         </div>
       </Card>
 
-      {/* Модал з детальною інформацією */}
       {selectedEmployee && (
         <EmployeeReportDetailsModal
           open={!!selectedEmployee}
@@ -144,6 +203,7 @@ export default function ManagerReports() {
           month={selectedMonth}
         />
       )}
-    </div>
+      </div>
+    </FeatureErrorBoundary>
   );
 }

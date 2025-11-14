@@ -1,3 +1,4 @@
+import { logger } from '@/utils/logger';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -24,7 +25,7 @@ export default function Settings() {
     try {
       await syncWithGoogleSheets();
     } catch (error) {
-      console.error('Failed to sync:', error);
+      logger.error('Failed to sync:', error);
     }
   };
 
@@ -32,7 +33,7 @@ export default function Settings() {
     try {
       await loadFromGoogleSheets();
     } catch (error) {
-      console.error('Failed to load data:', error);
+      logger.error('Failed to load data:', error);
     }
   };
 
