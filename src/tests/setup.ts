@@ -12,6 +12,63 @@ global.ResizeObserver = vi.fn().mockImplementation(() => ({
   disconnect: vi.fn(),
 }));
 
+class MockIDBDatabase {
+  objectStoreNames = {
+    contains: vi.fn(() => false),
+  };
+  transaction = vi.fn();
+}
+
+class MockIDBTransaction {
+  objectStore = vi.fn();
+  oncomplete: (() => void) | null = null;
+  onerror: ((event: Event) => void) | null = null;
+}
+
+class MockIDBObjectStore {
+  put = vi.fn((data) => ({
+    onerror: null,
+    onsuccess: null,
+  }));
+  add = vi.fn((data) => ({
+    onerror: null,
+    onsuccess: null,
+  }));
+  delete = vi.fn(() => ({
+    onerror: null,
+    onsuccess: null,
+  }));
+  getAll = vi.fn(() => ({
+    onerror: null,
+    onsuccess: null,
+  }));
+  clear = vi.fn(() => ({
+    onerror: null,
+    onsuccess: null,
+  }));
+}
+
+if (typeof window !== 'undefined') {
+  (window as any).indexedDB = {
+    open: vi.fn((dbName: string, version: number) => {
+      const mockRequest = {
+        onerror: null as ((event: Event) => void) | null,
+        onsuccess: null as ((event: Event) => void) | null,
+        onupgradeneeded: null as ((event: IDBVersionChangeEvent) => void) | null,
+        result: new MockIDBDatabase(),
+      };
+
+      setTimeout(() => {
+        if (mockRequest.onsuccess) {
+          mockRequest.onsuccess(new Event('success'));
+        }
+      }, 0);
+
+      return mockRequest;
+    }),
+  };
+}
+
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation(query => ({
