@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hr-management-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=http://localhost:3000/api
+      - VITE_GOOGLE_SHEETS_API_KEY=${VITE_GOOGLE_SHEETS_API_KEY}
+      - VITE_GOOGLE_SHEETS_SPREADSHEET_ID=${VITE_GOOGLE_SHEETS_SPREADSHEET_ID}
+    volumes:
+      - ./dist:/app/dist:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  # Optional: Supabase for local development
+  # db:
+  #   image: postgres:15-alpine
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: hr_management
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - db_data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U postgres"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+# volumes:
+#   db_data:
+
+networks:
+  default:
+    name: hr-management-network

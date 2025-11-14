@@ -1,0 +1,129 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: production
+  labels:
+    name: production
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: production
+
+data:
+  api-url: "https://api.your-domain.com"
+  error-reporting-url: "https://sentry.your-domain.com"
+  log-level: "warn"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secrets
+  namespace: production
+type: Opaque
+
+data:
+  # Base64 encoded - replace with actual values
+  google-sheets-key: "YOUR_BASE64_ENCODED_KEY"
+  spreadsheet-id: "YOUR_BASE64_ENCODED_ID"
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: hr-management
+  namespace: production
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: hr-management-role
+  namespace: production
+
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: hr-management-rolebinding
+  namespace: production
+
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: hr-management-role
+
+subjects:
+  - kind: ServiceAccount
+    name: hr-management
+    namespace: production
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: hr-management-pdb
+  namespace: production
+
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: hr-management
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hr-management-hpa
+  namespace: production
+
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: hr-management-app
+
+  minReplicas: 3
+  maxReplicas: 10
+
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 30
