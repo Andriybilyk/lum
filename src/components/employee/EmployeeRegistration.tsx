@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react';
+import { logger } from '@/utils/logger';
+import { UserSchema, validateData } from '@/utils/validation';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
 import { useData } from '@/contexts/DataContext';
+import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,48 +13,112 @@ import { motion } from 'framer-motion';
 
 export default function EmployeeRegistration() {
   const { setUser } = useUser();
-  const { levels, addUser, isLoading, isConfigured } = useData();
+  const { users, levels, addUser, isLoading, isConfigured } = useData();
   const navigate = useNavigate();
-  
+  const { toast } = useToast();
+
+  const [authMode, setAuthMode] = useState<'select' | 'create'>('select');
   const [formData, setFormData] = useState({
+    selectedUserId: '',
     name: '',
     level: '',
-    hourlyRate: ''
+    hourlyRate: '',
+    managerId: 'none'
   });
 
-  // Логування для діагностики
+  const employeeUsers = useMemo(() => {
+    return users.filter(u => u.role === 'employee');
+  }, [users]);
+
+  const managerUsers = useMemo(() => {
+    return users.filter(u => u.role === 'manager');
+  }, [users]);
+
   useEffect(() => {
-    console.log('🔍 EmployeeRegistration - isLoading:', isLoading);
-    console.log('🔍 EmployeeRegistration - isConfigured:', isConfigured);
-    console.log('🔍 EmployeeRegistration - levels:', levels);
-    console.log('🔍 EmployeeRegistration - levels.length:', levels.length);
-  }, [isLoading, levels, isConfigured]);
+    logger.info('🔍 EmployeeRegistration - isLoading:', isLoading);
+    logger.info('🔍 EmployeeRegistration - isConfigured:', isConfigured);
+    logger.info('🔍 EmployeeRegistration - levels:', levels);
+    logger.info('🔍 EmployeeRegistration - employeeUsers:', employeeUsers);
+  }, [isLoading, levels, isConfigured, employeeUsers]);
 
   const handleLevelChange = (value: string) => {
     const selectedLevel = levels.find(l => l.name === value);
-    setFormData({ 
-      ...formData, 
+    setFormData({
+      ...formData,
       level: value,
       hourlyRate: selectedLevel ? selectedLevel.hourlyRate.toString() : formData.hourlyRate
     });
   };
 
+  const handleSelectUser = (userId: string) => {
+    const user = users.find(u => u.id === userId);
+    if (user) {
+      logger.info('👤 Selected existing employee:', user);
+      setUser(user);
+      navigate('/employee');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const userId = Date.now().toString();
-    const user = {
-      id: userId,
+
+    const userData = {
       name: formData.name,
       role: 'employee' as const,
       level: formData.level,
-      hourlyRate: parseFloat(formData.hourlyRate)
+      hourlyRate: parseFloat(formData.hourlyRate),
+      managerId: formData.managerId && formData.managerId !== 'none' ? formData.managerId : undefined
     };
-    
-    await addUser(user);
-    setUser(user);
-    navigate('/employee');
+
+    const { success, data: validatedUser, error } = validateData(UserSchema, userData);
+
+    if (!success) {
+      logger.warn('Employee registration validation failed', { error });
+      toast({
+        title: 'Помилка валідації',
+        description: error,
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    try {
+      const userId = Date.now().toString();
+      const user = {
+        id: userId,
+        ...validatedUser!,
+      };
+
+      logger.info('Employee registration successful', { userId: user.id, name: (user as any).name });
+      await addUser(user as any);
+      setUser(user as any);
+      navigate('/employee');
+    } catch (err) {
+      logger.error('Failed to add employee', err);
+      toast({
+        title: 'Помилка',
+        description: 'Не вдалося додати працівника',
+        variant: 'destructive'
+      });
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-400 p-4">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="w-full max-w-md"
+        >
+          <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-2xl text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-slate-600 dark:text-slate-400">Завантаження даних...</p>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-400 p-4">
@@ -69,17 +136,41 @@ export default function EmployeeRegistration() {
             </p>
           </div>
 
-          {/* Діагностична інформація */}
-          <div className="mb-4 p-3 bg-slate-100 dark:bg-slate-700 rounded-lg text-xs">
-            <div>Loading: {isLoading ? '✅' : '❌'}</div>
-            <div>Configured: {isConfigured ? '✅' : '❌'}</div>
-            <div>Levels count: {levels.length}</div>
-          </div>
+          {employeeUsers.length > 0 && authMode === 'select' ? (
+            <div className="space-y-4">
+              <div>
+                <Label className="text-slate-700 dark:text-slate-300">Оберіть працівника</Label>
+                <div className="mt-3 space-y-2">
+                  {employeeUsers.map((employee) => (
+                    <Button
+                      key={employee.id}
+                      onClick={() => handleSelectUser(employee.id)}
+                      variant="outline"
+                      className="w-full justify-start h-12 rounded-xl"
+                    >
+                      <span className="mr-2">👤</span>
+                      {employee.name} (₴{employee.hourlyRate}/год)
+                    </Button>
+                  ))}
+                </div>
+              </div>
 
-          {isLoading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-slate-600 dark:text-slate-400 mt-4">Завантаження даних...</p>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white dark:bg-slate-800 text-gray-500">або</span>
+                </div>
+              </div>
+
+              <Button
+                onClick={() => setAuthMode('create')}
+                variant="ghost"
+                className="w-full text-blue-600 dark:text-blue-400"
+              >
+                Створити нового працівника
+              </Button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -131,6 +222,23 @@ export default function EmployeeRegistration() {
                 />
               </div>
 
+              <div>
+                <Label htmlFor="manager" className="text-slate-700 dark:text-slate-300">Менеджер (опційно)</Label>
+                <Select value={formData.managerId} onValueChange={(value) => setFormData({ ...formData, managerId: value })}>
+                  <SelectTrigger className="mt-1.5 h-12 rounded-xl">
+                    <SelectValue placeholder="Оберіть менеджера або не обирайте" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Без менеджера</SelectItem>
+                    {managerUsers.map((manager) => (
+                      <SelectItem key={manager.id} value={manager.id}>
+                        {manager.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <Button
                 type="submit"
                 disabled={levels.length === 0}
@@ -138,6 +246,17 @@ export default function EmployeeRegistration() {
               >
                 Завершити Реєстрацію
               </Button>
+
+              {employeeUsers.length > 0 && (
+                <Button
+                  type="button"
+                  onClick={() => setAuthMode('select')}
+                  variant="ghost"
+                  className="w-full text-slate-600 dark:text-slate-400"
+                >
+                  ← Назад
+                </Button>
+              )}
             </form>
           )}
 
