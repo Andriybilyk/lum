@@ -86,29 +86,6 @@ function AppContent() {
 }
 
 function App() {
-  const isTelegramOnly = () => {
-    if (typeof window !== 'undefined') {
-      return !!(window.Telegram?.WebApp);
-    }
-    return false;
-  };
-
-  // Для Telegram Mini App обмежуємо провайдерів
-  if (isTelegramOnly()) {
-    return (
-      <ErrorBoundary>
-        <BrowserRouter>
-          <ThemeProvider>
-            <NotificationProvider>
-              <AppContent />
-            </NotificationProvider>
-          </ThemeProvider>
-        </BrowserRouter>
-      </ErrorBoundary>
-    );
-  }
-
-  // Для звичайного веб-додатку - всі провайдери
   return (
     <ErrorBoundary>
       <BrowserRouter>

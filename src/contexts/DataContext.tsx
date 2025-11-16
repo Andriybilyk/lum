@@ -96,30 +96,27 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
         const spreadsheetId = import.meta.env.VITE_SPREADSHEET_ID;
         const scriptUrl = import.meta.env.VITE_GOOGLE_SCRIPT_URL;
-        
-        logger.debug('Configuration check', {
-          hasApiKey: !!apiKey,
-          hasSpreadsheetId: !!spreadsheetId,
-          hasScriptUrl: !!scriptUrl
-        }, 'DataContext');
 
         if (apiKey && spreadsheetId && scriptUrl) {
           setIsConfigured(true);
-          logger.info('Google Sheets configured, loading data', 'DataContext');
-          // Викликаємо завантаження даних напряму, не через loadDataFromSheets
-          await loadData();
+          // Спробуємо завантажити дані, але не падаємо якщо помилка
+          try {
+            await loadData();
+          } catch (error) {
+            logger.warn('Failed to load data from Google Sheets, using empty state', error, 'DataContext');
+            setIsConfigured(false);
+          }
         } else {
-          logger.warn('Google Sheets not fully configured', 'DataContext');
           setIsConfigured(false);
         }
       } catch (error) {
-        logger.error('Failed to initialize', error, 'DataContext');
+        logger.warn('Failed to initialize DataContext', error, 'DataContext');
         setIsConfigured(false);
       } finally {
         setIsLoading(false);
       }
     };
-    
+
     init();
   }, []);
 
