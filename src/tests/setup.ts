@@ -28,11 +28,13 @@ class MockIDBTransaction {
 
 // @ts-ignore - Used for testing, may not be directly referenced
 class MockIDBObjectStore {
-  put = vi.fn(() => ({
+  // @ts-ignore - data parameter used in mock
+  put = vi.fn((_data: any) => ({
     onerror: null,
     onsuccess: null,
   }));
-  add = vi.fn(() => ({
+  // @ts-ignore - data parameter used in mock
+  add = vi.fn((_data: any) => ({
     onerror: null,
     onsuccess: null,
   }));

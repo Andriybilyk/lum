@@ -1066,6 +1066,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // @ts-ignore - Used for future conversion logic
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const convertApprovedAdditionalWorksToProcesses = async () => {
     try {

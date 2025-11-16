@@ -28,25 +28,25 @@ describe('User Validation', () => {
   });
 
   it('should reject short names', () => {
-    const { success } = validateData(UserSchema, {
+    const { success: _1 } = validateData(UserSchema, {
       name: 'І',
       role: 'employee',
       level: 'Junior',
       hourlyRate: 150,
     });
 
-    expect(success).toBe(false);
+    expect(_1).toBe(false);
   });
 
   it('should reject invalid role', () => {
-    const { success } = validateData(UserSchema, {
+    const { success: _2 } = validateData(UserSchema, {
       name: 'Іван Петренко',
       role: 'invalid_role',
       level: 'Junior',
       hourlyRate: 150,
     });
 
-    expect(success).toBe(false);
+    expect(_2).toBe(false);
   });
 
   it('should accept optional managerId', () => {
@@ -90,7 +90,7 @@ describe('Hours Validation', () => {
   });
 
   it('should reject invalid date format', () => {
-    const { success } = validateData(HoursSchema, {
+    const { success: _3 } = validateData(HoursSchema, {
       userId: 'user-123',
       date: '13-11-2024',
       hours: 8,
@@ -99,7 +99,7 @@ describe('Hours Validation', () => {
       salary: 1200,
     });
 
-    expect(success).toBe(false);
+    expect(_3).toBe(false);
   });
 
   it('should reject hours > 24', () => {
@@ -117,7 +117,7 @@ describe('Hours Validation', () => {
   });
 
   it('should reject negative hours', () => {
-    const { success } = validateData(HoursSchema, {
+    const { success: _4 } = validateData(HoursSchema, {
       userId: 'user-123',
       date: '2024-11-13',
       hours: -5,
@@ -126,7 +126,7 @@ describe('Hours Validation', () => {
       salary: 1200,
     });
 
-    expect(success).toBe(false);
+    expect(_4).toBe(false);
   });
 
   it('should accept business trip flag', () => {
@@ -166,6 +166,7 @@ describe('Process Validation', () => {
       userId: 'user-123',
       date: 'invalid-date',
       processName: 'Feature Development',
+      object: 'Project A',
       volume: 100,
       unit: 'lines of code',
       rate: 50,
@@ -176,7 +177,7 @@ describe('Process Validation', () => {
   });
 
   it('should reject zero volume', () => {
-    const { success } = validateData(ProcessSchema, {
+    const { success: _5 } = validateData(ProcessSchema, {
       userId: 'user-123',
       date: '2024-11-13',
       processName: 'Feature Development',
@@ -186,11 +187,11 @@ describe('Process Validation', () => {
       salary: 5000,
     });
 
-    expect(success).toBe(false);
+    expect(_5).toBe(false);
   });
 
   it('should reject negative rate', () => {
-    const { success } = validateData(ProcessSchema, {
+    const { success: _6 } = validateData(ProcessSchema, {
       userId: 'user-123',
       date: '2024-11-13',
       processName: 'Feature Development',
@@ -200,7 +201,7 @@ describe('Process Validation', () => {
       salary: 5000,
     });
 
-    expect(success).toBe(false);
+    expect(_6).toBe(false);
   });
 });
 
@@ -216,29 +217,29 @@ describe('Level Validation', () => {
   });
 
   it('should reject empty name', () => {
-    const { success } = validateData(LevelSchema, {
+    const { success: _7 } = validateData(LevelSchema, {
       name: '',
       hourlyRate: 250,
     });
 
-    expect(success).toBe(false);
+    expect(_7).toBe(false);
   });
 
   it('should reject zero hourly rate', () => {
-    const { success } = validateData(LevelSchema, {
+    const { success: _8 } = validateData(LevelSchema, {
       name: 'Junior Developer',
       hourlyRate: 0,
     });
 
-    expect(success).toBe(false);
+    expect(_8).toBe(false);
   });
 
   it('should reject negative hourly rate', () => {
-    const { success } = validateData(LevelSchema, {
+    const { success: _9 } = validateData(LevelSchema, {
       name: 'Junior Developer',
       hourlyRate: -100,
     });
 
-    expect(success).toBe(false);
+    expect(_9).toBe(false);
   });
 });

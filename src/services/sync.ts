@@ -10,6 +10,7 @@ export interface SyncResult {
 }
 
 export class SyncManager {
+  // @ts-ignore - Used in isSyncInProgress() method
   private isSyncing = false;
 
   async syncOfflineData(onSyncCallback?: (itemsSynced: number) => void): Promise<SyncResult> {
