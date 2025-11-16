@@ -6,7 +6,7 @@ import { TelegramAppProvider, useTelegramApp } from '../TelegramAppContext';
 vi.mock('@/services/telegramSync', () => ({
   telegramSync: {
     init: vi.fn(),
-    addHours: vi.fn((id, hours) => ({
+    addHours: vi.fn((_id, hours) => ({
       date: new Date().toISOString().split('T')[0],
       hours,
       synced: 'pending' as const,

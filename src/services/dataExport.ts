@@ -9,8 +9,8 @@ import * as XLSX from 'xlsx';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 
-if (pdfFonts && pdfFonts.pdfMake) {
-  pdfMake.vfs = pdfFonts.pdfMake.vfs;
+if (pdfFonts && (pdfFonts as any).pdfMake) {
+  pdfMake.vfs = (pdfFonts as any).pdfMake.vfs;
 }
 
 export interface ExportOptions {
@@ -102,7 +102,7 @@ export const exportToPDF = (
       return format(new Date(date), 'dd MMMM yyyy', { locale: uk });
     };
 
-    const documentDefinition: pdfMake.TDocumentDefinitions = {
+    const documentDefinition: any = {
       content: [
         {
           text: options.title || reportData.title,
@@ -256,7 +256,7 @@ export const generateSummary = (
   data: Array<Record<string, any>>,
   numericFields: string[]
 ) => {
-  const summary: Record<string, number> = {};
+  const summary: Record<string, any> = {};
 
   numericFields.forEach((field) => {
     const sum = data.reduce((acc, row) => {
