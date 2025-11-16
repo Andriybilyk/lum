@@ -19,15 +19,14 @@ class MockIDBDatabase {
   transaction = vi.fn();
 }
 
-// Mock IDB classes for future use
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// @ts-ignore - Used for testing, may not be directly referenced
 class MockIDBTransaction {
   objectStore = vi.fn();
   oncomplete: (() => void) | null = null;
   onerror: ((event: Event) => void) | null = null;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// @ts-ignore - Used for testing, may not be directly referenced
 class MockIDBObjectStore {
   put = vi.fn(() => ({
     onerror: null,
