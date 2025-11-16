@@ -4,22 +4,28 @@
   "framework": "vite",
   "env": {
     "VITE_TELEGRAM_BOT_TOKEN": {
-      "description": "Telegram Bot Token"
+      "description": "Telegram Bot Token",
+      "type": "string"
     },
     "VITE_TELEGRAM_BOT_USERNAME": {
-      "description": "Telegram Bot Username"
+      "description": "Telegram Bot Username",
+      "type": "string"
     },
     "VITE_APP_URL": {
-      "description": "Application URL"
+      "description": "Application URL",
+      "type": "string"
     },
     "VITE_GOOGLE_API_KEY": {
-      "description": "Google API Key"
+      "description": "Google API Key",
+      "type": "string"
     },
     "VITE_SPREADSHEET_ID": {
-      "description": "Google Spreadsheet ID"
+      "description": "Google Spreadsheet ID",
+      "type": "string"
     },
     "VITE_GOOGLE_SCRIPT_URL": {
-      "description": "Google Apps Script URL"
+      "description": "Google Apps Script URL",
+      "type": "string"
     }
   },
   "rewrites": [
