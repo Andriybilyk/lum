@@ -159,41 +159,45 @@ export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
             </p>
           </div>
 
-          {formData.hours && formData.object && totalHoursToday <= WORK_HOURS.MAX_DAILY_HOURS && (
-            <div className="space-y-2">
-              <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border">
-                <div className="space-y-1 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-slate-600 dark:text-slate-400">Звичайні години:</span>
-                    <span className="font-medium">{earnings.normalHours.toFixed(1)} год × ₴{user?.hourlyRate} × {earnings.baseCoefficient}x</span>
-                  </div>
-                  {earnings.overtimeHours > 0 && (
-                    <div className="flex justify-between text-orange-600 dark:text-orange-400">
-                      <span>Понаднормові години:</span>
-                      <span className="font-medium">{earnings.overtimeHours.toFixed(1)} год × ₴{user?.hourlyRate} × {earnings.baseCoefficient}x × 1.5x</span>
+          {formData.hours && formData.object && (
+            <>
+              {totalHoursToday <= WORK_HOURS.MAX_DAILY_HOURS && (
+                <div className="space-y-2">
+                  <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border">
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-slate-600 dark:text-slate-400">Звичайні години:</span>
+                        <span className="font-medium">{earnings.normalHours.toFixed(1)} год × ₴{user?.hourlyRate} × {earnings.baseCoefficient}x</span>
+                      </div>
+                      {earnings.overtimeHours > 0 && (
+                        <div className="flex justify-between text-orange-600 dark:text-orange-400">
+                          <span>Понаднормові години:</span>
+                          <span className="font-medium">{earnings.overtimeHours.toFixed(1)} год × ₴{user?.hourlyRate} × {earnings.baseCoefficient}x × 1.5x</span>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </div>
-              
-              <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
-                <p className="text-sm font-medium text-green-800 dark:text-green-200">
-                  Очікуваний Заробіток: ₴{earnings.total.toFixed(2)}
-                </p>
-                <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                  Всього за день: {totalHoursToday.toFixed(1)} год
-                  {totalHoursToday > WORK_HOURS.NORMAL_HOURS_LIMIT && ` (${(totalHoursToday - WORK_HOURS.NORMAL_HOURS_LIMIT).toFixed(1)} год понаднормових)`}
-                </p>
-              </div>
-            </div>
-          )}
+                  </div>
 
-          {totalHoursToday > WORK_HOURS.MAX_DAILY_HOURS && (
-            <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
-              <p className="text-sm font-medium text-red-800 dark:text-red-200">
-                Перевищено ліміт! Максимум {WORK_HOURS.MAX_DAILY_HOURS} годин на день
-              </p>
-            </div>
+                  <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                    <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                      Очікуваний Заробіток: ₴{earnings.total.toFixed(2)}
+                    </p>
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                      Всього за день: {totalHoursToday.toFixed(1)} год
+                      {totalHoursToday > WORK_HOURS.NORMAL_HOURS_LIMIT && ` (${(totalHoursToday - WORK_HOURS.NORMAL_HOURS_LIMIT).toFixed(1)} год понаднормових)`}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {totalHoursToday > WORK_HOURS.MAX_DAILY_HOURS && (
+                <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+                  <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                    ❌ Перевищено ліміт! Максимум {WORK_HOURS.MAX_DAILY_HOURS} годин на день
+                  </p>
+                </div>
+              )}
+            </>
           )}
 
           <div className="flex gap-2 pt-2">
