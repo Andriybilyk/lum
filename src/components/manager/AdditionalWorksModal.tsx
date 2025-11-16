@@ -136,8 +136,9 @@ export default function AdditionalWorksModal({ open, onClose }: AdditionalWorksM
                       {editingId === work.id ? (
                         <div className="space-y-3">
                           <div>
-                            <Label className="text-xs">Назва Робіт</Label>
+                            <Label htmlFor={`pending-work-name-${editingId}`} className="text-xs">Назва Робіт</Label>
                             <Input
+                              id={`pending-work-name-${editingId}`}
                               value={editData.workName || ''}
                               onChange={(e) => setEditData({ ...editData, workName: e.target.value })}
                               className="mt-1"
@@ -145,8 +146,9 @@ export default function AdditionalWorksModal({ open, onClose }: AdditionalWorksM
                           </div>
 
                           <div>
-                            <Label className="text-xs">Опис</Label>
+                            <Label htmlFor={`pending-description-${editingId}`} className="text-xs">Опис</Label>
                             <Input
+                              id={`pending-description-${editingId}`}
                               value={editData.description || ''}
                               onChange={(e) => setEditData({ ...editData, description: e.target.value })}
                               className="mt-1"
@@ -155,16 +157,18 @@ export default function AdditionalWorksModal({ open, onClose }: AdditionalWorksM
 
                           <div className="grid grid-cols-3 gap-2">
                             <div>
-                              <Label className="text-xs">Одиниця</Label>
+                              <Label htmlFor={`pending-unit-${editingId}`} className="text-xs">Одиниця</Label>
                               <Input
+                                id={`pending-unit-${editingId}`}
                                 value={editData.unit || ''}
                                 onChange={(e) => setEditData({ ...editData, unit: e.target.value })}
                                 className="mt-1"
                               />
                             </div>
                             <div>
-                              <Label className="text-xs">Кількість</Label>
+                              <Label htmlFor={`pending-volume-${editingId}`} className="text-xs">Кількість</Label>
                               <Input
+                                id={`pending-volume-${editingId}`}
                                 type="number"
                                 value={editData.volume || ''}
                                 onChange={(e) => setEditData({ ...editData, volume: parseFloat(e.target.value) || 0 })}
@@ -173,8 +177,9 @@ export default function AdditionalWorksModal({ open, onClose }: AdditionalWorksM
                               />
                             </div>
                             <div>
-                              <Label className="text-xs">Ставка (₴)</Label>
+                              <Label htmlFor={`pending-rate-${editingId}`} className="text-xs">Ставка (₴)</Label>
                               <Input
+                                id={`pending-rate-${editingId}`}
                                 type="number"
                                 value={editData.rate || ''}
                                 onChange={(e) => setEditData({ ...editData, rate: parseFloat(e.target.value) || 0 })}
@@ -292,8 +297,9 @@ export default function AdditionalWorksModal({ open, onClose }: AdditionalWorksM
                       {editingId === work.id ? (
                         <div className="space-y-3">
                           <div>
-                            <Label className="text-xs">Назва Робіт</Label>
+                            <Label htmlFor={`approved-work-name-${editingId}`} className="text-xs">Назва Робіт</Label>
                             <Input
+                              id={`approved-work-name-${editingId}`}
                               value={editData.workName || ''}
                               onChange={(e) => setEditData({ ...editData, workName: e.target.value })}
                               className="mt-1"
@@ -301,8 +307,9 @@ export default function AdditionalWorksModal({ open, onClose }: AdditionalWorksM
                           </div>
 
                           <div>
-                            <Label className="text-xs">Опис</Label>
+                            <Label htmlFor={`approved-description-${editingId}`} className="text-xs">Опис</Label>
                             <Input
+                              id={`approved-description-${editingId}`}
                               value={editData.description || ''}
                               onChange={(e) => setEditData({ ...editData, description: e.target.value })}
                               className="mt-1"
@@ -311,16 +318,18 @@ export default function AdditionalWorksModal({ open, onClose }: AdditionalWorksM
 
                           <div className="grid grid-cols-3 gap-2">
                             <div>
-                              <Label className="text-xs">Одиниця</Label>
+                              <Label htmlFor={`approved-unit-${editingId}`} className="text-xs">Одиниця</Label>
                               <Input
+                                id={`approved-unit-${editingId}`}
                                 value={editData.unit || ''}
                                 onChange={(e) => setEditData({ ...editData, unit: e.target.value })}
                                 className="mt-1"
                               />
                             </div>
                             <div>
-                              <Label className="text-xs">Кількість</Label>
+                              <Label htmlFor={`approved-volume-${editingId}`} className="text-xs">Кількість</Label>
                               <Input
+                                id={`approved-volume-${editingId}`}
                                 type="number"
                                 value={editData.volume || ''}
                                 onChange={(e) => setEditData({ ...editData, volume: parseFloat(e.target.value) || 0 })}
@@ -329,8 +338,9 @@ export default function AdditionalWorksModal({ open, onClose }: AdditionalWorksM
                               />
                             </div>
                             <div>
-                              <Label className="text-xs">Ставка (₴)</Label>
+                              <Label htmlFor={`approved-rate-${editingId}`} className="text-xs">Ставка (₴)</Label>
                               <Input
+                                id={`approved-rate-${editingId}`}
                                 type="number"
                                 value={editData.rate || ''}
                                 onChange={(e) => setEditData({ ...editData, rate: parseFloat(e.target.value) || 0 })}
