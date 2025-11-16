@@ -2,38 +2,14 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "env": [
-    {
-      "key": "VITE_TELEGRAM_BOT_TOKEN",
-      "value": "@telegram_bot_token",
-      "description": "Telegram Bot Token"
-    },
-    {
-      "key": "VITE_TELEGRAM_BOT_USERNAME",
-      "value": "@telegram_bot_username",
-      "description": "Telegram Bot Username"
-    },
-    {
-      "key": "VITE_APP_URL",
-      "value": "@app_url",
-      "description": "Application URL"
-    },
-    {
-      "key": "VITE_GOOGLE_API_KEY",
-      "value": "@google_api_key",
-      "description": "Google API Key"
-    },
-    {
-      "key": "VITE_SPREADSHEET_ID",
-      "value": "@spreadsheet_id",
-      "description": "Google Spreadsheet ID"
-    },
-    {
-      "key": "VITE_GOOGLE_SCRIPT_URL",
-      "value": "@google_script_url",
-      "description": "Google Apps Script URL"
-    }
-  ],
+  "env": {
+    "VITE_TELEGRAM_BOT_TOKEN": "string",
+    "VITE_TELEGRAM_BOT_USERNAME": "string",
+    "VITE_APP_URL": "string",
+    "VITE_GOOGLE_API_KEY": "string",
+    "VITE_SPREADSHEET_ID": "string",
+    "VITE_GOOGLE_SCRIPT_URL": "string"
+  },
   "rewrites": [
     {
       "source": "/(.*)",
