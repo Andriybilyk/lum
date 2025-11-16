@@ -20,7 +20,7 @@ interface TelegramUser {
 
 
 export default function TelegramApp() {
-  const { isRegistered, setUser } = useUser();
+  const { isRegistered, setUser, logout } = useUser();
   const { isLoading } = useData();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [telegramUser, setTelegramUser] = useState<TelegramUser | null>(null);
@@ -29,6 +29,10 @@ export default function TelegramApp() {
   useEffect(() => {
     initializeTelegram();
   }, []);
+
+  const handleLogout = () => {
+    logout();
+  };
 
   const initializeTelegram = () => {
     try {

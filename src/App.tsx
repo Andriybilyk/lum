@@ -24,10 +24,24 @@ const TelegramApp = lazy(() => import("./pages/TelegramApp"));
 function AppContent() {
   const { notifications } = useNotification();
 
+  // Детектуємо, чи це Telegram Mini App
+  const isTelegramMiniApp = () => {
+    if (typeof window !== 'undefined') {
+      return !!(window.Telegram?.WebApp);
+    }
+    return false;
+  };
+
   return (
     <>
       <Routes>
-        <Route path="/" element={<WelcomeScreen />} />
+        <Route path="/" element={isTelegramMiniApp() ? (
+          <TelegramAppProvider>
+            <Suspense fallback={<LoadingScreen />}>
+              <TelegramMiniApp />
+            </Suspense>
+          </TelegramAppProvider>
+        ) : <WelcomeScreen />} />
         <Route
           path="/employee"
           element={
@@ -72,6 +86,29 @@ function AppContent() {
 }
 
 function App() {
+  const isTelegramOnly = () => {
+    if (typeof window !== 'undefined') {
+      return !!(window.Telegram?.WebApp);
+    }
+    return false;
+  };
+
+  // Для Telegram Mini App обмежуємо провайдерів
+  if (isTelegramOnly()) {
+    return (
+      <ErrorBoundary>
+        <BrowserRouter>
+          <ThemeProvider>
+            <NotificationProvider>
+              <AppContent />
+            </NotificationProvider>
+          </ThemeProvider>
+        </BrowserRouter>
+      </ErrorBoundary>
+    );
+  }
+
+  // Для звичайного веб-додатку - всі провайдери
   return (
     <ErrorBoundary>
       <BrowserRouter>
