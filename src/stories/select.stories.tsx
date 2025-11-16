@@ -21,7 +21,7 @@ export default meta;
 export const Base = {
   render: () => (
     <Select>
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger id="story-select-fruit" name="fruit" className="w-[180px]">
         <SelectValue placeholder="Select a fruit" />
       </SelectTrigger>
       <SelectContent>

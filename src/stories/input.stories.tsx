@@ -12,14 +12,14 @@ const meta = {
 export default meta;
 
 export const Default = {
-  render: (args: any) => <Input {...args} />,
+  render: (args: any) => <Input id="story-input-default" name="email" {...args} />,
   args: {
     type: "email",
     placeholder: "Email",
   },
 };
 export const Disabled = {
-  render: (args: any) => <Input disabled {...args} />,
+  render: (args: any) => <Input id="story-input-disabled" name="email-disabled" disabled {...args} />,
   args: { ...Default.args },
 };
 export const WithLabel = {
@@ -44,7 +44,7 @@ export const WithText = {
 export const WithButton = {
   render: (args: any) => (
     <div className="flex w-full max-w-sm items-center space-x-2">
-      <Input {...args} />
+      <Input id="story-input-subscribe" name="email-subscribe" {...args} />
       <Button type="submit">Subscribe</Button>
     </div>
   ),

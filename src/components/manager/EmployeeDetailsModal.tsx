@@ -255,8 +255,9 @@ export default function EmployeeDetailsModal({ open, onClose, employee }: Employ
                         <div className="space-y-3">
                           <div className="grid grid-cols-2 gap-2">
                             <div>
-                              <Label className="text-xs">Дата</Label>
+                              <Label htmlFor={`emp-hour-date-${employee.id}`} className="text-xs">Дата</Label>
                               <Input
+                                id={`emp-hour-date-${employee.id}`}
                                 type="date"
                                 value={editHourData.date}
                                 onChange={(e) => setEditHourData({...editHourData, date: e.target.value})}
@@ -264,8 +265,9 @@ export default function EmployeeDetailsModal({ open, onClose, employee }: Employ
                               />
                             </div>
                             <div>
-                              <Label className="text-xs">Години</Label>
+                              <Label htmlFor={`emp-hour-hours-${employee.id}`} className="text-xs">Години</Label>
                               <Input
+                                id={`emp-hour-hours-${employee.id}`}
                                 type="number"
                                 value={editHourData.hours}
                                 onChange={(e) => setEditHourData({...editHourData, hours: parseFloat(e.target.value)})}

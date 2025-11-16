@@ -12,14 +12,14 @@ const meta = {
 export default meta;
 
 export const Default = {
-  render: (args: any) => <Textarea {...args} />,
+  render: (args: any) => <Textarea id="story-textarea-default" name="message" {...args} />,
   args: {
     placeholder: "Type your message here.",
   },
 };
 
 export const Disabled = {
-  render: (args: any) => <Textarea {...args} />,
+  render: (args: any) => <Textarea id="story-textarea-disabled" name="message-disabled" {...args} />,
   args: {
     ...Default.args,
     disabled: true,
@@ -52,7 +52,7 @@ export const WithText = {
 export const WithButton = {
   render: (args: any) => (
     <div className="grid w-full gap-2">
-      <Textarea {...args} />
+      <Textarea id="story-textarea-send" name="message-send" {...args} />
       <Button>Send message</Button>
     </div>
   ),
