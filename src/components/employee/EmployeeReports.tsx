@@ -1,22 +1,45 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Clock, Briefcase, DollarSign } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Clock, Briefcase, DollarSign } from 'lucide-react';
 import { useData } from '@/contexts/DataContext';
 import { useUser } from '@/contexts/UserContext';
+import ExportMenu from '@/components/export/ExportMenu';
 
 export default function EmployeeReports() {
   const { user } = useUser();
   const { getEmployeeReport } = useData();
   const [selectedMonth, setSelectedMonth] = useState('2024-01');
 
-  // Отримуємо реальні дані з контексту
-  const report = user ? getEmployeeReport(user.id, selectedMonth) : { hours: [], processes: [], totalHours: 0, totalEarnings: 0 };
+  const report = useMemo(() => {
+    return user ? getEmployeeReport(user.id, selectedMonth) : { hours: [], processes: [], totalHours: 0, totalEarnings: 0 };
+  }, [user, selectedMonth, getEmployeeReport]);
 
   const hourEarnings = report.hours.reduce((sum, h) => sum + h.earnings, 0);
   const processEarnings = report.processes.reduce((sum, p) => sum + p.earnings, 0);
+
+  const exportData = useMemo(() => {
+    return [
+      ...report.hours.map(h => ({
+        Дата: h.date,
+        Об_єкт: h.object,
+        Тип: 'Години',
+        Кількість: h.hours,
+        Відрядження: h.businessTrip ? 'Так' : 'Ні',
+        Заробіток: h.earnings,
+      })),
+      ...report.processes.map(p => ({
+        Дата: p.date,
+        Об_єкт: p.name,
+        Тип: 'Процес',
+        Кількість: p.volume,
+        Одиниця: p.unit,
+        Ставка: p.rate,
+        Заробіток: p.earnings,
+      })),
+    ];
+  }, [report]);
 
   return (
     <div className="p-4 space-y-4">
@@ -140,11 +163,17 @@ export default function EmployeeReports() {
         </Tabs>
       </Card>
 
-      {/* Кнопка експорту */}
-      <Button className="w-full bg-gradient-to-r from-blue-600 to-cyan-500">
-        <Calendar className="w-4 h-4 mr-2" />
-        Експортувати Звіт
-      </Button>
+      <div className="flex gap-2">
+        <ExportMenu
+          data={exportData}
+          filename={`employee-report-${selectedMonth}`}
+          reportTitle={`Звіт ${user?.name || 'Працівника'} за ${selectedMonth}`}
+          reportDate={selectedMonth}
+          disabled={exportData.length === 0}
+          includesSummary={true}
+          summaryFields={['Кількість', 'Заробіток']}
+        />
+      </div>
     </div>
   );
 }

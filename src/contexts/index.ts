@@ -6,3 +6,4 @@ export { MetaProvider, useMeta } from './MetaContext';
 export { DataProvider, useData } from './DataContext';
 export { UserProvider, useUser } from './UserContext';
 export { ThemeProvider, useTheme } from './ThemeContext';
+export { TelegramAppProvider, useTelegramApp } from './TelegramAppContext';

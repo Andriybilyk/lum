@@ -1,0 +1,67 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "env": {
+    "VITE_TELEGRAM_BOT_TOKEN": {
+      "description": "Telegram Bot Token"
+    },
+    "VITE_TELEGRAM_BOT_USERNAME": {
+      "description": "Telegram Bot Username"
+    },
+    "VITE_APP_URL": {
+      "description": "Application URL"
+    },
+    "VITE_GOOGLE_API_KEY": {
+      "description": "Google API Key"
+    },
+    "VITE_SPREADSHEET_ID": {
+      "description": "Google Spreadsheet ID"
+    },
+    "VITE_GOOGLE_SCRIPT_URL": {
+      "description": "Google Apps Script URL"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, must-revalidate"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+}

@@ -1,83 +1,46 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { useData } from '@/contexts/DataContext';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Clock, DollarSign, Eye, Download } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { Clock, DollarSign, Eye } from 'lucide-react';
 import { FeatureErrorBoundary } from '@/components/providers/FeatureErrorBoundary';
 import EmployeeReportDetailsModal from './EmployeeReportDetailsModal';
-import { exportTeamReport } from '@/services/reportExport';
+import ExportMenu from '@/components/export/ExportMenu';
 
 export default function ManagerReports() {
   const { user } = useUser();
-  const { getTeamReport, users, hours, processes } = useData();
-  const { toast } = useToast();
+  const { getTeamReport, users } = useData();
 
   // Встановлюємо поточний місяць за замовчуванням
   const currentMonth = new Date().toISOString().slice(0, 7);
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const [selectedEmployee, setSelectedEmployee] = useState<{ id: string; name: string } | null>(null);
-  const [isExportingTeam, setIsExportingTeam] = useState(false);
 
-  // Отримуємо звіт команди
   const reportData = getTeamReport(selectedMonth);
-  
-  // Фільтруємо тільки працівників команди менеджера
+
   const teamReport = reportData.filter(emp => {
     const empUser = users.find(u => u.id === emp.employeeId);
     return empUser && (empUser.managerId === user?.id || empUser.id === user?.id);
   });
-  
+
   const totalTeamHours = teamReport.reduce((sum, emp) => sum + emp.hours, 0);
   const totalTeamEarnings = teamReport.reduce((sum, emp) => sum + emp.earnings, 0);
 
-  const handleExportTeamReport = async () => {
-    setIsExportingTeam(true);
-    try {
-      const teamData = teamReport.map(emp => {
-        const empUser = users.find(u => u.id === emp.employeeId);
-        const empHours = hours.filter(h => h.userId === emp.employeeId && h.date.startsWith(selectedMonth));
-        const empProcesses = processes.filter(p => p.userId === emp.employeeId && p.date.startsWith(selectedMonth));
+  const exportData = useMemo(() => {
+    return teamReport.map((emp) => {
+      const empUser = users.find(u => u.id === emp.employeeId);
+      return {
+        ПІБ: emp.name,
+        Посада: empUser?.role === 'manager' ? 'Менеджер' : 'Працівник',
+        Години: emp.hours,
+        Заробіток: emp.earnings,
+        Місяць: selectedMonth,
+      };
+    });
+  }, [teamReport, selectedMonth, users]);
 
-        return {
-          employeeName: emp.name,
-          hours: empHours.map(h => ({
-            date: h.date,
-            object: h.object,
-            hours: h.hours,
-            businessTrip: h.isBusinessTrip,
-            earnings: h.salary
-          })),
-          processes: empProcesses.map(p => ({
-            date: p.date,
-            name: p.processName,
-            object: p.object || '',
-            volume: p.volume,
-            unit: p.unit,
-            rate: p.salary / p.volume,
-            earnings: p.salary
-          }))
-        };
-      });
-
-      await exportTeamReport(teamData, selectedMonth);
-
-      toast({
-        title: 'Успішно',
-        description: 'Звіт команди експортовано в Google Sheets'
-      });
-    } catch (error) {
-      toast({
-        title: 'Помилка',
-        description: 'Не вдалося експортувати звіт',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsExportingTeam(false);
-    }
-  };
 
   return (
     <FeatureErrorBoundary featureName="ManagerReports">
@@ -86,14 +49,15 @@ export default function ManagerReports() {
         <h2 className="text-2xl font-bold text-slate-800 dark:text-white">
           📊 Звіти Команди
         </h2>
-        <Button
-          onClick={handleExportTeamReport}
-          disabled={isExportingTeam || teamReport.length === 0}
-          className="gap-2 bg-gradient-to-r from-blue-600 to-cyan-500"
-        >
-          <Download className="w-4 h-4" />
-          {isExportingTeam ? 'Експортування...' : 'Експортувати'}
-        </Button>
+        <ExportMenu
+          data={exportData}
+          filename={`team-report-${selectedMonth}`}
+          reportTitle={`Звіт команди за ${selectedMonth}`}
+          reportDate={selectedMonth}
+          disabled={teamReport.length === 0}
+          includesSummary={true}
+          summaryFields={['Години', 'Заробіток']}
+        />
       </div>
 
       <Card className="p-4">

@@ -8,6 +8,7 @@ import { HoursProvider } from "./contexts/HoursContext";
 import { ProcessProvider } from "./contexts/ProcessContext";
 import { ReportProvider } from "./contexts/ReportContext";
 import { MetaProvider } from "./contexts/MetaContext";
+import { TelegramAppProvider } from "./contexts/TelegramAppContext";
 import { NotificationProvider, useNotification } from "./contexts/NotificationContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import NotificationContainer from "./components/providers/NotificationContainer";
@@ -17,6 +18,8 @@ import { Toaster } from '@/components/ui/toaster';
 
 const EmployeeDashboard = lazy(() => import("./pages/EmployeeDashboard"));
 const ManagerDashboard = lazy(() => import("./pages/ManagerDashboard"));
+const TelegramMiniApp = lazy(() => import("./pages/TelegramMiniApp"));
+const TelegramApp = lazy(() => import("./pages/TelegramApp"));
 
 function AppContent() {
   const { notifications } = useNotification();
@@ -39,6 +42,26 @@ function AppContent() {
             <Suspense fallback={<LoadingScreen />}>
               <ManagerDashboard />
             </Suspense>
+          }
+        />
+        <Route
+          path="/telegram"
+          element={
+            <TelegramAppProvider>
+              <Suspense fallback={<LoadingScreen />}>
+                <TelegramApp />
+              </Suspense>
+            </TelegramAppProvider>
+          }
+        />
+        <Route
+          path="/telegram/quick"
+          element={
+            <TelegramAppProvider>
+              <Suspense fallback={<LoadingScreen />}>
+                <TelegramMiniApp />
+              </Suspense>
+            </TelegramAppProvider>
           }
         />
       </Routes>
