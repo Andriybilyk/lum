@@ -163,8 +163,9 @@ export default function ProcessDetailsModal({ open, onClose, month, year }: Proc
                       <div className="space-y-3">
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <Label className="text-xs">Дата</Label>
+                            <Label htmlFor={`date-${entry.id}`} className="text-xs">Дата</Label>
                             <Input
+                              id={`date-${entry.id}`}
                               type="date"
                               value={editProcessData.date}
                               onChange={(e) => setEditProcessData({...editProcessData, date: e.target.value})}
@@ -172,8 +173,9 @@ export default function ProcessDetailsModal({ open, onClose, month, year }: Proc
                             />
                           </div>
                           <div>
-                            <Label className="text-xs">Процес</Label>
+                            <Label htmlFor={`process-${entry.id}`} className="text-xs">Процес</Label>
                             <Input
+                              id={`process-${entry.id}`}
                               value={editProcessData.processName}
                               onChange={(e) => setEditProcessData({...editProcessData, processName: e.target.value})}
                               className="h-8"
@@ -182,8 +184,9 @@ export default function ProcessDetailsModal({ open, onClose, month, year }: Proc
                         </div>
                         <div className="grid grid-cols-3 gap-2">
                           <div>
-                            <Label className="text-xs">Обсяг</Label>
+                            <Label htmlFor={`volume-${entry.id}`} className="text-xs">Обсяг</Label>
                             <Input
+                              id={`volume-${entry.id}`}
                               type="number"
                               value={editProcessData.volume}
                               onChange={(e) => setEditProcessData({...editProcessData, volume: parseFloat(e.target.value)})}
@@ -191,16 +194,18 @@ export default function ProcessDetailsModal({ open, onClose, month, year }: Proc
                             />
                           </div>
                           <div>
-                            <Label className="text-xs">Одиниця</Label>
+                            <Label htmlFor={`unit-${entry.id}`} className="text-xs">Одиниця</Label>
                             <Input
+                              id={`unit-${entry.id}`}
                               value={editProcessData.unit}
                               onChange={(e) => setEditProcessData({...editProcessData, unit: e.target.value})}
                               className="h-8"
                             />
                           </div>
                           <div>
-                            <Label className="text-xs">Ставк��</Label>
+                            <Label htmlFor={`rate-${entry.id}`} className="text-xs">Ставка</Label>
                             <Input
+                              id={`rate-${entry.id}`}
                               type="number"
                               value={editProcessData.rate}
                               onChange={(e) => setEditProcessData({...editProcessData, rate: parseFloat(e.target.value)})}

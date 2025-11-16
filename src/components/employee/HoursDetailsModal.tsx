@@ -159,8 +159,9 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
                       <div className="space-y-3">
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <Label className="text-xs">Дата</Label>
+                            <Label htmlFor={`hour-date-${entry.id}`} className="text-xs">Дата</Label>
                             <Input
+                              id={`hour-date-${entry.id}`}
                               type="date"
                               value={editHourData.date}
                               onChange={(e) => setEditHourData({...editHourData, date: e.target.value})}
@@ -168,8 +169,9 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
                             />
                           </div>
                           <div>
-                            <Label className="text-xs">Години</Label>
+                            <Label htmlFor={`hour-hours-${entry.id}`} className="text-xs">Години</Label>
                             <Input
+                              id={`hour-hours-${entry.id}`}
                               type="number"
                               value={editHourData.hours}
                               onChange={(e) => setEditHourData({...editHourData, hours: parseFloat(e.target.value)})}
@@ -180,8 +182,9 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
                           </div>
                         </div>
                         <div>
-                          <Label className="text-xs">Об'єкт</Label>
+                          <Label htmlFor={`hour-object-${entry.id}`} className="text-xs">Об'єкт</Label>
                           <Input
+                            id={`hour-object-${entry.id}`}
                             value={editHourData.object}
                             onChange={(e) => setEditHourData({...editHourData, object: e.target.value})}
                             className="h-8"
@@ -189,12 +192,13 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
                         </div>
                         <div className="flex items-center gap-2">
                           <input
+                            id={`hour-trip-${entry.id}`}
                             type="checkbox"
                             checked={editHourData.isBusinessTrip}
                             onChange={(e) => setEditHourData({...editHourData, isBusinessTrip: e.target.checked})}
                             className="w-4 h-4"
                           />
-                          <Label className="text-xs">Відрядження (1.2x)</Label>
+                          <Label htmlFor={`hour-trip-${entry.id}`} className="text-xs">Відрядження (1.2x)</Label>
                         </div>
                         <div className="flex gap-2">
                           <Button

@@ -29,6 +29,7 @@ const SearchBar = memo(function SearchBar({
     <div className="relative flex items-center">
       <Search className="absolute left-3 w-4 h-4 text-slate-400 pointer-events-none" />
       <Input
+        id="search-bar"
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
