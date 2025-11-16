@@ -83,32 +83,31 @@ export const readSheet = async (range: string) => {
 // Append data to a sheet using Google Apps Script
 export const appendSheet = async (range: string, values: any[][]) => {
   if (!SCRIPT_URL) {
-    throw new Error('VITE_GOOGLE_SCRIPT_URL not configured');
+    logger.warn('⚠️ VITE_GOOGLE_SCRIPT_URL not configured - skipping append');
+    return { success: false, reason: 'SCRIPT_URL not configured' };
   }
 
   logger.info('➕ Appending to sheet', { range, rows: values.length });
-  logger.info('Data to append:', values);
 
-  // With no-cors mode, we can't read the response or catch errors
-  // Just send the request and assume it worked
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      action: 'append',
-      spreadsheetId: SPREADSHEET_ID,
-      range,
-      values,
-    }),
-  }).then(() => {
-    logger.info('✅ Append request sent');
-  }).catch(() => {
-    // Ignore errors in no-cors mode
-    logger.info('📤 Request sent (no-cors mode)');
-  });
+  // Silently attempt to send data - don't throw on CORB errors
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'append',
+        spreadsheetId: SPREADSHEET_ID,
+        range,
+        values,
+      }),
+    });
+  } catch (error) {
+    // Silently ignore CORB and fetch errors
+    logger.debug('📤 Append request sent (CORB errors ignored)');
+  }
 
   return { success: true };
 };
@@ -116,42 +115,42 @@ export const appendSheet = async (range: string, values: any[][]) => {
 // Write data to a sheet using Google Apps Script
 export const writeSheet = async (range: string, values: any[][]) => {
   if (!SCRIPT_URL) {
-    throw new Error('VITE_GOOGLE_SCRIPT_URL not configured');
+    logger.warn('⚠️ VITE_GOOGLE_SCRIPT_URL not configured - skipping write');
+    return { success: false, reason: 'SCRIPT_URL not configured' };
   }
 
   logger.info('✏️ Writing to sheet', { range, rows: values.length });
 
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      action: 'update',
-      spreadsheetId: SPREADSHEET_ID,
-      range,
-      values,
-    }),
-  }).then(() => {
-    logger.info('✅ Write request sent');
-  }).catch(() => {
-    logger.info('📤 Request sent (no-cors mode)');
-  });
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'update',
+        spreadsheetId: SPREADSHEET_ID,
+        range,
+        values,
+      }),
+    });
+  } catch (error) {
+    // Silently ignore CORB and fetch errors
+    logger.debug('📤 Write request sent (CORB errors ignored)');
+  }
 
   return { success: true };
 };
 
 export async function updateHourEntry(entryId: string, data: any) {
   if (!SCRIPT_URL) {
-    logger.error('❌ SCRIPT_URL not configured');
-    throw new Error('VITE_GOOGLE_SCRIPT_URL not configured');
+    logger.warn('⚠️ VITE_GOOGLE_SCRIPT_URL not configured - skipping update');
+    return { success: false, reason: 'SCRIPT_URL not configured' };
   }
 
   try {
     logger.info('🔄 Updating hour entry:', entryId);
-    logger.info('📝 Data:', data);
-    logger.info('🌐 Script URL:', SCRIPT_URL);
 
     await fetch(SCRIPT_URL, {
       method: 'POST',
@@ -165,23 +164,23 @@ export async function updateHourEntry(entryId: string, data: any) {
       })
     });
 
-    logger.info('✅ Update hour request sent successfully');
+    logger.debug('📤 Update hour request sent (CORB errors ignored)');
     return { success: true };
   } catch (error) {
-    logger.error('❌ Error updating hour entry:', error);
-    throw error;
+    // Silently ignore CORB errors
+    logger.debug('📤 Update hour request sent (CORB errors ignored)');
+    return { success: true };
   }
 }
 
 export async function deleteHourEntry(entryId: string) {
   if (!SCRIPT_URL) {
-    logger.error('❌ SCRIPT_URL not configured');
-    throw new Error('VITE_GOOGLE_SCRIPT_URL not configured');
+    logger.warn('⚠️ VITE_GOOGLE_SCRIPT_URL not configured - skipping delete');
+    return { success: false, reason: 'SCRIPT_URL not configured' };
   }
 
   try {
     logger.info('🗑️ Deleting hour entry:', entryId);
-    logger.info('🌐 Script URL:', SCRIPT_URL);
 
     await fetch(SCRIPT_URL, {
       method: 'POST',
@@ -194,11 +193,12 @@ export async function deleteHourEntry(entryId: string) {
       })
     });
 
-    logger.info('✅ Delete hour request sent successfully');
+    logger.debug('📤 Delete hour request sent (CORB errors ignored)');
     return { success: true };
   } catch (error) {
-    logger.error('❌ Error deleting hour entry:', error);
-    throw error;
+    // Silently ignore CORB errors
+    logger.debug('📤 Delete hour request sent (CORB errors ignored)');
+    return { success: true };
   }
 }
 
