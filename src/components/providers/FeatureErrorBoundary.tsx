@@ -1,5 +1,4 @@
 import React, { ReactNode } from 'react';
-import { logger } from '@/utils/logger';
 import ErrorBoundary from '../ErrorBoundary';
 import { AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';

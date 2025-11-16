@@ -1066,6 +1066,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const convertApprovedAdditionalWorksToProcesses = async () => {
     try {
       // Знаходимо затверджені додаткові роботи, які ще не були конвертовані

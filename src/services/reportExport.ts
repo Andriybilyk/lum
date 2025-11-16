@@ -25,15 +25,6 @@ interface EmployeeReport {
   processes: ProcessEntry[];
 }
 
-interface TeamStats {
-  objectName: string;
-  totalHours: number;
-  totalRegularHours: number;
-  totalOvertimeHours: number;
-  totalProcessEarnings: number;
-  totalEarnings: number;
-}
-
 const MAX_COLS = 8;
 
 const padRow = (row: any[]): any[] => {

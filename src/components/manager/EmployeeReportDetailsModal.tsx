@@ -49,7 +49,7 @@ export default function EmployeeReportDetailsModal({
   const [year, monthNum] = month.split('-');
   const monthName = monthNames[parseInt(monthNum) - 1];
 
-  const handleEditHour = (hourId: string, currentHours: number, date: string, object: string, hourlyRate: number, isBusinessTrip: boolean) => {
+  const handleEditHour = (hourId: string, currentHours: number, _date: string, _object: string, _hourlyRate: number, _isBusinessTrip: boolean) => {
     setEditingHour(hourId);
     setEditHourData({ hours: currentHours });
   };

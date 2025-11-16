@@ -11,7 +11,6 @@ export interface SyncResult {
 
 export class SyncManager {
   private isSyncing = false;
-  private syncInProgress = false;
 
   async syncOfflineData(onSyncCallback?: (itemsSynced: number) => void): Promise<SyncResult> {
     if (this.isSyncing) {

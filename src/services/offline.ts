@@ -14,7 +14,6 @@ export class OfflineManager {
   private db: IDBDatabase | null = null;
   private dbName = 'hr-system';
   private dbVersion = 1;
-  private isSyncing = false;
 
   async init(): Promise<void> {
     return new Promise((resolve, reject) => {
