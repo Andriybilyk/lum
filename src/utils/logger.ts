@@ -37,64 +37,69 @@ const formatMessage = (_level: LogLevel, message: string, context?: string): str
   return `${timestamp}${contextStr} - ${message}`;
 };
 
+// Safe logger that prevents recursion by not logging in production
 export const logger = {
   debug: (message: string, data?: any, context?: string) => {
-    if (!shouldLog('debug')) return;
+    if (!shouldLog('debug') || !isDevelopment) return;
 
-    const formatted = formatMessage('debug', message, context);
-    if (isDevelopment) {
+    try {
+      const formatted = formatMessage('debug', message, context);
       originalConsoleLog(`%c${formatted}`, COLORS.debug);
       if (data) originalConsoleLog(data);
+    } catch {
+      // Silently ignore any logging errors to prevent recursion
     }
   },
 
   info: (message: string, data?: any, context?: string) => {
-    if (!shouldLog('info')) return;
+    if (!shouldLog('info') || !isDevelopment) return;
 
-    const formatted = formatMessage('info', message, context);
-    if (isDevelopment) {
+    try {
+      const formatted = formatMessage('info', message, context);
       originalConsoleLog(`%c${formatted}`, COLORS.info);
       if (data) originalConsoleLog(data);
+    } catch {
+      // Silently ignore any logging errors to prevent recursion
     }
   },
 
   warn: (message: string, data?: any, context?: string) => {
-    if (!shouldLog('warn')) return;
+    if (!shouldLog('warn') || !isDevelopment) return;
 
-    const formatted = formatMessage('warn', message, context);
-    if (isDevelopment) {
+    try {
+      const formatted = formatMessage('warn', message, context);
       originalConsoleWarn(`%c${formatted}`, COLORS.warn);
       if (data) originalConsoleWarn(data);
+    } catch {
+      // Silently ignore any logging errors to prevent recursion
     }
   },
 
   error: (message: string, data?: any, context?: string) => {
-    if (!shouldLog('error')) return;
+    if (!shouldLog('error') || !isDevelopment) return;
 
-    const formatted = formatMessage('error', message, context);
-    if (isDevelopment) {
+    try {
+      const formatted = formatMessage('error', message, context);
       originalConsoleError(`%c${formatted}`, COLORS.error);
       if (data) originalConsoleError(data);
-    }
-
-    // In production, you could send errors to a service here
-    if (!isDevelopment) {
-      // Example: sendToErrorTracking(message, data, context);
+    } catch {
+      // Silently ignore any logging errors to prevent recursion
     }
   },
 
   group: (label: string, fn: () => void) => {
-    if (!shouldLog('debug')) {
+    if (!shouldLog('debug') || !isDevelopment) {
       fn();
       return;
     }
 
-    if (isDevelopment) {
+    try {
       originalConsoleLog(`%c${label}`, COLORS.debug);
-    }
-    fn();
-    if (isDevelopment) {
+      fn();
       originalConsoleLog('groupEnd');
+    } catch {
+      // Silently ignore any logging errors
+      fn();
     }
   },
 };
