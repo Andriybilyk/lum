@@ -73,7 +73,7 @@ export default function AssignWorkModal({ open, onClose }: AssignWorkModalProps)
               value={formData.employeeId}
               onValueChange={(value) => setFormData({ ...formData, employeeId: value })}
             >
-              <SelectTrigger className="mt-1.5">
+              <SelectTrigger id="employee" className="mt-1.5">
                 <SelectValue placeholder="Оберіть працівника" />
               </SelectTrigger>
               <SelectContent>
@@ -109,7 +109,7 @@ export default function AssignWorkModal({ open, onClose }: AssignWorkModalProps)
               value={formData.object}
               onValueChange={(value) => setFormData({ ...formData, object: value })}
             >
-              <SelectTrigger className="mt-1.5">
+              <SelectTrigger id="object" className="mt-1.5">
                 <SelectValue placeholder="Оберіть об'єкт" />
               </SelectTrigger>
               <SelectContent>

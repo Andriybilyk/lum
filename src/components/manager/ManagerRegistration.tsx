@@ -161,7 +161,7 @@ export default function ManagerRegistration() {
               <div>
                 <Label htmlFor="level" className="text-slate-700 dark:text-slate-300">Рівень</Label>
                 <Select value={formData.level} onValueChange={handleLevelChange}>
-                  <SelectTrigger className="mt-1.5 h-12 rounded-xl">
+                  <SelectTrigger id="level" className="mt-1.5 h-12 rounded-xl">
                     <SelectValue placeholder="Оберіть свій рівень" />
                   </SelectTrigger>
                   <SelectContent>

@@ -209,7 +209,7 @@ export default function LogProcessModal({ open, onClose }: LogProcessModalProps)
               value={formData.object}
               onValueChange={(value) => setFormData({ ...formData, object: value, processName: '', volume: '', unit: '', rate: '' })}
             >
-              <SelectTrigger className="mt-1.5">
+              <SelectTrigger id="object" className="mt-1.5">
                 <SelectValue placeholder="Оберіть об'єкт" />
               </SelectTrigger>
               <SelectContent>
@@ -229,7 +229,7 @@ export default function LogProcessModal({ open, onClose }: LogProcessModalProps)
               onValueChange={handleProcessSelect}
               disabled={!formData.object}
             >
-              <SelectTrigger className="mt-1.5">
+              <SelectTrigger id="processName" className="mt-1.5">
                 <SelectValue placeholder={formData.object ? "Оберіть процес" : "Спочатку оберіть об'єкт"} />
               </SelectTrigger>
               <SelectContent>
@@ -325,7 +325,7 @@ export default function LogProcessModal({ open, onClose }: LogProcessModalProps)
               value={additionalWorkData.object}
               onValueChange={(value) => setAdditionalWorkData({ ...additionalWorkData, object: value })}
             >
-              <SelectTrigger className="mt-1.5">
+              <SelectTrigger id="aw-object" className="mt-1.5">
                 <SelectValue placeholder="Оберіть об'єкт" />
               </SelectTrigger>
               <SelectContent>

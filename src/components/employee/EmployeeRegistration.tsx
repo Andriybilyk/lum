@@ -189,7 +189,7 @@ export default function EmployeeRegistration() {
               <div>
                 <Label htmlFor="level" className="text-slate-700 dark:text-slate-300">Рівень</Label>
                 <Select value={formData.level} onValueChange={handleLevelChange}>
-                  <SelectTrigger className="mt-1.5 h-12 rounded-xl">
+                  <SelectTrigger id="level" className="mt-1.5 h-12 rounded-xl">
                     <SelectValue placeholder={levels.length === 0 ? "Немає доступних рівнів" : "Оберіть свій рівень"} />
                   </SelectTrigger>
                   <SelectContent>
@@ -225,7 +225,7 @@ export default function EmployeeRegistration() {
               <div>
                 <Label htmlFor="manager" className="text-slate-700 dark:text-slate-300">Менеджер (опційно)</Label>
                 <Select value={formData.managerId} onValueChange={(value) => setFormData({ ...formData, managerId: value })}>
-                  <SelectTrigger className="mt-1.5 h-12 rounded-xl">
+                  <SelectTrigger id="manager" className="mt-1.5 h-12 rounded-xl">
                     <SelectValue placeholder="Оберіть менеджера або не обирайте" />
                   </SelectTrigger>
                   <SelectContent>
