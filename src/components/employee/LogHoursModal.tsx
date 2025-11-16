@@ -147,7 +147,7 @@ export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
               id="hours"
               type="number"
               step={WORK_HOURS.HOUR_STEP}
-              max={WORK_HOURS.MAX_DAILY_HOURS - hoursWorkedToday}
+              max={Math.max(0, WORK_HOURS.MAX_DAILY_HOURS - hoursWorkedToday) || undefined}
               value={formData.hours}
               onChange={(e) => setFormData({ ...formData, hours: e.target.value })}
               placeholder="4.0"
@@ -155,7 +155,7 @@ export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
               className="mt-1.5"
             />
             <p className="text-xs text-slate-500 mt-1">
-              Доступно: {(WORK_HOURS.MAX_DAILY_HOURS - hoursWorkedToday).toFixed(1)} год (макс. {WORK_HOURS.MAX_DAILY_HOURS} год/день)
+              Доступно: {Math.max(0, WORK_HOURS.MAX_DAILY_HOURS - hoursWorkedToday).toFixed(1)} год (макс. {WORK_HOURS.MAX_DAILY_HOURS} год/день)
             </p>
           </div>
 
