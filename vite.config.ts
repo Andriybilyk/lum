@@ -5,7 +5,7 @@ import react from "@vitejs/plugin-react-swc";
 export default defineConfig({
   base: process.env.NODE_ENV === "development" ? "/" : process.env.VITE_BASE_PATH || "/",
   optimizeDeps: {
-    entries: ["src/main.tsx", "src/tempobook/**/*"],
+    entries: process.env.NODE_ENV === "development" ? ["src/main.tsx", "src/tempobook/**/*"] : ["src/main.tsx"],
   },
   plugins: [
     react(),
