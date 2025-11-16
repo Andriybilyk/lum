@@ -22,6 +22,11 @@ const COLORS = {
   error: 'color: #EF4444; font-weight: bold;',
 };
 
+// Store original console methods to prevent recursion
+const originalConsoleError = console.error;
+const originalConsoleWarn = console.warn;
+const originalConsoleLog = console.log;
+
 const shouldLog = (level: LogLevel): boolean => {
   return LOG_LEVELS[level] >= LOG_LEVELS[LOG_LEVEL];
 };
@@ -37,32 +42,40 @@ export const logger = {
     if (!shouldLog('debug')) return;
 
     const formatted = formatMessage('debug', message, context);
-    console.log(`%c${formatted}`, COLORS.debug);
-    if (data) console.log(data);
+    if (isDevelopment) {
+      originalConsoleLog(`%c${formatted}`, COLORS.debug);
+      if (data) originalConsoleLog(data);
+    }
   },
 
   info: (message: string, data?: any, context?: string) => {
     if (!shouldLog('info')) return;
 
     const formatted = formatMessage('info', message, context);
-    console.log(`%c${formatted}`, COLORS.info);
-    if (data) console.log(data);
+    if (isDevelopment) {
+      originalConsoleLog(`%c${formatted}`, COLORS.info);
+      if (data) originalConsoleLog(data);
+    }
   },
 
   warn: (message: string, data?: any, context?: string) => {
     if (!shouldLog('warn')) return;
 
     const formatted = formatMessage('warn', message, context);
-    console.warn(`%c${formatted}`, COLORS.warn);
-    if (data) console.warn(data);
+    if (isDevelopment) {
+      originalConsoleWarn(`%c${formatted}`, COLORS.warn);
+      if (data) originalConsoleWarn(data);
+    }
   },
 
   error: (message: string, data?: any, context?: string) => {
     if (!shouldLog('error')) return;
 
     const formatted = formatMessage('error', message, context);
-    console.error(`%c${formatted}`, COLORS.error);
-    if (data) console.error(data);
+    if (isDevelopment) {
+      originalConsoleError(`%c${formatted}`, COLORS.error);
+      if (data) originalConsoleError(data);
+    }
 
     // In production, you could send errors to a service here
     if (!isDevelopment) {
@@ -76,25 +89,23 @@ export const logger = {
       return;
     }
 
-    console.group(`%c${label}`, COLORS.debug);
+    if (isDevelopment) {
+      originalConsoleLog(`%c${label}`, COLORS.debug);
+    }
     fn();
-    console.groupEnd();
+    if (isDevelopment) {
+      originalConsoleLog('groupEnd');
+    }
   },
 };
 
 // Prevent console spam in development by intercepting native console if needed
-if (isDevelopment) {
-  // Keep console methods available in dev
-} else {
+if (!isDevelopment) {
   // In production, disable console for better performance
   const noop = () => {};
   window.console.log = noop;
   window.console.debug = noop;
   window.console.info = noop;
-  window.console.warn = (msg: string, ...args: any[]) => {
-    if (msg.includes('React')) logger.warn(msg, args);
-  };
-  window.console.error = (msg: string, ...args: any[]) => {
-    logger.error(msg, args);
-  };
+  window.console.warn = noop;
+  window.console.error = noop;
 }
