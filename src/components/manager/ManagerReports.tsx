@@ -64,6 +64,8 @@ export default function ManagerReports() {
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-slate-800 dark:text-white">Оберіть Місяць</h3>
           <Input
+            id="manager-report-month-picker"
+            name="manager-report-month"
             type="month"
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}

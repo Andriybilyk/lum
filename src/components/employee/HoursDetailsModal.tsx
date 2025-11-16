@@ -193,6 +193,7 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
                         <div className="flex items-center gap-2">
                           <input
                             id={`hour-trip-${entry.id}`}
+                            name={`hour-trip-${entry.id}`}
                             type="checkbox"
                             checked={editHourData.isBusinessTrip}
                             onChange={(e) => setEditHourData({...editHourData, isBusinessTrip: e.target.checked})}
