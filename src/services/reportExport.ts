@@ -43,28 +43,6 @@ const padRow = (row: any[]): any[] => {
   return row.slice(0, MAX_COLS);
 };
 
-const calculateRegularAndOvertimeHours = (hours: HourEntry[]): { regularHours: number; overtimeHours: number } => {
-  const hoursByDate = new Map<string, number>();
-
-  hours.forEach(hour => {
-    const current = hoursByDate.get(hour.date) || 0;
-    hoursByDate.set(hour.date, current + hour.hours);
-  });
-
-  let regularHours = 0;
-  let overtimeHours = 0;
-
-  hoursByDate.forEach(dailyHours => {
-    if (dailyHours > 8) {
-      regularHours += 8;
-      overtimeHours += dailyHours - 8;
-    } else {
-      regularHours += dailyHours;
-    }
-  });
-
-  return { regularHours, overtimeHours };
-};
 
 export async function exportEmployeeReport(
   report: EmployeeReport,

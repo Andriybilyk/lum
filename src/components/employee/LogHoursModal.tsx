@@ -18,7 +18,7 @@ interface LogHoursModalProps {
 
 export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
   const { user } = useUser();
-  const { objects, hours, addHours, loadFromGoogleSheets } = useData();
+  const { objects, hours, addHours } = useData();
   const { error, success } = useNotification();
 
   const [formData, setFormData] = useState({

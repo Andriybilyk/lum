@@ -16,7 +16,7 @@ interface LogProcessModalProps {
 
 export default function LogProcessModal({ open, onClose }: LogProcessModalProps) {
   const { user } = useUser();
-  const { objects, processTypes, addProcess, addAdditionalWork, loadFromGoogleSheets, users } = useData();
+  const { objects, processTypes, addProcess, addAdditionalWork, users } = useData();
   const { toast } = useToast();
 
   const [mode, setMode] = useState<'standard' | 'additional'>('standard');

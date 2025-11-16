@@ -15,27 +15,12 @@ export function FeatureErrorBoundary({
   children,
   featureName,
   fallback,
-  onError,
 }: FeatureErrorBoundaryProps) {
-  const handleError = (error: Error, errorInfo: React.ErrorInfo) => {
-    logger.error(`Feature "${featureName}" crashed`, {
-      error: error.message,
-      stack: error.stack,
-      componentStack: errorInfo.componentStack,
-    }, 'FeatureErrorBoundary');
-
-    if (onError) {
-      onError(error, errorInfo);
-    }
-
-    if (typeof window !== 'undefined' && window.__errorReporting) {
-      window.__errorReporting({
-        feature: featureName,
-        error: error.message,
-        stack: error.stack,
-      });
-    }
-  };
+  if (typeof window !== 'undefined' && window.__errorReporting) {
+    window.__errorReporting({
+      feature: featureName,
+    });
+  }
 
   const defaultFallback = (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -72,7 +57,6 @@ export function FeatureErrorBoundary({
   return (
     <ErrorBoundary
       fallback={fallback || defaultFallback}
-      onError={handleError}
     >
       {children}
     </ErrorBoundary>

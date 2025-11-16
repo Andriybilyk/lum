@@ -16,11 +16,10 @@ interface ObjectProcessesModalProps {
   objectName: string;
 }
 
-export default function ObjectProcessesModal({ 
-  open, 
-  onClose, 
-  objectId, 
-  objectName 
+export default function ObjectProcessesModal({
+  open,
+  onClose,
+  objectName
 }: ObjectProcessesModalProps) {
   const { processTypes, addProcessType, updateProcessType, deleteProcessType } = useData();
   const { toast } = useToast();

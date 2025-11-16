@@ -24,7 +24,7 @@ export default function EmployeeReportDetailsModal({
   employeeName,
   month
 }: EmployeeReportDetailsModalProps) {
-  const { getEmployeeReport, users, updateHours, updateProcess, deleteHours, deleteProcess, loadFromGoogleSheets } = useData();
+  const { getEmployeeReport, users, updateHours, updateProcess, deleteHours, deleteProcess } = useData();
   const { toast } = useToast();
 
   const employee = users.find(u => u.id === employeeId);
@@ -37,7 +37,7 @@ export default function EmployeeReportDetailsModal({
   const [isExporting, setIsExporting] = useState(false);
 
   const report = getEmployeeReport(employeeId, month);
-  
+
   const hoursEarnings = report.hours.reduce((sum, h) => sum + h.earnings, 0);
   const processEarnings = report.processes.reduce((sum, p) => sum + p.earnings, 0);
 
@@ -45,7 +45,7 @@ export default function EmployeeReportDetailsModal({
     'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень',
     'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'
   ];
-  
+
   const [year, monthNum] = month.split('-');
   const monthName = monthNames[parseInt(monthNum) - 1];
 
