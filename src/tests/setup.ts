@@ -26,11 +26,11 @@ class MockIDBTransaction {
 }
 
 class MockIDBObjectStore {
-  put = vi.fn((data) => ({
+  put = vi.fn(() => ({
     onerror: null,
     onsuccess: null,
   }));
-  add = vi.fn((data) => ({
+  add = vi.fn(() => ({
     onerror: null,
     onsuccess: null,
   }));
@@ -50,7 +50,7 @@ class MockIDBObjectStore {
 
 if (typeof window !== 'undefined') {
   (window as any).indexedDB = {
-    open: vi.fn((_dbName: string, _version: number) => {
+    open: vi.fn(() => {
       const mockRequest = {
         onerror: null as ((event: Event) => void) | null,
         onsuccess: null as ((event: Event) => void) | null,
