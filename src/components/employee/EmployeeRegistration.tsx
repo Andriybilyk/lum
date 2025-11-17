@@ -30,30 +30,26 @@ export default function EmployeeRegistration() {
   // Отримати Telegram ID при завантаженні
   useEffect(() => {
     logger.info('useEffect: Getting Telegram ID', 'EmployeeRegistration');
-    if (typeof window !== 'undefined') {
-      logger.info('window.Telegram exists: ' + (window.Telegram ? 'YES' : 'NO'), 'EmployeeRegistration');
-      if (window.Telegram?.WebApp?.instance) {
-        const app = window.Telegram.WebApp.instance;
-        logger.info('Got WebApp instance', 'EmployeeRegistration');
-        const tgUser = app.initDataUnsafe?.user;
-        logger.info('Telegram user from WebApp:', tgUser, 'EmployeeRegistration');
-        if (tgUser && tgUser.id) {
-          const tgId = tgUser.id.toString();
-          logger.info('✅ Set Telegram ID: ' + tgId + ' (Type: ' + typeof tgId + ')', 'EmployeeRegistration');
-          setTelegramId(tgId);
-          // Автоматично заповнити ім'я з Telegram
-          setFormData(prev => ({
-            ...prev,
-            name: `${tgUser.first_name}${tgUser.last_name ? ' ' + tgUser.last_name : ''}`
-          }));
-        } else {
-          logger.warn('⚠️ Telegram ID not found', 'EmployeeRegistration');
-        }
+    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+      const webApp = window.Telegram.WebApp;
+      logger.info('Got WebApp:', webApp ? 'YES' : 'NO', 'EmployeeRegistration');
+      // @ts-ignore
+      const tgUser = webApp.initDataUnsafe?.user;
+      logger.info('Telegram user from WebApp:', tgUser, 'EmployeeRegistration');
+      if (tgUser && tgUser.id) {
+        const tgId = tgUser.id.toString();
+        logger.info('✅ Set Telegram ID: ' + tgId + ' (Type: ' + typeof tgId + ')', 'EmployeeRegistration');
+        setTelegramId(tgId);
+        // Автоматично заповнити ім'я з Telegram
+        setFormData(prev => ({
+          ...prev,
+          name: `${tgUser.first_name}${tgUser.last_name ? ' ' + tgUser.last_name : ''}`
+        }));
       } else {
-        logger.warn('⚠️ WebApp instance not available', 'EmployeeRegistration');
+        logger.warn('⚠️ Telegram ID or user not found. tgUser:', tgUser, 'EmployeeRegistration');
       }
     } else {
-      logger.warn('⚠️ window is undefined', 'EmployeeRegistration');
+      logger.warn('⚠️ Telegram.WebApp not available', 'EmployeeRegistration');
     }
   }, []);
 

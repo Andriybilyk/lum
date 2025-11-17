@@ -17,9 +17,10 @@ export default function WelcomeScreen() {
       return;
     }
 
-    if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
-      const app = window.Telegram.WebApp.instance;
-      const tgUser = app.initDataUnsafe?.user;
+    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+      const webApp = window.Telegram.WebApp;
+      // @ts-ignore
+      const tgUser = webApp.initDataUnsafe?.user;
       if (tgUser && users.length > 0) {
         const existingUser = users.find(u => u.telegramId === tgUser.id.toString());
         if (existingUser) {
