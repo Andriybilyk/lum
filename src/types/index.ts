@@ -5,6 +5,7 @@ export interface User {
   level: string;
   hourlyRate: number;
   managerId?: string;
+  telegramId?: string;
 }
 
 export interface Hours {

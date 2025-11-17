@@ -18,6 +18,7 @@ export default function EmployeeRegistration() {
   const { toast } = useToast();
 
   const [authMode, setAuthMode] = useState<'select' | 'create'>('select');
+  const [telegramId, setTelegramId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     selectedUserId: '',
     name: '',
@@ -25,6 +26,22 @@ export default function EmployeeRegistration() {
     hourlyRate: '',
     managerId: 'none'
   });
+
+  // Отримати Telegram ID при завантаженні
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
+      const app = window.Telegram.WebApp.instance;
+      const tgUser = app.initDataUnsafe?.user;
+      if (tgUser) {
+        setTelegramId(tgUser.id.toString());
+        // Автоматично заповнити ім'я з Telegram
+        setFormData(prev => ({
+          ...prev,
+          name: `${tgUser.first_name}${tgUser.last_name ? ' ' + tgUser.last_name : ''}`
+        }));
+      }
+    }
+  }, []);
 
   const employeeUsers = useMemo(() => {
     return users.filter(u => u.role === 'employee');
@@ -83,13 +100,14 @@ export default function EmployeeRegistration() {
     }
 
     try {
-      const userId = Date.now().toString();
+      const userId = telegramId || Date.now().toString();
       const user = {
         id: userId,
         ...validatedUser!,
+        telegramId: telegramId || undefined,
       };
 
-      logger.info('Employee registration successful', { userId: user.id, name: (user as any).name });
+      logger.info('Employee registration successful', { userId: user.id, name: (user as any).name, telegramId });
       await addUser(user as any);
       setUser(user as any);
       navigate('/employee');

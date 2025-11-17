@@ -1,18 +1,35 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
+import { useData } from '@/contexts/DataContext';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { logger } from '@/utils/logger';
 
 export default function WelcomeScreen() {
-  const { user, isRegistered } = useUser();
+  const { user, isRegistered, setUser } = useUser();
+  const { users } = useData();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (isRegistered && user) {
       navigate(user.role === 'employee' ? '/employee' : '/manager');
+      return;
     }
-  }, [isRegistered, user, navigate]);
+
+    if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
+      const app = window.Telegram.WebApp.instance;
+      const tgUser = app.initDataUnsafe?.user;
+      if (tgUser && users.length > 0) {
+        const existingUser = users.find(u => u.telegramId === tgUser.id.toString());
+        if (existingUser) {
+          logger.info('Auto-login via Telegram ID', { userId: existingUser.id });
+          setUser(existingUser);
+          navigate(existingUser.role === 'employee' ? '/employee' : '/manager');
+        }
+      }
+    }
+  }, [isRegistered, user, users, setUser, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-400 p-4">

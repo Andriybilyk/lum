@@ -1,5 +1,5 @@
 import { logger } from '@/utils/logger';
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
 import { useData } from '@/contexts/DataContext';
@@ -17,6 +17,7 @@ export default function ManagerRegistration() {
   const { toast } = useToast();
 
   const [authMode, setAuthMode] = useState<'select' | 'create'>('select');
+  const [telegramId, setTelegramId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     selectedUserId: '',
     name: '',
@@ -24,6 +25,20 @@ export default function ManagerRegistration() {
     hourlyRate: '',
     password: ''
   });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
+      const app = window.Telegram.WebApp.instance;
+      const tgUser = app.initDataUnsafe?.user;
+      if (tgUser) {
+        setTelegramId(tgUser.id.toString());
+        setFormData(prev => ({
+          ...prev,
+          name: `${tgUser.first_name}${tgUser.last_name ? ' ' + tgUser.last_name : ''}`
+        }));
+      }
+    }
+  }, []);
 
   const managerUsers = useMemo(() => {
     return users.filter(u => u.role === 'manager');
@@ -61,13 +76,14 @@ export default function ManagerRegistration() {
       return;
     }
 
-    const userId = Date.now().toString();
+    const userId = telegramId || Date.now().toString();
     const user = {
       id: userId,
       name: formData.name,
       role: 'manager' as const,
       level: formData.level,
-      hourlyRate: parseFloat(formData.hourlyRate)
+      hourlyRate: parseFloat(formData.hourlyRate),
+      telegramId: telegramId || undefined
     };
 
     await addUser(user);
