@@ -98,6 +98,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (apiKey && spreadsheetId && scriptUrl) {
           setIsConfigured(true);
+          setIsLoading(false);
           // Завантажуємо дані у фоні без блокування UI
           loadData().catch(error => {
             logger.warn('Failed to load data from Google Sheets, using empty state', error, 'DataContext');
@@ -441,6 +442,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsSyncing(false);
       setIsLoadingInProgress(false);
+      setIsLoading(false);
       if (!lastLoadTime) {
         setLastLoadTime(Date.now());
       }
