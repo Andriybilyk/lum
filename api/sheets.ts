@@ -12,8 +12,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
 
-  // Get SCRIPT_URL from environment
-  const SCRIPT_URL = process.env.VITE_GOOGLE_SCRIPT_URL;
+  // Get SCRIPT_URL from environment (try both VITE_ prefixed and non-prefixed versions)
+  const SCRIPT_URL = process.env.VITE_GOOGLE_SCRIPT_URL ||
+                     process.env.GOOGLE_SCRIPT_URL ||
+                     'https://script.google.com/macros/s/AKfycbxyZ92BQIycYb97kcqcqHLeSK4Z33FYP-wUS0EMKUDEPgNHQpoakB2iuzcI_S0rd6r6/exec';
+
+  console.log('Using SCRIPT_URL:', SCRIPT_URL ? '✓ configured' : '✗ not configured');
 
   if (!SCRIPT_URL) {
     console.error('VITE_GOOGLE_SCRIPT_URL not configured');
