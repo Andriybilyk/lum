@@ -188,6 +188,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
               level: row[3],
               hourlyRate: parseFloat(row[4]) || 0,
               managerId: cleanedManagerId,
+              telegramId: row[6] || undefined,
             };
             logger.info(`✅ Parsed user ${idx}:`, { id: parsedUser.id, name: parsedUser.name }, 'DataContext');
             return parsedUser;
@@ -537,7 +538,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         logger.info('💾 Saving user to Google Sheets...', 'DataContext');
         await appendSheet(CONFIG.GOOGLE_SHEETS.RANGES.USERS, [[
-          parseInt(newUser.id), newUser.name, newUser.role, newUser.level, newUser.hourlyRate, newUser.managerId ? parseInt(newUser.managerId) : ''
+          parseInt(newUser.id), newUser.name, newUser.role, newUser.level, newUser.hourlyRate, newUser.managerId ? parseInt(newUser.managerId) : '', (newUser as any).telegramId || ''
         ]]);
         logger.debug('✅ User saved to Google Sheets', 'DataContext');
       } catch (error) {
