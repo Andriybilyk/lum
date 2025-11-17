@@ -30,26 +30,56 @@ export default function EmployeeRegistration() {
   // Отримати Telegram ID при завантаженні
   useEffect(() => {
     logger.info('useEffect: Getting Telegram ID', 'EmployeeRegistration');
-    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-      const webApp = window.Telegram.WebApp;
-      logger.info('Got WebApp:', webApp ? 'YES' : 'NO', 'EmployeeRegistration');
-      // @ts-ignore
-      const tgUser = webApp.initDataUnsafe?.user;
-      logger.info('Telegram user from WebApp:', tgUser, 'EmployeeRegistration');
-      if (tgUser && tgUser.id) {
-        const tgId = tgUser.id.toString();
-        logger.info('✅ Set Telegram ID: ' + tgId + ' (Type: ' + typeof tgId + ')', 'EmployeeRegistration');
-        setTelegramId(tgId);
-        // Автоматично заповнити ім'я з Telegram
-        setFormData(prev => ({
-          ...prev,
-          name: `${tgUser.first_name}${tgUser.last_name ? ' ' + tgUser.last_name : ''}`
-        }));
+
+    if (typeof window !== 'undefined') {
+      logger.info('window.Telegram available: ' + (window.Telegram ? 'YES' : 'NO'), 'EmployeeRegistration');
+
+      if (window.Telegram?.WebApp) {
+        const webApp = window.Telegram.WebApp;
+        logger.info('✅ WebApp object exists', 'EmployeeRegistration');
+
+        // @ts-ignore
+        logger.info('WebApp properties:', Object.keys(webApp), 'EmployeeRegistration');
+
+        // @ts-ignore
+        const initData = webApp.initData;
+        logger.info('initData:', initData ? 'present' : 'missing', 'EmployeeRegistration');
+
+        // @ts-ignore
+        const initDataUnsafe = webApp.initDataUnsafe;
+        logger.info('initDataUnsafe available: ' + (initDataUnsafe ? 'YES' : 'NO'), 'EmployeeRegistration');
+
+        if (initDataUnsafe) {
+          // @ts-ignore
+          logger.info('initDataUnsafe.user:', initDataUnsafe.user, 'EmployeeRegistration');
+        }
+
+        // @ts-ignore
+        const tgUser = webApp.initDataUnsafe?.user;
+
+        if (tgUser) {
+          logger.info('✅ Telegram user found:', tgUser, 'EmployeeRegistration');
+          if (tgUser.id) {
+            const tgId = tgUser.id.toString();
+            logger.info('✅ Set Telegram ID: ' + tgId, 'EmployeeRegistration');
+            setTelegramId(tgId);
+            // Автоматично заповнити ім'я з Telegram
+            setFormData(prev => ({
+              ...prev,
+              name: `${tgUser.first_name}${tgUser.last_name ? ' ' + tgUser.last_name : ''}`
+            }));
+          } else {
+            logger.warn('⚠️ tgUser.id is missing', 'EmployeeRegistration');
+          }
+        } else {
+          logger.warn('⚠️ No user in initDataUnsafe', 'EmployeeRegistration');
+        }
       } else {
-        logger.warn('⚠️ Telegram ID or user not found. tgUser:', tgUser, 'EmployeeRegistration');
+        logger.warn('⚠️ window.Telegram.WebApp not available', 'EmployeeRegistration');
+        logger.info('Available Telegram properties:', Object.keys(window.Telegram || {}), 'EmployeeRegistration');
       }
     } else {
-      logger.warn('⚠️ Telegram.WebApp not available', 'EmployeeRegistration');
+      logger.warn('⚠️ window is undefined', 'EmployeeRegistration');
     }
   }, []);
 
