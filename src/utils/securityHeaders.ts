@@ -7,6 +7,8 @@ export interface SecurityHeaders {
   [key: string]: string;
 }
 
+type HeadersInitType = Record<string, string>;
+
 /**
  * Get security headers for HTTP responses
  * These headers help prevent common web vulnerabilities
@@ -35,7 +37,7 @@ export const getSecurityHeaders = (): SecurityHeaders => {
 /**
  * Apply security headers to a fetch request
  */
-export const addSecurityHeaders = (headers: HeadersInit = {}): HeadersInit => {
+export const addSecurityHeaders = (headers: HeadersInitType = {}): HeadersInitType => {
   const securityHeaders = getSecurityHeaders();
   return {
     ...headers,
