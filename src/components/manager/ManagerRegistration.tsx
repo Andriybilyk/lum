@@ -1,4 +1,5 @@
 import { logger } from '@/utils/logger';
+import { getTelegramUser, getTelegramUserId, getTelegramUserName } from '@/utils/telegramWebApp';
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
@@ -27,26 +28,25 @@ export default function ManagerRegistration() {
   });
 
   useEffect(() => {
-    logger.info('useEffect: Getting Telegram ID (Manager)', 'ManagerRegistration');
-    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-      const webApp = window.Telegram.WebApp;
-      logger.info('Got WebApp:', webApp ? 'YES' : 'NO', 'ManagerRegistration');
-      // @ts-ignore
-      const tgUser = webApp.initDataUnsafe?.user;
-      logger.info('Telegram user from WebApp (Manager):', tgUser, 'ManagerRegistration');
-      if (tgUser && tgUser.id) {
-        const tgId = tgUser.id.toString();
-        logger.info('✅ Set Manager Telegram ID: ' + tgId + ' (Type: ' + typeof tgId + ')', 'ManagerRegistration');
-        setTelegramId(tgId);
-        setFormData(prev => ({
-          ...prev,
-          name: `${tgUser.first_name}${tgUser.last_name ? ' ' + tgUser.last_name : ''}`
-        }));
-      } else {
-        logger.warn('⚠️ Telegram ID or user not found (Manager). tgUser:', tgUser, 'ManagerRegistration');
-      }
+    logger.info('📱 Initializing Telegram registration (Manager)');
+
+    const tgUser = getTelegramUser();
+    const tgUserId = getTelegramUserId();
+    const tgUserName = getTelegramUserName();
+
+    if (tgUser && tgUserId) {
+      logger.info('✅ Telegram user data loaded (Manager):', {
+        id: tgUserId,
+        name: tgUserName
+      });
+      setTelegramId(tgUserId);
+      setFormData(prev => ({
+        ...prev,
+        name: tgUserName || ''
+      }));
     } else {
-      logger.warn('⚠️ Telegram.WebApp not available (Manager)', 'ManagerRegistration');
+      logger.warn('⚠️ Telegram user data not available in mini app context');
+      logger.warn('This is normal during development - Telegram ID will be available only in Telegram mini app');
     }
   }, []);
 

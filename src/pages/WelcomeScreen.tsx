@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
 import { useData } from '@/contexts/DataContext';
+import { getTelegramUserId } from '@/utils/telegramWebApp';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { logger } from '@/utils/logger';
@@ -17,17 +18,13 @@ export default function WelcomeScreen() {
       return;
     }
 
-    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-      const webApp = window.Telegram.WebApp;
-      // @ts-ignore
-      const tgUser = webApp.initDataUnsafe?.user;
-      if (tgUser && users.length > 0) {
-        const existingUser = users.find(u => u.telegramId === tgUser.id.toString());
-        if (existingUser) {
-          logger.info('Auto-login via Telegram ID', { userId: existingUser.id });
-          setUser(existingUser);
-          navigate(existingUser.role === 'employee' ? '/employee' : '/manager');
-        }
+    const tgUserId = getTelegramUserId();
+    if (tgUserId && users.length > 0) {
+      const existingUser = users.find(u => u.telegramId === tgUserId);
+      if (existingUser) {
+        logger.info('✅ Auto-login via Telegram ID', { userId: existingUser.id, telegramId: tgUserId });
+        setUser(existingUser);
+        navigate(existingUser.role === 'employee' ? '/employee' : '/manager');
       }
     }
   }, [isRegistered, user, users, setUser, navigate]);
