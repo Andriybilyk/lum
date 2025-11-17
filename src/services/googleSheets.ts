@@ -6,6 +6,51 @@ const SPREADSHEET_ID = import.meta.env.VITE_SPREADSHEET_ID;
 const SCRIPT_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL;
 const BASE_URL = CONFIG.API.BASE_URL;
 
+// Request queue to prevent API quota exceeded errors
+const REQUEST_QUEUE: Array<() => Promise<any>> = [];
+let IS_QUEUE_PROCESSING = false;
+const MIN_DELAY_BETWEEN_REQUESTS = CONFIG.GOOGLE_SHEETS.DELAY_BETWEEN_REQUESTS;
+
+// Cache for read requests to avoid duplicate API calls
+const CACHE = new Map<string, { data: any; timestamp: number }>();
+const CACHE_DURATION = CONFIG.GOOGLE_SHEETS.CACHE_DURATION;
+
+// Process the request queue with controlled delays
+async function processQueue() {
+  if (IS_QUEUE_PROCESSING || REQUEST_QUEUE.length === 0) {
+    return;
+  }
+
+  IS_QUEUE_PROCESSING = true;
+  try {
+    while (REQUEST_QUEUE.length > 0) {
+      const request = REQUEST_QUEUE.shift();
+      if (request) {
+        await request();
+        // Add delay between requests to respect API rate limit
+        await new Promise(resolve => setTimeout(resolve, MIN_DELAY_BETWEEN_REQUESTS));
+      }
+    }
+  } finally {
+    IS_QUEUE_PROCESSING = false;
+  }
+}
+
+// Add a request to the queue
+function queueRequest<T>(fn: () => Promise<T>): Promise<T> {
+  return new Promise((resolve, reject) => {
+    REQUEST_QUEUE.push(async () => {
+      try {
+        const result = await fn();
+        resolve(result);
+      } catch (error) {
+        reject(error);
+      }
+    });
+    processQueue();
+  });
+}
+
 // Логування конфігурації при завантаженні модуля
 logger.info('📊 Google Sheets Configuration:');
 logger.info('  Spreadsheet ID:', SPREADSHEET_ID || '⚠️ NOT SET');
@@ -26,136 +71,146 @@ if (!API_KEY || !SPREADSHEET_ID) {
 
 // Read data from a sheet using API Key
 export const readSheet = async (range: string) => {
-  // Перевірка конфігурації перед запитом
-  if (!API_KEY) {
-    logger.error('❌ VITE_GOOGLE_API_KEY is not set');
-    logger.error('⚠️ Environment variables not loaded. Please ensure:');
-    logger.error('   1. .env or .env.local file exists in project root');
-    logger.error('   2. It contains: VITE_GOOGLE_API_KEY=your_key');
-    logger.error('   3. Dev server is restarted after creating/modifying .env file');
-    throw new Error('Google API Key not configured. Check .env file and restart dev server.');
+  // Check cache first
+  const cacheKey = `read:${range}`;
+  const cached = CACHE.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    logger.debug(`📦 Using cached data for range "${range}" (age: ${Math.round((Date.now() - cached.timestamp) / 1000)}s)`, undefined, 'googleSheets');
+    return cached.data;
   }
 
-  if (!SPREADSHEET_ID) {
-    logger.error('❌ VITE_SPREADSHEET_ID is not set');
-    logger.error('⚠️ Environment variables not loaded. Please ensure:');
-    logger.error('   1. .env or .env.local file exists in project root');
-    logger.error('   2. It contains: VITE_SPREADSHEET_ID=your_id');
-    logger.error('   3. Dev server is restarted after creating/modifying .env file');
-    throw new Error('Spreadsheet ID not configured. Check .env file and restart dev server.');
-  }
+  return queueRequest(async () => {
+    // Перевірка конфігурації перед запитом
+    if (!API_KEY) {
+      logger.error('❌ VITE_GOOGLE_API_KEY is not set');
+      throw new Error('Google API Key not configured. Check .env file and restart dev server.');
+    }
 
-  try {
-    const url = `${BASE_URL}/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
-    logger.info(`📡 Fetching range: ${range}`, undefined, 'googleSheets');
-    const response = await fetch(url);
+    if (!SPREADSHEET_ID) {
+      logger.error('❌ VITE_SPREADSHEET_ID is not set');
+      throw new Error('Spreadsheet ID not configured. Check .env file and restart dev server.');
+    }
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      let errorMessage = 'Failed to read sheet';
-      try {
-        const error = JSON.parse(errorText);
-        errorMessage = error.error?.message || errorMessage;
+    try {
+      const url = `${BASE_URL}/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
+      logger.info(`📡 Fetching range: ${range}`, undefined, 'googleSheets');
+      const response = await fetch(url);
 
-        // Лог тільки якщо це помилка квоти
-        if (error.error?.code === 429) {
-          logger.warn('⚠️ API Quota exceeded. Using cached data.');
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = 'Failed to read sheet';
+        try {
+          const error = JSON.parse(errorText);
+          errorMessage = error.error?.message || errorMessage;
+
+          // Log only if quota error
+          if (error.error?.code === 429) {
+            logger.warn('⚠️ API Quota exceeded. Retrying with backoff.');
+          }
+        } catch (e) {
+          // Silently handle parse error
         }
-      } catch (e) {
-        // Мовчки обробляємо помилку парсингу
+
+        throw new Error(errorMessage);
       }
 
-      throw new Error(errorMessage);
-    }
+      const data = await response.json();
+      const values = data.values || [];
 
-    const data = await response.json();
-    logger.info(`✅ Fetched range "${range}": ${data.values?.length || 0} rows`, undefined, 'googleSheets');
-    return data.values || [];
-  } catch (error) {
-    if (error instanceof TypeError && error.message === 'Load failed') {
-      logger.error('❌ Network error: Could not connect to Google Sheets API');
-      throw new Error('Network error: Could not connect to Google Sheets. Check API key and spreadsheet permissions.');
+      // Cache the result
+      CACHE.set(cacheKey, { data: values, timestamp: Date.now() });
+
+      logger.info(`✅ Fetched range "${range}": ${values.length} rows`, undefined, 'googleSheets');
+      return values;
+    } catch (error) {
+      if (error instanceof TypeError && error.message === 'Load failed') {
+        logger.error('❌ Network error: Could not connect to Google Sheets API');
+        throw new Error('Network error: Could not connect to Google Sheets.');
+      }
+      throw error;
     }
-    throw error;
-  }
+  });
 };
 
 // Append data to a sheet using Vercel API (which proxies to Google Apps Script)
 export const appendSheet = async (range: string, values: any[][]) => {
-  logger.info('➕ Appending to sheet: ' + range, 'googleSheets');
-  logger.info('📝 Values being appended: ' + JSON.stringify(values), 'googleSheets');
+  return queueRequest(async () => {
+    logger.info('➕ Appending to sheet: ' + range, 'googleSheets');
+    logger.info('📝 Values being appended: ' + JSON.stringify(values), 'googleSheets');
 
-  try {
-    const payload = {
-      action: 'append',
-      spreadsheetId: SPREADSHEET_ID,
-      range,
-      values,
-    };
-    logger.info('📤 Sending payload to Vercel API: ' + JSON.stringify(payload), 'googleSheets');
+    try {
+      const payload = {
+        action: 'append',
+        spreadsheetId: SPREADSHEET_ID,
+        range,
+        values,
+      };
 
-    const response = await fetch('/api/sheets', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+      const response = await fetch('/api/sheets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
 
-    logger.info('📥 HTTP Status: ' + response.status, 'googleSheets');
-    const responseData = await response.json();
-    logger.info('📥 Response from API: ' + JSON.stringify(responseData), 'googleSheets');
+      logger.info('📥 HTTP Status: ' + response.status, 'googleSheets');
+      const responseData = await response.json();
 
-    if (!response.ok) {
-      logger.error('❌ Failed to append - HTTP ' + response.status, 'googleSheets');
-      return { success: false, reason: 'HTTP ' + response.status };
+      if (!response.ok) {
+        logger.error('❌ Failed to append - HTTP ' + response.status, 'googleSheets');
+        return { success: false, reason: 'HTTP ' + response.status };
+      }
+
+      logger.info('✅ Append request successful', 'googleSheets');
+      // Invalidate cache after write operation
+      CACHE.clear();
+      return { success: true, data: responseData };
+    } catch (error) {
+      logger.error('❌ Error appending to sheet:', error, 'googleSheets');
+      return { success: false, reason: String(error) };
     }
-
-    logger.info('✅ Append request successful', 'googleSheets');
-    return { success: true, data: responseData };
-  } catch (error) {
-    logger.error('❌ Error appending to sheet:', error, 'googleSheets');
-    logger.error('Error details:', String(error), 'googleSheets');
-    return { success: false, reason: String(error) };
-  }
+  });
 };
 
 // Write data to a sheet using Vercel API (which proxies to Google Apps Script)
 export const writeSheet = async (range: string, values: any[][]) => {
-  logger.info('✏️ Writing to sheet: ' + range, 'googleSheets');
+  return queueRequest(async () => {
+    logger.info('✏️ Writing to sheet: ' + range, 'googleSheets');
 
-  try {
-    const payload = {
-      action: 'update',
-      spreadsheetId: SPREADSHEET_ID,
-      range,
-      values,
-    };
-    logger.info('📤 Sending payload to Vercel API: ' + JSON.stringify(payload), 'googleSheets');
+    try {
+      const payload = {
+        action: 'update',
+        spreadsheetId: SPREADSHEET_ID,
+        range,
+        values,
+      };
 
-    const response = await fetch('/api/sheets', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+      const response = await fetch('/api/sheets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
 
-    logger.info('📥 HTTP Status: ' + response.status, 'googleSheets');
-    const responseData = await response.json();
-    logger.info('📥 Response from API: ' + JSON.stringify(responseData), 'googleSheets');
+      logger.info('📥 HTTP Status: ' + response.status, 'googleSheets');
+      const responseData = await response.json();
 
-    if (!response.ok) {
-      logger.error('❌ Failed to write - HTTP ' + response.status, 'googleSheets');
-      return { success: false, reason: 'HTTP ' + response.status };
+      if (!response.ok) {
+        logger.error('❌ Failed to write - HTTP ' + response.status, 'googleSheets');
+        return { success: false, reason: 'HTTP ' + response.status };
+      }
+
+      logger.info('✅ Write request successful', 'googleSheets');
+      // Invalidate cache after write operation
+      CACHE.clear();
+      return { success: true, data: responseData };
+    } catch (error) {
+      logger.error('❌ Error writing to sheet:', error, 'googleSheets');
+      return { success: false, reason: String(error) };
     }
-
-    logger.info('✅ Write request successful', 'googleSheets');
-    return { success: true, data: responseData };
-  } catch (error) {
-    logger.error('❌ Error writing to sheet:', error, 'googleSheets');
-    return { success: false, reason: String(error) };
-  }
+  });
 };
 
 export async function updateHourEntry(entryId: string, data: any) {
