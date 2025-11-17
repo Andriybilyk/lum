@@ -1,7 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-const SCRIPT_URL = process.env.VITE_GOOGLE_SCRIPT_URL || '';
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -14,11 +12,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
 
+  // Get SCRIPT_URL from environment
+  const SCRIPT_URL = process.env.VITE_GOOGLE_SCRIPT_URL;
+
   if (!SCRIPT_URL) {
-    return res.status(500).json({ error: 'GOOGLE_SCRIPT_URL not configured' });
+    console.error('VITE_GOOGLE_SCRIPT_URL not configured');
+    return res.status(500).json({
+      error: 'GOOGLE_SCRIPT_URL not configured',
+      message: 'VITE_GOOGLE_SCRIPT_URL environment variable is not set'
+    });
   }
 
   try {
+    console.log('Forwarding request to Google Apps Script');
+    console.log('Payload:', JSON.stringify(req.body));
+
     // Forward the request to Google Apps Script
     const response = await fetch(SCRIPT_URL, {
       method: 'POST',
@@ -29,14 +37,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     const responseText = await response.text();
+    console.log('Response status:', response.status);
+    console.log('Response text:', responseText);
 
     if (!response.ok) {
+      console.error('Google Apps Script error:', response.status, responseText);
       return res.status(response.status).json({
         error: `Google Apps Script returned ${response.status}`,
         details: responseText,
       });
     }
 
+    console.log('Successfully forwarded to Google Apps Script');
     return res.status(200).json({
       success: true,
       message: 'Request forwarded to Google Apps Script',
