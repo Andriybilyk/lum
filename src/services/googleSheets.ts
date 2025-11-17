@@ -80,13 +80,8 @@ export const readSheet = async (range: string) => {
   }
 };
 
-// Append data to a sheet using Google Apps Script
+// Append data to a sheet using Vercel API (which proxies to Google Apps Script)
 export const appendSheet = async (range: string, values: any[][]) => {
-  if (!SCRIPT_URL) {
-    logger.warn('⚠️ VITE_GOOGLE_SCRIPT_URL not configured - skipping append');
-    return { success: false, reason: 'SCRIPT_URL not configured' };
-  }
-
   logger.info('➕ Appending to sheet: ' + range, 'googleSheets');
   logger.info('📝 Values being appended: ' + JSON.stringify(values), 'googleSheets');
 
@@ -97,21 +92,27 @@ export const appendSheet = async (range: string, values: any[][]) => {
       range,
       values,
     };
-    logger.info('📤 Sending payload to Google Apps Script: ' + JSON.stringify(payload), 'googleSheets');
-    logger.info('📤 Script URL: ' + SCRIPT_URL, 'googleSheets');
+    logger.info('📤 Sending payload to Vercel API: ' + JSON.stringify(payload), 'googleSheets');
 
-    await fetch(SCRIPT_URL, {
+    const response = await fetch('/api/sheets', {
       method: 'POST',
-      mode: 'no-cors',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
     });
 
-    // With no-cors mode, we can't read the response
-    logger.info('✅ Append request sent (no-cors mode - response not readable)', 'googleSheets');
-    return { success: true };
+    logger.info('📥 HTTP Status: ' + response.status, 'googleSheets');
+    const responseData = await response.json();
+    logger.info('📥 Response from API: ' + JSON.stringify(responseData), 'googleSheets');
+
+    if (!response.ok) {
+      logger.error('❌ Failed to append - HTTP ' + response.status, 'googleSheets');
+      return { success: false, reason: 'HTTP ' + response.status };
+    }
+
+    logger.info('✅ Append request successful', 'googleSheets');
+    return { success: true, data: responseData };
   } catch (error) {
     logger.error('❌ Error appending to sheet:', error, 'googleSheets');
     logger.error('Error details:', String(error), 'googleSheets');
@@ -119,13 +120,8 @@ export const appendSheet = async (range: string, values: any[][]) => {
   }
 };
 
-// Write data to a sheet using Google Apps Script
+// Write data to a sheet using Vercel API (which proxies to Google Apps Script)
 export const writeSheet = async (range: string, values: any[][]) => {
-  if (!SCRIPT_URL) {
-    logger.warn('⚠️ VITE_GOOGLE_SCRIPT_URL not configured - skipping write');
-    return { success: false, reason: 'SCRIPT_URL not configured' };
-  }
-
   logger.info('✏️ Writing to sheet: ' + range, 'googleSheets');
 
   try {
@@ -135,20 +131,27 @@ export const writeSheet = async (range: string, values: any[][]) => {
       range,
       values,
     };
-    logger.info('📤 Sending payload to Google Apps Script: ' + JSON.stringify(payload), 'googleSheets');
+    logger.info('📤 Sending payload to Vercel API: ' + JSON.stringify(payload), 'googleSheets');
 
-    await fetch(SCRIPT_URL, {
+    const response = await fetch('/api/sheets', {
       method: 'POST',
-      mode: 'no-cors',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
     });
 
-    // With no-cors mode, we can't read the response
-    logger.info('✅ Write request sent (no-cors mode - response not readable)', 'googleSheets');
-    return { success: true };
+    logger.info('📥 HTTP Status: ' + response.status, 'googleSheets');
+    const responseData = await response.json();
+    logger.info('📥 Response from API: ' + JSON.stringify(responseData), 'googleSheets');
+
+    if (!response.ok) {
+      logger.error('❌ Failed to write - HTTP ' + response.status, 'googleSheets');
+      return { success: false, reason: 'HTTP ' + response.status };
+    }
+
+    logger.info('✅ Write request successful', 'googleSheets');
+    return { success: true, data: responseData };
   } catch (error) {
     logger.error('❌ Error writing to sheet:', error, 'googleSheets');
     return { success: false, reason: String(error) };
