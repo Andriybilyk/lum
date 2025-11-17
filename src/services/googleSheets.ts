@@ -146,15 +146,30 @@ export const appendSheet = async (range: string, values: any[][]) => {
         values,
       };
 
-      const response = await fetch('/api/sheets', {
+      // Try to use API proxy first, fall back to direct Google Apps Script URL in dev
+      const endpoint = import.meta.env.DEV ? (SCRIPT_URL || '/api/sheets') : '/api/sheets';
+
+      logger.info('📤 Using endpoint: ' + endpoint, 'googleSheets');
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
+        // Use no-cors mode for direct Google Apps Script calls (for dev)
+        mode: endpoint === SCRIPT_URL ? 'no-cors' : 'cors'
       });
 
       logger.info('📥 HTTP Status: ' + response.status, 'googleSheets');
+
+      // For no-cors requests, we can't read the response
+      if (response.type === 'opaque') {
+        logger.info('✅ Append request sent (no-cors mode)', 'googleSheets');
+        CACHE.clear();
+        return { success: true, data: { message: 'Request sent to Google Apps Script' } };
+      }
+
       const responseData = await response.json();
 
       if (!response.ok) {
@@ -186,15 +201,30 @@ export const writeSheet = async (range: string, values: any[][]) => {
         values,
       };
 
-      const response = await fetch('/api/sheets', {
+      // Try to use API proxy first, fall back to direct Google Apps Script URL in dev
+      const endpoint = import.meta.env.DEV ? (SCRIPT_URL || '/api/sheets') : '/api/sheets';
+
+      logger.info('📤 Using endpoint: ' + endpoint, 'googleSheets');
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
+        // Use no-cors mode for direct Google Apps Script calls (for dev)
+        mode: endpoint === SCRIPT_URL ? 'no-cors' : 'cors'
       });
 
       logger.info('📥 HTTP Status: ' + response.status, 'googleSheets');
+
+      // For no-cors requests, we can't read the response
+      if (response.type === 'opaque') {
+        logger.info('✅ Write request sent (no-cors mode)', 'googleSheets');
+        CACHE.clear();
+        return { success: true, data: { message: 'Request sent to Google Apps Script' } };
+      }
+
       const responseData = await response.json();
 
       if (!response.ok) {
