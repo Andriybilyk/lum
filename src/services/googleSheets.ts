@@ -98,6 +98,7 @@ export const appendSheet = async (range: string, values: any[][]) => {
       values,
     };
     logger.info('📤 Sending payload to Google Apps Script: ' + JSON.stringify(payload), 'googleSheets');
+    logger.info('📤 Script URL: ' + SCRIPT_URL, 'googleSheets');
 
     const response = await fetch(SCRIPT_URL, {
       method: 'POST',
@@ -107,6 +108,7 @@ export const appendSheet = async (range: string, values: any[][]) => {
       body: JSON.stringify(payload),
     });
 
+    logger.info('📥 HTTP Status: ' + response.status, 'googleSheets');
     const responseText = await response.text();
     logger.info('📥 Response from Google Apps Script: ' + responseText, 'googleSheets');
 
@@ -119,6 +121,7 @@ export const appendSheet = async (range: string, values: any[][]) => {
     return { success: true };
   } catch (error) {
     logger.error('❌ Error appending to sheet:', error, 'googleSheets');
+    logger.error('Error details:', String(error), 'googleSheets');
     return { success: false, reason: String(error) };
   }
 };
