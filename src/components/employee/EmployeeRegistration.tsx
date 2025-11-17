@@ -29,20 +29,31 @@ export default function EmployeeRegistration() {
 
   // Отримати Telegram ID при завантаженні
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
-      const app = window.Telegram.WebApp.instance;
-      const tgUser = app.initDataUnsafe?.user;
-      logger.info('Telegram user from WebApp:', tgUser, 'EmployeeRegistration');
-      if (tgUser) {
-        const tgId = tgUser.id.toString();
-        logger.info('Set Telegram ID: ' + tgId + ' (Type: ' + typeof tgId + ')', 'EmployeeRegistration');
-        setTelegramId(tgId);
-        // Автоматично заповнити ім'я з Telegram
-        setFormData(prev => ({
-          ...prev,
-          name: `${tgUser.first_name}${tgUser.last_name ? ' ' + tgUser.last_name : ''}`
-        }));
+    logger.info('useEffect: Getting Telegram ID', 'EmployeeRegistration');
+    if (typeof window !== 'undefined') {
+      logger.info('window.Telegram exists: ' + (window.Telegram ? 'YES' : 'NO'), 'EmployeeRegistration');
+      if (window.Telegram?.WebApp?.instance) {
+        const app = window.Telegram.WebApp.instance;
+        logger.info('Got WebApp instance', 'EmployeeRegistration');
+        const tgUser = app.initDataUnsafe?.user;
+        logger.info('Telegram user from WebApp:', tgUser, 'EmployeeRegistration');
+        if (tgUser && tgUser.id) {
+          const tgId = tgUser.id.toString();
+          logger.info('✅ Set Telegram ID: ' + tgId + ' (Type: ' + typeof tgId + ')', 'EmployeeRegistration');
+          setTelegramId(tgId);
+          // Автоматично заповнити ім'я з Telegram
+          setFormData(prev => ({
+            ...prev,
+            name: `${tgUser.first_name}${tgUser.last_name ? ' ' + tgUser.last_name : ''}`
+          }));
+        } else {
+          logger.warn('⚠️ Telegram ID not found', 'EmployeeRegistration');
+        }
+      } else {
+        logger.warn('⚠️ WebApp instance not available', 'EmployeeRegistration');
       }
+    } else {
+      logger.warn('⚠️ window is undefined', 'EmployeeRegistration');
     }
   }, []);
 

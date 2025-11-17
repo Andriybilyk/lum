@@ -27,19 +27,30 @@ export default function ManagerRegistration() {
   });
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
-      const app = window.Telegram.WebApp.instance;
-      const tgUser = app.initDataUnsafe?.user;
-      logger.info('Telegram user from WebApp (Manager):', tgUser, 'ManagerRegistration');
-      if (tgUser) {
-        const tgId = tgUser.id.toString();
-        logger.info('Set Manager Telegram ID: ' + tgId + ' (Type: ' + typeof tgId + ')', 'ManagerRegistration');
-        setTelegramId(tgId);
-        setFormData(prev => ({
-          ...prev,
-          name: `${tgUser.first_name}${tgUser.last_name ? ' ' + tgUser.last_name : ''}`
-        }));
+    logger.info('useEffect: Getting Telegram ID (Manager)', 'ManagerRegistration');
+    if (typeof window !== 'undefined') {
+      logger.info('window.Telegram exists: ' + (window.Telegram ? 'YES' : 'NO'), 'ManagerRegistration');
+      if (window.Telegram?.WebApp?.instance) {
+        const app = window.Telegram.WebApp.instance;
+        logger.info('Got WebApp instance', 'ManagerRegistration');
+        const tgUser = app.initDataUnsafe?.user;
+        logger.info('Telegram user from WebApp (Manager):', tgUser, 'ManagerRegistration');
+        if (tgUser && tgUser.id) {
+          const tgId = tgUser.id.toString();
+          logger.info('✅ Set Manager Telegram ID: ' + tgId + ' (Type: ' + typeof tgId + ')', 'ManagerRegistration');
+          setTelegramId(tgId);
+          setFormData(prev => ({
+            ...prev,
+            name: `${tgUser.first_name}${tgUser.last_name ? ' ' + tgUser.last_name : ''}`
+          }));
+        } else {
+          logger.warn('⚠️ Telegram ID not found (Manager)', 'ManagerRegistration');
+        }
+      } else {
+        logger.warn('⚠️ WebApp instance not available (Manager)', 'ManagerRegistration');
       }
+    } else {
+      logger.warn('⚠️ window is undefined (Manager)', 'ManagerRegistration');
     }
   }, []);
 
