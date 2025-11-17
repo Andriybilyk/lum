@@ -14,7 +14,7 @@ export interface SecurityHeaders {
 export const getSecurityHeaders = (): SecurityHeaders => {
   return {
     'X-Content-Type-Options': 'nosniff',
-    'X-Frame-Options': 'DENY',
+    'X-Frame-Options': 'SAMEORIGIN',
     'X-XSS-Protection': '1; mode=block',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
     'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
@@ -25,7 +25,7 @@ export const getSecurityHeaders = (): SecurityHeaders => {
       "img-src 'self' data: https:",
       "font-src 'self' data:",
       "connect-src 'self' https:",
-      "frame-ancestors 'none'",
+      "frame-ancestors 'self' https://web.telegram.org https://t.me",
       "base-uri 'self'",
       "form-action 'self'",
     ].join('; '),
