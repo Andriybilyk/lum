@@ -32,8 +32,11 @@ export default function EmployeeRegistration() {
     if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
       const app = window.Telegram.WebApp.instance;
       const tgUser = app.initDataUnsafe?.user;
+      logger.info('Telegram user from WebApp:', tgUser, 'EmployeeRegistration');
       if (tgUser) {
-        setTelegramId(tgUser.id.toString());
+        const tgId = tgUser.id.toString();
+        logger.info('Set Telegram ID: ' + tgId + ' (Type: ' + typeof tgId + ')', 'EmployeeRegistration');
+        setTelegramId(tgId);
         // Автоматично заповнити ім'я з Telegram
         setFormData(prev => ({
           ...prev,
@@ -107,7 +110,8 @@ export default function EmployeeRegistration() {
         telegramId: telegramId || undefined,
       };
 
-      logger.info('Employee registration successful', { userId: user.id, name: (user as any).name, telegramId });
+      logger.info('Employee registration - telegramId: ' + telegramId + ', userId: ' + user.id, 'EmployeeRegistration');
+      logger.info('Before addUser - User object:', { ...user, telegramId }, 'EmployeeRegistration');
       await addUser(user as any);
       setUser(user as any);
       navigate('/employee');

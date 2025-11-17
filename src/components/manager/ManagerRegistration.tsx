@@ -30,8 +30,11 @@ export default function ManagerRegistration() {
     if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
       const app = window.Telegram.WebApp.instance;
       const tgUser = app.initDataUnsafe?.user;
+      logger.info('Telegram user from WebApp (Manager):', tgUser, 'ManagerRegistration');
       if (tgUser) {
-        setTelegramId(tgUser.id.toString());
+        const tgId = tgUser.id.toString();
+        logger.info('Set Manager Telegram ID: ' + tgId + ' (Type: ' + typeof tgId + ')', 'ManagerRegistration');
+        setTelegramId(tgId);
         setFormData(prev => ({
           ...prev,
           name: `${tgUser.first_name}${tgUser.last_name ? ' ' + tgUser.last_name : ''}`
@@ -86,6 +89,8 @@ export default function ManagerRegistration() {
       telegramId: telegramId || undefined
     };
 
+    logger.info('Manager registration - telegramId: ' + telegramId + ', userId: ' + user.id, 'ManagerRegistration');
+    logger.info('Before addUser - User object:', { ...user, telegramId }, 'ManagerRegistration');
     await addUser(user);
     setUser(user);
     navigate('/manager');

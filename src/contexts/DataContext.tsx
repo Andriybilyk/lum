@@ -539,9 +539,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // ��икористовуємо setTimeout щоб не блокув��ти UI
       try {
         logger.info('💾 Saving user to Google Sheets...', 'DataContext');
-        await appendSheet(CONFIG.GOOGLE_SHEETS.RANGES.USERS, [[
-          newUser.id, newUser.name, newUser.role, newUser.level, newUser.hourlyRate, newUser.managerId ? parseInt(newUser.managerId) : ''
-        ]]);
+        logger.info('User ID to save: ' + newUser.id + ' (Type: ' + typeof newUser.id + ')', 'DataContext');
+        const rowData = [
+          newUser.id,
+          newUser.name,
+          newUser.role,
+          newUser.level,
+          newUser.hourlyRate,
+          newUser.managerId ? parseInt(newUser.managerId) : ''
+        ];
+        logger.info('Row data to append:', rowData, 'DataContext');
+        await appendSheet(CONFIG.GOOGLE_SHEETS.RANGES.USERS, [rowData]);
         logger.debug('✅ User saved to Google Sheets', 'DataContext');
       } catch (error) {
         logger.error('❌ Failed to save user to Google Sheets:', error, 'DataContext');

@@ -88,21 +88,24 @@ export const appendSheet = async (range: string, values: any[][]) => {
   }
 
   logger.info('➕ Appending to sheet', { range, rows: values.length });
+  logger.info('📝 Values being appended: ' + JSON.stringify(values), 'googleSheets');
 
   // Silently attempt to send data - don't throw on CORB errors
   try {
+    const payload = {
+      action: 'append',
+      spreadsheetId: SPREADSHEET_ID,
+      range,
+      values,
+    };
+    logger.info('📤 Sending payload to Google Apps Script: ' + JSON.stringify(payload), 'googleSheets');
     await fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        action: 'append',
-        spreadsheetId: SPREADSHEET_ID,
-        range,
-        values,
-      }),
+      body: JSON.stringify(payload),
     });
   } catch (error) {
     // Silently ignore CORB and fetch errors
