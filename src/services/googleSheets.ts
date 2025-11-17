@@ -100,24 +100,17 @@ export const appendSheet = async (range: string, values: any[][]) => {
     logger.info('📤 Sending payload to Google Apps Script: ' + JSON.stringify(payload), 'googleSheets');
     logger.info('📤 Script URL: ' + SCRIPT_URL, 'googleSheets');
 
-    const response = await fetch(SCRIPT_URL, {
+    await fetch(SCRIPT_URL, {
       method: 'POST',
+      mode: 'no-cors',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
     });
 
-    logger.info('📥 HTTP Status: ' + response.status, 'googleSheets');
-    const responseText = await response.text();
-    logger.info('📥 Response from Google Apps Script: ' + responseText, 'googleSheets');
-
-    if (!response.ok) {
-      logger.error('❌ Failed to append - HTTP ' + response.status + ': ' + responseText, 'googleSheets');
-      return { success: false, reason: 'HTTP ' + response.status };
-    }
-
-    logger.info('✅ Append request sent successfully', 'googleSheets');
+    // With no-cors mode, we can't read the response
+    logger.info('✅ Append request sent (no-cors mode - response not readable)', 'googleSheets');
     return { success: true };
   } catch (error) {
     logger.error('❌ Error appending to sheet:', error, 'googleSheets');
@@ -144,23 +137,17 @@ export const writeSheet = async (range: string, values: any[][]) => {
     };
     logger.info('📤 Sending payload to Google Apps Script: ' + JSON.stringify(payload), 'googleSheets');
 
-    const response = await fetch(SCRIPT_URL, {
+    await fetch(SCRIPT_URL, {
       method: 'POST',
+      mode: 'no-cors',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
     });
 
-    const responseText = await response.text();
-    logger.info('📥 Response from Google Apps Script: ' + responseText, 'googleSheets');
-
-    if (!response.ok) {
-      logger.error('❌ Failed to write - HTTP ' + response.status + ': ' + responseText, 'googleSheets');
-      return { success: false, reason: 'HTTP ' + response.status };
-    }
-
-    logger.info('✅ Write request sent successfully', 'googleSheets');
+    // With no-cors mode, we can't read the response
+    logger.info('✅ Write request sent (no-cors mode - response not readable)', 'googleSheets');
     return { success: true };
   } catch (error) {
     logger.error('❌ Error writing to sheet:', error, 'googleSheets');
