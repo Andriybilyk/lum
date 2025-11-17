@@ -1,5 +1,4 @@
 import { logger } from '@/utils/logger';
-import { getTelegramUser, getTelegramUserId, getTelegramUserName } from '@/utils/telegramWebApp';
 import { UserSchema, validateData } from '@/utils/validation';
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -32,23 +31,48 @@ export default function EmployeeRegistration() {
   useEffect(() => {
     logger.info('📱 Initializing Telegram registration');
 
-    const tgUser = getTelegramUser();
-    const tgUserId = getTelegramUserId();
-    const tgUserName = getTelegramUserName();
+    // Спочатку ініціалізуємо Telegram WebApp
+    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+      // @ts-ignore - Telegram WebApp API
+      const webApp = window.Telegram.WebApp;
+      logger.info('🔍 Telegram WebApp object:', webApp);
 
-    if (tgUser && tgUserId) {
-      logger.info('✅ Telegram user data loaded:', {
-        id: tgUserId,
-        name: tgUserName
-      });
-      setTelegramId(tgUserId);
-      setFormData(prev => ({
-        ...prev,
-        name: tgUserName || ''
-      }));
+      // Викликаємо ready() щоб повідомити Telegram що додаток готовий
+      // @ts-ignore
+      if (typeof webApp.ready === 'function') {
+        // @ts-ignore
+        webApp.ready();
+        logger.info('✅ WebApp.ready() called');
+      }
+
+      // Перевіряємо initDataUnsafe
+      // @ts-ignore
+      logger.info('🔍 initDataUnsafe:', webApp.initDataUnsafe);
+      // @ts-ignore
+      logger.info('🔍 initDataUnsafe.user:', webApp.initDataUnsafe?.user);
+
+      // @ts-ignore
+      if (webApp.initDataUnsafe?.user) {
+        // @ts-ignore
+        const tgUserId = webApp.initDataUnsafe.user.id.toString();
+        // @ts-ignore
+        const tgUserName = `${webApp.initDataUnsafe.user.first_name}${webApp.initDataUnsafe.user.last_name ? ' ' + webApp.initDataUnsafe.user.last_name : ''}`;
+
+        logger.info('✅ REAL Telegram ID captured:', tgUserId);
+        logger.info('✅ Telegram user name:', tgUserName);
+
+        setTelegramId(tgUserId);
+        setFormData(prev => ({
+          ...prev,
+          name: tgUserName
+        }));
+      } else {
+        logger.warn('⚠️ Telegram user data NOT found in WebApp.initDataUnsafe');
+        logger.warn('⚠️ This means app is NOT running inside Telegram Mini App');
+      }
     } else {
-      logger.warn('⚠️ Telegram user data not available in mini app context');
-      logger.warn('This is normal during development - Telegram ID will be available only in Telegram mini app');
+      logger.warn('⚠️ window.Telegram.WebApp not available');
+      logger.warn('⚠️ App must be opened through Telegram Mini App to get real Telegram ID');
     }
   }, []);
 
