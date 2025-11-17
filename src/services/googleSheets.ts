@@ -87,10 +87,9 @@ export const appendSheet = async (range: string, values: any[][]) => {
     return { success: false, reason: 'SCRIPT_URL not configured' };
   }
 
-  logger.info('➕ Appending to sheet', { range, rows: values.length });
+  logger.info('➕ Appending to sheet: ' + range, 'googleSheets');
   logger.info('📝 Values being appended: ' + JSON.stringify(values), 'googleSheets');
 
-  // Silently attempt to send data - don't throw on CORB errors
   try {
     const payload = {
       action: 'append',
@@ -99,20 +98,29 @@ export const appendSheet = async (range: string, values: any[][]) => {
       values,
     };
     logger.info('📤 Sending payload to Google Apps Script: ' + JSON.stringify(payload), 'googleSheets');
-    await fetch(SCRIPT_URL, {
+
+    const response = await fetch(SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
     });
-  } catch (error) {
-    // Silently ignore CORB and fetch errors
-    logger.debug('📤 Append request sent (CORB errors ignored)');
-  }
 
-  return { success: true };
+    const responseText = await response.text();
+    logger.info('📥 Response from Google Apps Script: ' + responseText, 'googleSheets');
+
+    if (!response.ok) {
+      logger.error('❌ Failed to append - HTTP ' + response.status + ': ' + responseText, 'googleSheets');
+      return { success: false, reason: 'HTTP ' + response.status };
+    }
+
+    logger.info('✅ Append request sent successfully', 'googleSheets');
+    return { success: true };
+  } catch (error) {
+    logger.error('❌ Error appending to sheet:', error, 'googleSheets');
+    return { success: false, reason: String(error) };
+  }
 };
 
 // Write data to a sheet using Google Apps Script
@@ -122,28 +130,39 @@ export const writeSheet = async (range: string, values: any[][]) => {
     return { success: false, reason: 'SCRIPT_URL not configured' };
   }
 
-  logger.info('✏️ Writing to sheet', { range, rows: values.length });
+  logger.info('✏️ Writing to sheet: ' + range, 'googleSheets');
 
   try {
-    await fetch(SCRIPT_URL, {
+    const payload = {
+      action: 'update',
+      spreadsheetId: SPREADSHEET_ID,
+      range,
+      values,
+    };
+    logger.info('📤 Sending payload to Google Apps Script: ' + JSON.stringify(payload), 'googleSheets');
+
+    const response = await fetch(SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        action: 'update',
-        spreadsheetId: SPREADSHEET_ID,
-        range,
-        values,
-      }),
+      body: JSON.stringify(payload),
     });
-  } catch (error) {
-    // Silently ignore CORB and fetch errors
-    logger.debug('📤 Write request sent (CORB errors ignored)');
-  }
 
-  return { success: true };
+    const responseText = await response.text();
+    logger.info('📥 Response from Google Apps Script: ' + responseText, 'googleSheets');
+
+    if (!response.ok) {
+      logger.error('❌ Failed to write - HTTP ' + response.status + ': ' + responseText, 'googleSheets');
+      return { success: false, reason: 'HTTP ' + response.status };
+    }
+
+    logger.info('✅ Write request sent successfully', 'googleSheets');
+    return { success: true };
+  } catch (error) {
+    logger.error('❌ Error writing to sheet:', error, 'googleSheets');
+    return { success: false, reason: String(error) };
+  }
 };
 
 export async function updateHourEntry(entryId: string, data: any) {

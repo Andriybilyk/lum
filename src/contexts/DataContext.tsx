@@ -549,7 +549,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           newUser.managerId ? parseInt(newUser.managerId) : ''
         ];
         logger.info('Row data to append:', rowData, 'DataContext');
-        await appendSheet(CONFIG.GOOGLE_SHEETS.RANGES.USERS, [rowData]);
+        const result = await appendSheet(CONFIG.GOOGLE_SHEETS.RANGES.USERS, [rowData]);
+        logger.info('Append result:', result, 'DataContext');
+        if (!result.success) {
+          logger.error('❌ Failed to append user: ' + result.reason, 'DataContext');
+          throw new Error('Failed to save: ' + result.reason);
+        }
         logger.debug('✅ User saved to Google Sheets', 'DataContext');
       } catch (error) {
         logger.error('❌ Failed to save user to Google Sheets:', error, 'DataContext');
