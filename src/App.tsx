@@ -92,19 +92,19 @@ function App() {
         <ThemeProvider>
           <NotificationProvider>
             <UserProvider>
-              <MetaProvider>
-                <AuthProvider>
-                  <HoursProvider>
-                    <ProcessProvider>
-                      <ReportProvider>
-                        <DataProvider>
+              <AuthProvider>
+                <DataProvider>
+                  <MetaProvider>
+                    <HoursProvider>
+                      <ProcessProvider>
+                        <ReportProvider>
                           <AppContent />
-                        </DataProvider>
-                      </ReportProvider>
-                    </ProcessProvider>
-                  </HoursProvider>
-                </AuthProvider>
-              </MetaProvider>
+                        </ReportProvider>
+                      </ProcessProvider>
+                    </HoursProvider>
+                  </MetaProvider>
+                </DataProvider>
+              </AuthProvider>
             </UserProvider>
           </NotificationProvider>
         </ThemeProvider>

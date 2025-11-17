@@ -92,27 +92,24 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const init = async () => {
       try {
-        // Check if Google Sheets is configured
         const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
         const spreadsheetId = import.meta.env.VITE_SPREADSHEET_ID;
         const scriptUrl = import.meta.env.VITE_GOOGLE_SCRIPT_URL;
 
         if (apiKey && spreadsheetId && scriptUrl) {
           setIsConfigured(true);
-          // Спробуємо завантажити дані, але не падаємо якщо помилка
-          try {
-            await loadData();
-          } catch (error) {
+          // Завантажуємо дані у фоні без блокування UI
+          loadData().catch(error => {
             logger.warn('Failed to load data from Google Sheets, using empty state', error, 'DataContext');
             setIsConfigured(false);
-          }
+          });
         } else {
           setIsConfigured(false);
+          setIsLoading(false);
         }
       } catch (error) {
         logger.warn('Failed to initialize DataContext', error, 'DataContext');
         setIsConfigured(false);
-      } finally {
         setIsLoading(false);
       }
     };
@@ -159,10 +156,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Load users
       try {
         const usersData = await readSheet(CONFIG.GOOGLE_SHEETS.RANGES.USERS);
-        logger.info('📊 Raw users data from sheet:', usersData, 'DataContext');
-        logger.info('📊 Users data length:', usersData.length, 'DataContext');
+        logger.debug('📊 Raw users data from sheet:', usersData, 'DataContext');
+        logger.debug('📊 Users data length:', usersData.length, 'DataContext');
         if (usersData.length > 1) {
-          logger.info('📋 Processing users rows (excluding header)', 'DataContext');
+          logger.debug('📋 Processing users rows (excluding header)', 'DataContext');
           const loadedUsers = usersData.slice(1).map((row: string[], idx: number) => {
             logger.info(`📌 Processing user row ${idx}:`, row, 'DataContext');
             const rawId = String(row[0]);
@@ -195,12 +192,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             logger.info(`✅ Parsed user ${idx}:`, { id: parsedUser.id, name: parsedUser.name }, 'DataContext');
             return parsedUser;
           });
-          logger.info('✅ Loaded users (processed):', loadedUsers, 'DataContext');
+          logger.debug('✅ Loaded users (processed):', loadedUsers, 'DataContext');
           setUsers(loadedUsers);
-          logger.info('✅ Loaded users count:', loadedUsers.length, 'DataContext');
+          logger.debug('✅ Loaded users count:', loadedUsers.length, 'DataContext');
         } else {
           setUsers([]);
-          logger.info('ℹ️ Loaded users: 0 (sheet is empty or only has headers)', 'DataContext');
+          logger.debug('ℹ️ Loaded users: 0 (sheet is empty or only has headers)', 'DataContext');
         }
       } catch (error) {
         logger.error('❌ Failed to load users:', error, 'DataContext');
@@ -212,7 +209,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Load hours
       try {
         const hoursData = await readSheet(CONFIG.GOOGLE_SHEETS.RANGES.HOURS);
-        logger.info('📊 Raw hours data from sheet:', hoursData, 'DataContext');
+        logger.debug('📊 Raw hours data from sheet:', hoursData, 'DataContext');
         if (hoursData.length > 1) {
           const loadedHours = hoursData.slice(1).map((row: string[], idx: number) => {
             const rawUserId = String(row[1]);
@@ -243,11 +240,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             };
           });
           setHours(loadedHours);
-          logger.info('✅ Loaded hours:', loadedHours.length, 'DataContext');
+          logger.debug('✅ Loaded hours:', loadedHours.length, 'DataContext');
         } else {
           // Якщо немає даних (тільки заголовки), очищаємо state
           setHours([]);
-          logger.info('ℹ️ Loaded hours: 0 (sheet is empty or only has headers)', 'DataContext');
+          logger.debug('ℹ️ Loaded hours: 0 (sheet is empty or only has headers)', 'DataContext');
         }
       } catch (error) {
         logger.error('❌ Failed to load hours:', error, 'DataContext');
@@ -259,7 +256,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Load processes
       try {
         const processesData = await readSheet(CONFIG.GOOGLE_SHEETS.RANGES.PROCESSES);
-        logger.info('📊 Raw processes data from sheet:', processesData, 'DataContext');
+        logger.debug('📊 Raw processes data from sheet:', processesData, 'DataContext');
         if (processesData.length > 1) {
           const loadedProcesses = processesData.slice(1).map((row: string[], idx: number) => {
             const rawUserId = String(row[1]);
@@ -292,11 +289,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             };
           });
           setProcesses(loadedProcesses);
-          logger.info('✅ Loaded processes:', loadedProcesses.length, 'DataContext');
+          logger.debug('✅ Loaded processes:', loadedProcesses.length, 'DataContext');
         } else {
           // Якщо немає даних (тільки заголовки), очищаємо state
           setProcesses([]);
-          logger.info('ℹ️ Loaded processes: 0 (sheet is empty or only has headers)', 'DataContext');
+          logger.debug('ℹ️ Loaded processes: 0 (sheet is empty or only has headers)', 'DataContext');
         }
       } catch (error) {
         logger.error('❌ Failed to load processes:', error, 'DataContext');
@@ -308,7 +305,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Load levels
       try {
         const levelsData = await readSheet(CONFIG.GOOGLE_SHEETS.RANGES.LEVELS);
-        logger.info('📊 Raw levels data from Google Sheets:', levelsData, 'DataContext');
+        logger.debug('📊 Raw levels data from Google Sheets:', levelsData, 'DataContext');
 
         if (levelsData.length > 1) {
           const loadedLevels = levelsData.slice(1)
@@ -323,7 +320,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
               };
             });
 
-          logger.info('✅ Loaded levels from Google Sheets:', loadedLevels, 'DataContext');
+          logger.debug('✅ Loaded levels from Google Sheets:', loadedLevels, 'DataContext');
           setLevels(loadedLevels);
         } else {
           logger.warn('No levels found in Google Sheets (only headers or empty)');
@@ -348,7 +345,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             };
           });
           setObjects(loadedObjects);
-          logger.info('✅ Loaded objects:', loadedObjects.length, 'DataContext');
+          logger.debug('✅ Loaded objects:', loadedObjects.length, 'DataContext');
         }
       } catch (error) {
         logger.warn('Could not load objects:', error);
@@ -373,7 +370,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             };
           });
           setProcessTypes(loadedProcessTypes);
-          logger.info('✅ Loaded process types:', loadedProcessTypes.length, 'DataContext');
+          logger.debug('✅ Loaded process types:', loadedProcessTypes.length, 'DataContext');
         }
       } catch (error) {
         logger.warn('Could not load process types:', error);
@@ -395,7 +392,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             status: row[6] as 'pending' | 'confirmed' | 'declined' | 'employee_confirmed' | 'manager_confirmed',
           }));
           setAssignments(loadedAssignments);
-          logger.info('✅ Loaded assignments:', loadedAssignments.length, 'DataContext');
+          logger.debug('✅ Loaded assignments:', loadedAssignments.length, 'DataContext');
         }
       } catch (error) {
         logger.warn('Could not load assignments:', error);
@@ -424,7 +421,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             updatedAt: row[13] || new Date().toISOString(),
           }));
           setAdditionalWorks(loadedAdditionalWorks);
-          logger.info('✅ Loaded additional works:', loadedAdditionalWorks.length, 'DataContext');
+          logger.debug('✅ Loaded additional works:', loadedAdditionalWorks.length, 'DataContext');
         }
       } catch (error) {
         logger.warn('Could not load additional works:', error);
@@ -446,7 +443,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!lastLoadTime) {
         setLastLoadTime(Date.now());
       }
-      logger.info('✅ Data load completed', 'DataContext');
+      logger.debug('✅ Data load completed', 'DataContext');
     }
   };
 
@@ -531,7 +528,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const newUser = 'id' in user ? user : { ...user, id: Date.now().toString() };
     
     logger.info('👤 Adding user:', newUser, 'DataContext');
-    logger.info('📊 Is configured:', isConfigured, 'DataContext');
+    logger.debug('📊 Is configured:', isConfigured, 'DataContext');
     
     setUsers([...users, newUser]);
     
@@ -542,7 +539,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await appendSheet(CONFIG.GOOGLE_SHEETS.RANGES.USERS, [[
           parseInt(newUser.id), newUser.name, newUser.role, newUser.level, newUser.hourlyRate, newUser.managerId ? parseInt(newUser.managerId) : ''
         ]]);
-        logger.info('✅ User saved to Google Sheets', 'DataContext');
+        logger.debug('✅ User saved to Google Sheets', 'DataContext');
       } catch (error) {
         logger.error('❌ Failed to save user to Google Sheets:', error, 'DataContext');
         throw error;
@@ -587,7 +584,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           isBusinessTrip: updatedEntry.isBusinessTrip,
           salary: updatedEntry.salary
         });
-        logger.info('✅ Hour entry updated successfully', 'DataContext');
+        logger.debug('✅ Hour entry updated successfully', 'DataContext');
       } catch (error) {
         logger.error('Failed to update hours in sheets:', error, 'DataContext');
       }
@@ -600,7 +597,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isConfigured) {
       try {
         await deleteHourEntry(id);
-        logger.info('✅ Hour entry deleted successfully', 'DataContext');
+        logger.debug('✅ Hour entry deleted successfully', 'DataContext');
       } catch (error) {
         logger.error('Failed to delete hours from sheets:', error, 'DataContext');
       }
@@ -631,7 +628,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           parseInt(newProcess.id), parseInt(newProcess.userId), newProcess.date, newProcess.processName,
           newProcess.object || '', newProcess.volume, newProcess.unit, newProcess.rate, newProcess.salary
         ]]);
-        logger.info('✅ Process saved to Google Sheets:', newProcess.processName, 'DataContext');
+        logger.debug('✅ Process saved to Google Sheets:', newProcess.processName, 'DataContext');
       } catch (error) {
         logger.error('❌ Failed to save process to sheets:', error, 'DataContext');
         // Видаляємо з пам'яті, якщо не вдалося зберегти
@@ -664,7 +661,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           rate: updatedEntry.rate,
           salary: updatedEntry.salary
         });
-        logger.info('✅ Process entry updated successfully', 'DataContext');
+        logger.debug('✅ Process entry updated successfully', 'DataContext');
       } catch (error) {
         logger.error('Failed to update process in sheets:', error, 'DataContext');
       }
@@ -677,7 +674,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isConfigured) {
       try {
         await deleteProcessEntry(id);
-        logger.info('✅ Process entry deleted successfully', 'DataContext');
+        logger.debug('✅ Process entry deleted successfully', 'DataContext');
       } catch (error) {
         logger.error('Failed to delete process from sheets:', error, 'DataContext');
       }
@@ -955,7 +952,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ]);
 
       setAdditionalWorks(prev => [...prev, newWork]);
-      logger.info('✅ Additional work added:', newWork, 'DataContext');
+      logger.debug('✅ Additional work added:', newWork, 'DataContext');
 
       // Якщо статус 'approved' (для менеджера), одразу конвертуємо у процес
       if (work.status === 'approved') {
@@ -1007,7 +1004,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ]);
 
       setAdditionalWorks(prev => prev.map(w => w.id === id ? updatedWork : w));
-      logger.info('✅ Additional work updated:', updatedWork, 'DataContext');
+      logger.debug('✅ Additional work updated:', updatedWork, 'DataContext');
 
       // Якщо статус змінено на 'approved', конвертуємо у процес
       if (updates.status === 'approved' && work.status !== 'approved') {
