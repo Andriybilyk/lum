@@ -29,13 +29,19 @@ export default function EmployeeRegistration() {
 
   // Отримати Telegram ID при завантаженні
   useEffect(() => {
-    logger.info('📱 Initializing Telegram registration');
+    logger.info('📱 ========== TELEGRAM REGISTRATION START ==========');
+    logger.info('📱 Current URL:', window.location.href);
+    logger.info('📱 window.Telegram exists?', typeof window.Telegram !== 'undefined');
 
     // Спочатку ініціалізуємо Telegram WebApp
     if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
       // @ts-ignore - Telegram WebApp API
       const webApp = window.Telegram.WebApp;
-      logger.info('🔍 Telegram WebApp object:', webApp);
+      logger.info('✅ WebApp object found');
+      // @ts-ignore
+      logger.info('🔍 WebApp version:', webApp.version || 'unknown');
+      // @ts-ignore
+      logger.info('🔍 WebApp platform:', webApp.platform || 'unknown');
 
       // Викликаємо ready() щоб повідомити Telegram що додаток готовий
       // @ts-ignore
@@ -45,35 +51,53 @@ export default function EmployeeRegistration() {
         logger.info('✅ WebApp.ready() called');
       }
 
+      // Перевіряємо initData (raw string)
+      // @ts-ignore
+      logger.info('🔍 initData (raw):', webApp.initData || 'EMPTY');
+
       // Перевіряємо initDataUnsafe
       // @ts-ignore
-      logger.info('🔍 initDataUnsafe:', webApp.initDataUnsafe);
-      // @ts-ignore
-      logger.info('🔍 initDataUnsafe.user:', webApp.initDataUnsafe?.user);
+      const initDataUnsafe = webApp.initDataUnsafe;
+      logger.info('🔍 initDataUnsafe:', initDataUnsafe);
 
-      // @ts-ignore
-      if (webApp.initDataUnsafe?.user) {
-        // @ts-ignore
-        const tgUserId = webApp.initDataUnsafe.user.id.toString();
-        // @ts-ignore
-        const tgUserName = `${webApp.initDataUnsafe.user.first_name}${webApp.initDataUnsafe.user.last_name ? ' ' + webApp.initDataUnsafe.user.last_name : ''}`;
+      if (initDataUnsafe) {
+        logger.info('🔍 initDataUnsafe keys:', Object.keys(initDataUnsafe));
+        logger.info('🔍 initDataUnsafe.user:', initDataUnsafe.user);
 
-        logger.info('✅ REAL Telegram ID captured:', tgUserId);
-        logger.info('✅ Telegram user name:', tgUserName);
+        if (initDataUnsafe.user) {
+          const user = initDataUnsafe.user;
+          logger.info('🔍 User object:', user);
+          logger.info('🔍 User ID type:', typeof user.id);
+          logger.info('🔍 User ID value:', user.id);
 
-        setTelegramId(tgUserId);
-        setFormData(prev => ({
-          ...prev,
-          name: tgUserName
-        }));
+          const tgUserId = user.id.toString();
+          const tgUserName = `${user.first_name}${user.last_name ? ' ' + user.last_name : ''}`;
+
+          logger.info('✅✅✅ REAL Telegram ID captured: ' + tgUserId);
+          logger.info('✅✅✅ Telegram user name: ' + tgUserName);
+
+          setTelegramId(tgUserId);
+          setFormData(prev => ({
+            ...prev,
+            name: tgUserName
+          }));
+        } else {
+          logger.error('❌ initDataUnsafe.user is NULL or UNDEFINED');
+          logger.error('❌ initDataUnsafe content:', JSON.stringify(initDataUnsafe));
+        }
       } else {
-        logger.warn('⚠️ Telegram user data NOT found in WebApp.initDataUnsafe');
-        logger.warn('⚠️ This means app is NOT running inside Telegram Mini App');
+        logger.error('❌ initDataUnsafe is NULL or UNDEFINED');
+        logger.error('❌ This means Telegram did NOT pass user data');
+        logger.error('❌ App MUST be opened via Telegram Bot URL');
       }
     } else {
-      logger.warn('⚠️ window.Telegram.WebApp not available');
-      logger.warn('⚠️ App must be opened through Telegram Mini App to get real Telegram ID');
+      logger.error('❌ window.Telegram.WebApp NOT AVAILABLE');
+      logger.error('❌ Telegram SDK not loaded or not running in Telegram');
+      logger.error('❌ Check: 1) Telegram SDK script in index.html');
+      logger.error('❌ Check: 2) App opened through Telegram Mini App URL');
     }
+
+    logger.info('📱 ========== TELEGRAM REGISTRATION END ==========');
   }, []);
 
   const employeeUsers = useMemo(() => {
