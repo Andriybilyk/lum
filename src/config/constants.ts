@@ -14,7 +14,7 @@ export const CONFIG = {
 
     // Sheet ranges - all sheets and their column ranges
     RANGES: {
-      USERS: 'Users!A:G',
+      USERS: 'Users!A:F',
       HOURS: 'Hours!A:G',
       PROCESSES: 'Processes!A:I',
       LEVELS: 'Levels!A:C',
@@ -26,7 +26,7 @@ export const CONFIG = {
 
     // Sheet row indexes (0-based)
     COLUMN_INDEXES: {
-      USERS: { ID: 0, NAME: 1, ROLE: 2, LEVEL: 3, HOURLY_RATE: 4, MANAGER_ID: 5, TELEGRAM_ID: 6 },
+      USERS: { ID: 0, NAME: 1, ROLE: 2, LEVEL: 3, HOURLY_RATE: 4, MANAGER_ID: 5 },
       HOURS: { ID: 0, USER_ID: 1, DATE: 2, HOURS: 3, OBJECT: 4, IS_BUSINESS_TRIP: 5, SALARY: 6 },
       PROCESSES: { ID: 0, USER_ID: 1, DATE: 2, PROCESS_NAME: 3, OBJECT: 4, VOLUME: 5, UNIT: 6, RATE: 7, SALARY: 8 },
       LEVELS: { ID: 0, NAME: 1, HOURLY_RATE: 2 },
