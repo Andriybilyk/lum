@@ -60,9 +60,9 @@ export const calculateMonthlyStats = (
   userId: string,
   month: string
 ) => {
-  const userHours = hours.filter((h) => h.userId === userId && h.date.startsWith(month));
+  const userHours = hours.filter((h) => h.userId === userId && h.date && h.date.startsWith(month));
   const userProcesses = processes.filter(
-    (p) => p.userId === userId && p.date.startsWith(month)
+    (p) => p.userId === userId && p.date && p.date.startsWith(month)
   );
 
   const totalHours = userHours.reduce((sum, h) => sum + h.hours, 0);

@@ -874,16 +874,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getTeamReport = (month: string) => {
     // Включаємо всіх користувачів (і працівників, і менеджерів)
     const allUsers = users;
-    
+
     return allUsers.map(emp => {
       // Фільтруємо години за місяцем
-      const empHours = hours.filter(h => 
-        h.userId === emp.id && h.date.startsWith(month)
+      const empHours = hours.filter(h =>
+        h.userId === emp.id && h.date && h.date.startsWith(month)
       );
-      
+
       // Фільтруємо процеси за місяцем
-      const empProcesses = processes.filter(p => 
-        p.userId === emp.id && p.date.startsWith(month)
+      const empProcesses = processes.filter(p =>
+        p.userId === emp.id && p.date && p.date.startsWith(month)
       );
       
       // Рахуємо загальні години
@@ -905,13 +905,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const getEmployeeReport = (userId: string, month: string) => {
     // Фільтруємо години за місяцем
-    const empHours = hours.filter(h => 
-      h.userId === userId && h.date.startsWith(month)
+    const empHours = hours.filter(h =>
+      h.userId === userId && h.date && h.date.startsWith(month)
     );
-    
+
     // Фільтруємо процеси за місяцем
-    const empProcesses = processes.filter(p => 
-      p.userId === userId && p.date.startsWith(month)
+    const empProcesses = processes.filter(p =>
+      p.userId === userId && p.date && p.date.startsWith(month)
     );
     
     // Форматуємо години

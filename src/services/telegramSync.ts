@@ -79,7 +79,7 @@ class TelegramSyncService {
     const targetMonth = month || new Date().toISOString().slice(0, 7);
     const entries = this.loadUserData(userId);
 
-    const monthEntries = entries.filter(e => e.date.startsWith(targetMonth));
+    const monthEntries = entries.filter(e => e.date && e.date.startsWith(targetMonth));
     const total = monthEntries.reduce((sum, e) => sum + e.hours, 0);
 
     return { total, entries: monthEntries };

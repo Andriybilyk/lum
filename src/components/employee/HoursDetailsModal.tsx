@@ -31,7 +31,7 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
   // Фільтруємо години для поточного користувача та місяця
   const monthStr = `${year}-${month}`;
   const userHours = hours.filter(h =>
-    h.userId === user?.id && h.date.startsWith(monthStr)
+    h.userId === user?.id && h.date && h.date.startsWith(monthStr)
   );
 
   const totalHours = userHours.reduce((sum, h) => sum + h.hours, 0);

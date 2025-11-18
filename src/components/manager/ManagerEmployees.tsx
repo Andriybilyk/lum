@@ -46,11 +46,11 @@ export default function ManagerEmployees() {
 
     teamMembers.forEach(employee => {
       const empHours = hours.filter(h =>
-        h.userId === employee.id && h.date.startsWith(currentMonth)
+        h.userId === employee.id && h.date && h.date.startsWith(currentMonth)
       );
 
       const empProcesses = processes.filter(p =>
-        p.userId === employee.id && p.date.startsWith(currentMonth)
+        p.userId === employee.id && p.date && p.date.startsWith(currentMonth)
       );
 
       const totalHours = empHours.reduce((sum, h) => sum + h.hours, 0);

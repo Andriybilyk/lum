@@ -24,7 +24,7 @@ export const useTeamStats = (teamMemberIds: string[]) => {
       logger.info('🔍 Checking hours:');
       hours.forEach((h, idx) => {
         const inTeam = teamMemberSet.has(h.userId);
-        const matchesMonth = h.date.startsWith(currentMonth);
+        const matchesMonth = h.date && h.date.startsWith(currentMonth);
 
         // Детальна перевірка ID
         if (idx === 0 && teamMemberIds.length > 0) {
@@ -43,7 +43,7 @@ export const useTeamStats = (teamMemberIds: string[]) => {
       logger.info('🔍 Checking processes:');
       processes.forEach((p, idx) => {
         const inTeam = teamMemberSet.has(p.userId);
-        const matchesMonth = p.date.startsWith(currentMonth);
+        const matchesMonth = p.date && p.date.startsWith(currentMonth);
         logger.info(`  [${idx}] userId=${p.userId}, date=${p.date}, process=${p.processName}, inTeam=${inTeam}, matchesMonth=${matchesMonth}`);
       });
     }
@@ -55,11 +55,11 @@ export const useTeamStats = (teamMemberIds: string[]) => {
     logger.info('👤 Active today:', activeToday);
 
     const monthHours = hours.filter(h =>
-      h.date.startsWith(currentMonth) && teamMemberSet.has(h.userId)
+      h.date && h.date.startsWith(currentMonth) && teamMemberSet.has(h.userId)
     );
 
     const monthProcesses = processes.filter(p =>
-      p.date.startsWith(currentMonth) && teamMemberSet.has(p.userId)
+      p.date && p.date.startsWith(currentMonth) && teamMemberSet.has(p.userId)
     );
 
     logger.info('📊 Filtered month hours', { count: monthHours.length, data: monthHours });

@@ -19,8 +19,8 @@ export const useEmployeeStats = (userId: string) => {
         currentMonth,
         totalHours: hours.length,
         totalProcesses: processes.length,
-        userHours: hours.filter(h => h.userId === userId && h.date.startsWith(currentMonth)).length,
-        userProcesses: processes.filter(p => p.userId === userId && p.date.startsWith(currentMonth)).length,
+        userHours: hours.filter(h => h.userId === userId && h.date && h.date.startsWith(currentMonth)).length,
+        userProcesses: processes.filter(p => p.userId === userId && p.date && p.date.startsWith(currentMonth)).length,
         stats
       });
     }

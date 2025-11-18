@@ -17,10 +17,10 @@ export default function EarningsDetailsModal({ open, onClose, month, year }: Ear
 
   const monthStr = `${year}-${month}`;
   const userHours = hours.filter(h =>
-    h.userId === user?.id && h.date.startsWith(monthStr)
+    h.userId === user?.id && h.date && h.date.startsWith(monthStr)
   );
   const userProcesses = processes.filter(p =>
-    p.userId === user?.id && p.date.startsWith(monthStr)
+    p.userId === user?.id && p.date && p.date.startsWith(monthStr)
   );
 
   const hourlyTotal = userHours.reduce((sum, h) => sum + h.salary, 0);

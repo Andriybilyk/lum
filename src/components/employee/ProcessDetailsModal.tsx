@@ -31,7 +31,7 @@ export default function ProcessDetailsModal({ open, onClose, month, year }: Proc
   // Фільтруємо процеси для поточного користувача та місяця
   const monthStr = `${year}-${month}`;
   const userProcesses = processes.filter(p =>
-    p.userId === user?.id && p.date.startsWith(monthStr)
+    p.userId === user?.id && p.date && p.date.startsWith(monthStr)
   );
 
   const totalProcesses = userProcesses.length;
