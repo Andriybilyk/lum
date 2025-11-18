@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
 import { useTelegramApp } from '@/contexts/TelegramAppContext';
 import { useData } from '@/contexts/DataContext';
 import { useUser } from '@/contexts/UserContext';
@@ -14,14 +13,12 @@ import ManagerNav from '@/components/manager/ManagerNav';
 import ManagerStats from '@/components/manager/ManagerStats';
 import ManagerEmployees from '@/components/manager/ManagerEmployees';
 import ManagerReports from '@/components/manager/ManagerReports';
-import LoadingScreen from '@/components/LoadingScreen';
 import { motion } from 'framer-motion';
 import { Clock } from 'lucide-react';
 
 type UserRole = 'employee' | 'manager' | null;
 
 export default function TelegramMiniApp() {
-  const { toast } = useToast();
   const {
     user: telegramUser,
     isInitialized,
@@ -30,10 +27,12 @@ export default function TelegramMiniApp() {
   const { user: appUser, setUser } = useUser();
   const [selectedRole, setSelectedRole] = useState<UserRole>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [hasLoggedOut, setHasLoggedOut] = useState(false);
 
   useEffect(() => {
     // Перевіряємо чи користувач вже зареєстрований через Telegram ID
-    if (isInitialized && telegramUser && users.length > 0 && !appUser) {
+    // НЕ логінимо автоматично якщо користувач вийшов вручну
+    if (isInitialized && telegramUser && users.length > 0 && !appUser && !hasLoggedOut) {
       if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
         // @ts-ignore
         const webApp = window.Telegram.WebApp;
@@ -48,7 +47,7 @@ export default function TelegramMiniApp() {
         }
       }
     }
-  }, [isInitialized, telegramUser, users, appUser, setUser]);
+  }, [isInitialized, telegramUser, users, appUser, hasLoggedOut, setUser]);
 
   useEffect(() => {
     const handleChangeTab = (event: any) => {
@@ -60,11 +59,13 @@ export default function TelegramMiniApp() {
 
   const handleLogout = () => {
     // Очищуємо користувача з контексту
-    setUser(null);
+    setUser(null as any);
     // Скидаємо вибрану роль
     setSelectedRole(null);
     // Повертаємося на перший таб
     setActiveTab('dashboard');
+    // Встановлюємо прапорець що користувач вийшов вручну
+    setHasLoggedOut(true);
   };
 
   if (!isInitialized || isLoading) {
@@ -182,7 +183,7 @@ export default function TelegramMiniApp() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 dark:from-slate-900 dark:to-slate-800">
         <div className="max-w-4xl mx-auto pb-20">
-          {activeTab === 'dashboard' && <ManagerStats />}
+          {activeTab === 'dashboard' && <ManagerStats setActiveTab={setActiveTab} />}
           {activeTab === 'employees' && <ManagerEmployees />}
           {activeTab === 'reports' && <ManagerReports />}
           {activeTab === 'settings' && <Settings />}
