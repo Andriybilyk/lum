@@ -202,6 +202,20 @@ export default function ManagerRegistration({ onBack }: ManagerRegistrationProps
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
+              {telegramId && (
+                <div>
+                  <Label htmlFor="telegramId" className="text-slate-700 dark:text-slate-300">ID Telegram</Label>
+                  <Input
+                    id="telegramId"
+                    type="text"
+                    value={telegramId}
+                    readOnly
+                    className="mt-1.5 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 cursor-not-allowed"
+                  />
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Ідентифікатор отримано з Telegram</p>
+                </div>
+              )}
+
               <div>
                 <Label htmlFor="name" className="text-slate-700 dark:text-slate-300">Повне Ім'я</Label>
                 <Input
