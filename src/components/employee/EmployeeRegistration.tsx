@@ -11,12 +11,20 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { motion } from 'framer-motion';
 
+interface TelegramUserData {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+}
+
 interface EmployeeRegistrationProps {
   onBack?: () => void;
   isTelegramMiniApp?: boolean;
+  telegramUser?: TelegramUserData | null;
 }
 
-export default function EmployeeRegistration({ onBack, isTelegramMiniApp = false }: EmployeeRegistrationProps = {}) {
+export default function EmployeeRegistration({ onBack, isTelegramMiniApp = false, telegramUser: propTelegramUser }: EmployeeRegistrationProps = {}) {
   const { setUser } = useUser();
   const { users, levels, addUser, isLoading, isConfigured } = useData();
   const navigate = useNavigate();
@@ -35,6 +43,25 @@ export default function EmployeeRegistration({ onBack, isTelegramMiniApp = false
   // Отримати Telegram ID при завантаженні
   useEffect(() => {
     logger.info('📱 ========== TELEGRAM REGISTRATION START ==========');
+    logger.info('📱 propTelegramUser:', propTelegramUser);
+
+    // Якщо передано telegramUser через пропси (Telegram Mini App контекст)
+    if (propTelegramUser) {
+      const tgUserId = propTelegramUser.id.toString();
+      const tgUserName = `${propTelegramUser.first_name}${propTelegramUser.last_name ? ' ' + propTelegramUser.last_name : ''}`;
+
+      logger.info('✅✅✅ Telegram ID from props: ' + tgUserId);
+      logger.info('✅✅✅ Telegram user name from props: ' + tgUserName);
+
+      setTelegramId(tgUserId);
+      setFormData(prev => ({
+        ...prev,
+        name: tgUserName
+      }));
+      return;
+    }
+
+    // Fallback: отримуємо дані напряму з window.Telegram
     logger.info('📱 Current URL:', window.location.href);
     logger.info('📱 window.Telegram exists?', typeof window.Telegram !== 'undefined');
 
@@ -103,7 +130,7 @@ export default function EmployeeRegistration({ onBack, isTelegramMiniApp = false
     }
 
     logger.info('📱 ========== TELEGRAM REGISTRATION END ==========');
-  }, []);
+  }, [propTelegramUser]);
 
   const employeeUsers = useMemo(() => {
     return users.filter(u => u.role === 'employee');

@@ -10,12 +10,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
 
+interface TelegramUserData {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+}
+
 interface ManagerRegistrationProps {
   onBack?: () => void;
   isTelegramMiniApp?: boolean;
+  telegramUser?: TelegramUserData | null;
 }
 
-export default function ManagerRegistration({ onBack, isTelegramMiniApp = false }: ManagerRegistrationProps = {}) {
+export default function ManagerRegistration({ onBack, isTelegramMiniApp = false, telegramUser: propTelegramUser }: ManagerRegistrationProps = {}) {
   const { setUser } = useUser();
   const { users, levels, addUser, isLoading } = useData();
   const navigate = useNavigate();
@@ -33,8 +41,25 @@ export default function ManagerRegistration({ onBack, isTelegramMiniApp = false 
 
   useEffect(() => {
     logger.info('📱 Initializing Telegram registration (Manager)');
+    logger.info('📱 propTelegramUser:', propTelegramUser);
 
-    // Спочатку ініціалізуємо Telegram WebApp
+    // Якщо передано telegramUser через пропси (Telegram Mini App контекст)
+    if (propTelegramUser) {
+      const tgUserId = propTelegramUser.id.toString();
+      const tgUserName = `${propTelegramUser.first_name}${propTelegramUser.last_name ? ' ' + propTelegramUser.last_name : ''}`;
+
+      logger.info('✅✅✅ Telegram ID from props (Manager): ' + tgUserId);
+      logger.info('✅✅✅ Telegram user name from props: ' + tgUserName);
+
+      setTelegramId(tgUserId);
+      setFormData(prev => ({
+        ...prev,
+        name: tgUserName
+      }));
+      return;
+    }
+
+    // Fallback: отримуємо дані напряму з window.Telegram
     if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
       // @ts-ignore - Telegram WebApp API
       const webApp = window.Telegram.WebApp;
@@ -77,7 +102,7 @@ export default function ManagerRegistration({ onBack, isTelegramMiniApp = false 
       logger.warn('⚠️ window.Telegram.WebApp not available');
       logger.warn('⚠️ App must be opened through Telegram Mini App to get real Telegram ID');
     }
-  }, []);
+  }, [propTelegramUser]);
 
   const managerUsers = useMemo(() => {
     return users.filter(u => u.role === 'manager');
