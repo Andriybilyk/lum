@@ -1,16 +1,18 @@
-import { Users, FileText, Settings } from 'lucide-react';
+import { Users, FileText, Settings, LogOut } from 'lucide-react';
 
 interface ManagerNavProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  onLogout?: () => void;
 }
 
-export default function ManagerNav({ activeTab, setActiveTab }: ManagerNavProps) {
+export default function ManagerNav({ activeTab, setActiveTab, onLogout }: ManagerNavProps) {
   const tabs = [
     { id: 'dashboard', label: 'Панель', icon: Users },
     { id: 'employees', label: 'Працівники', icon: Users },
     { id: 'reports', label: 'Звіти', icon: FileText },
     { id: 'settings', label: 'Налаштування', icon: Settings },
+    { id: 'logout', label: 'Вихід', icon: LogOut },
   ];
 
   return (
@@ -24,10 +26,18 @@ export default function ManagerNav({ activeTab, setActiveTab }: ManagerNavProps)
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  if (tab.id === 'logout' && onLogout) {
+                    onLogout();
+                  } else {
+                    setActiveTab(tab.id);
+                  }
+                }}
                 className={`flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all duration-200 ${
                   isActive
                     ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-lg scale-105'
+                    : tab.id === 'logout'
+                    ? 'text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >

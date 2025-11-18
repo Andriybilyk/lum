@@ -58,6 +58,15 @@ export default function TelegramMiniApp() {
     return () => window.removeEventListener('changeTab', handleChangeTab);
   }, []);
 
+  const handleLogout = () => {
+    // Очищуємо користувача з контексту
+    setUser(null);
+    // Скидаємо вибрану роль
+    setSelectedRole(null);
+    // Повертаємося на перший таб
+    setActiveTab('dashboard');
+  };
+
   if (!isInitialized || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -163,7 +172,7 @@ export default function TelegramMiniApp() {
           {activeTab === 'dashboard' && <EmployeeStats />}
           {activeTab === 'reports' && <EmployeeReports />}
           {activeTab === 'settings' && <Settings />}
-          <EmployeeNav activeTab={activeTab} setActiveTab={setActiveTab} />
+          <EmployeeNav activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />
         </div>
       </div>
     );
@@ -177,7 +186,7 @@ export default function TelegramMiniApp() {
           {activeTab === 'employees' && <ManagerEmployees />}
           {activeTab === 'reports' && <ManagerReports />}
           {activeTab === 'settings' && <Settings />}
-          <ManagerNav activeTab={activeTab} setActiveTab={setActiveTab} />
+          <ManagerNav activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />
         </div>
       </div>
     );
