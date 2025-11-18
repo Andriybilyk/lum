@@ -50,8 +50,8 @@ class TelegramIntegrationService {
 
   init(): void {
     try {
-      if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
-        const app = window.Telegram.WebApp.instance as TelegramWebAppInstance;
+      if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+        const app = window.Telegram.WebApp as any;
 
         // Сповістити Telegram про готовність
         app.ready();
@@ -65,8 +65,8 @@ class TelegramIntegrationService {
           this.initialized = true;
 
           logger.info('Telegram Mini App initialized', {
-            userId: this.telegramUser.id,
-            username: this.telegramUser.username,
+            userId: this.telegramUser?.id,
+            username: this.telegramUser?.username,
           });
         }
       } else {
@@ -88,8 +88,8 @@ class TelegramIntegrationService {
   }
 
   getColorScheme(): 'light' | 'dark' {
-    if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
-      const app = window.Telegram.WebApp.instance as TelegramWebAppInstance;
+    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+      const app = window.Telegram.WebApp as any;
       return (app.colorScheme as 'light' | 'dark') || 'light';
     }
     return 'light';
@@ -97,8 +97,8 @@ class TelegramIntegrationService {
 
   expandWebApp(): void {
     try {
-      if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
-        const app = window.Telegram.WebApp.instance as TelegramWebAppInstance;
+      if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+        const app = window.Telegram.WebApp as any;
         app.expand();
       }
     } catch (error) {
@@ -108,8 +108,8 @@ class TelegramIntegrationService {
 
   closeWebApp(): void {
     try {
-      if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
-        const app = window.Telegram.WebApp.instance as TelegramWebAppInstance;
+      if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+        const app = window.Telegram.WebApp as any;
         app.close();
       }
     } catch (error) {
@@ -119,8 +119,8 @@ class TelegramIntegrationService {
 
   showBackButton(callback?: () => void): void {
     try {
-      if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
-        const app = window.Telegram.WebApp.instance as TelegramWebAppInstance;
+      if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+        const app = window.Telegram.WebApp as any;
         if (app.BackButton) {
           app.BackButton.show();
           if (callback) {
@@ -135,8 +135,8 @@ class TelegramIntegrationService {
 
   hideBackButton(): void {
     try {
-      if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
-        const app = window.Telegram.WebApp.instance as TelegramWebAppInstance;
+      if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+        const app = window.Telegram.WebApp as any;
         if (app.BackButton) {
           app.BackButton.hide();
         }
@@ -152,8 +152,8 @@ class TelegramIntegrationService {
     options?: { color?: string; textColor?: string }
   ): void {
     try {
-      if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
-        const app = window.Telegram.WebApp.instance as TelegramWebAppInstance;
+      if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+        const app = window.Telegram.WebApp as any;
         if (app.MainButton) {
           app.MainButton.text = text;
 
@@ -175,8 +175,8 @@ class TelegramIntegrationService {
 
   hideMainButton(): void {
     try {
-      if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
-        const app = window.Telegram.WebApp.instance as TelegramWebAppInstance;
+      if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+        const app = window.Telegram.WebApp as any;
         if (app.MainButton) {
           app.MainButton.hide();
         }
@@ -188,8 +188,8 @@ class TelegramIntegrationService {
 
   triggerHapticFeedback(type: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft' = 'light'): void {
     try {
-      if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
-        const app = window.Telegram.WebApp.instance as TelegramWebAppInstance;
+      if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+        const app = window.Telegram.WebApp as any;
         if (app.HapticFeedback) {
           app.HapticFeedback.impactOccurred(type);
         }

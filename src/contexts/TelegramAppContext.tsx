@@ -84,10 +84,14 @@ export const TelegramAppProvider: React.FC<{ children: React.ReactNode }> = ({ c
   useEffect(() => {
     const initTelegram = async () => {
       try {
-        if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
-          const app = window.Telegram.WebApp.instance;
-          app.ready();
-          app.expand();
+        if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+          const app = window.Telegram.WebApp as any;
+          if (typeof app.ready === 'function') {
+            app.ready();
+          }
+          if (typeof app.expand === 'function') {
+            app.expand();
+          }
 
           const tgUser = app.initDataUnsafe?.user;
           if (tgUser) {
@@ -127,22 +131,38 @@ export const TelegramAppProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const syncWithServer = async () => {
     if (!user) return;
 
+    if (isSyncing) {
+      logger.warn('Sync already in progress, skipping duplicate sync');
+      return;
+    }
+
     setIsSyncing(true);
+    const syncTimeout = setTimeout(() => {
+      logger.warn('Sync operation timed out after 30 seconds');
+      setIsSyncing(false);
+    }, 30000);
+
     try {
       const userId = user.id.toString();
       const pendingEntries = telegramSync.getPendingSyncEntries(userId);
 
       if (pendingEntries.length > 0) {
         try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 15000);
+
           const response = await fetch('/api/telegram/sync', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-Telegram-User-ID': userId },
             body: JSON.stringify({
               userId,
               entries: pendingEntries,
               timestamp: new Date().toISOString(),
             }),
+            signal: controller.signal,
           });
+
+          clearTimeout(timeoutId);
 
           if (response.ok) {
             const entryIds = pendingEntries.map(e => e.id || '').filter(Boolean);
@@ -151,10 +171,14 @@ export const TelegramAppProvider: React.FC<{ children: React.ReactNode }> = ({ c
           } else {
             const entryIds = pendingEntries.map(e => e.id || '').filter(Boolean);
             telegramSync.markSyncFailed(userId, entryIds);
-            logger.error('Sync failed for Telegram user:', userId);
+            logger.error('Sync failed for Telegram user:', { userId, status: response.status });
           }
         } catch (fetchError) {
-          logger.warn('Sync API not available, data saved locally:', fetchError);
+          if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+            logger.warn('Sync request timed out, data saved locally');
+          } else {
+            logger.warn('Sync API not available, data saved locally:', fetchError);
+          }
         }
       }
 
@@ -162,6 +186,7 @@ export const TelegramAppProvider: React.FC<{ children: React.ReactNode }> = ({ c
     } catch (error) {
       logger.error('Sync error:', error);
     } finally {
+      clearTimeout(syncTimeout);
       setIsSyncing(false);
     }
   };

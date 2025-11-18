@@ -28,7 +28,7 @@ export const useOffline = (): UseOfflineResult => {
       logger.error('Sync failed', error);
       return {
         success: false,
-        itemssynced: 0,
+        itemsSynced: 0,
         failed: 0,
         errors: [(error as Error).message],
       };

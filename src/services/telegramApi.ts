@@ -14,8 +14,20 @@ export interface SyncRequest {
 export interface SyncResponse {
   success: boolean;
   message: string;
-  syncedAt: string;
+  syncedAt?: string;
+  entriesSynced?: number;
+  googleSheetsSynced?: boolean;
   entries?: SyncRequest['entries'];
+  [key: string]: any;
+}
+
+export interface TelegramUser {
+  id: string;
+  firstName: string;
+  lastName?: string;
+  username?: string;
+  createdAt: string;
+  lastActivity: string;
 }
 
 class TelegramApiService {
@@ -121,6 +133,79 @@ class TelegramApiService {
       return data;
     } catch (error) {
       logger.error('Delete user error:', error);
+      throw error;
+    }
+  }
+
+  async getUser(userId: string): Promise<{ success: boolean; user: TelegramUser }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/users`, {
+        method: 'GET',
+        headers: {
+          'X-Telegram-User-ID': userId,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Get user failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      logger.info('User retrieved:', userId);
+      return data;
+    } catch (error) {
+      logger.error('Get user error:', error);
+      throw error;
+    }
+  }
+
+  async createUser(userId: string, userData: Omit<TelegramUser, 'id' | 'createdAt' | 'lastActivity'>): Promise<{ success: boolean; user: TelegramUser; googleSheetsSynced: boolean }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Telegram-User-ID': userId,
+        },
+        body: JSON.stringify({
+          id: userId,
+          ...userData,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Create user failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      logger.info('User created:', { userId, ...userData });
+      return data;
+    } catch (error) {
+      logger.error('Create user error:', error);
+      throw error;
+    }
+  }
+
+  async updateUser(userId: string, userData: Partial<Omit<TelegramUser, 'id' | 'createdAt' | 'lastActivity'>>): Promise<{ success: boolean; user: TelegramUser }> {
+    try {
+      const response = await fetch(`${this.baseUrl}/users`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Telegram-User-ID': userId,
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Update user failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      logger.info('User updated:', userId);
+      return data;
+    } catch (error) {
+      logger.error('Update user error:', error);
       throw error;
     }
   }

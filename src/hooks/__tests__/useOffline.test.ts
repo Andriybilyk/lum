@@ -57,7 +57,7 @@ describe('useOffline hook', () => {
       const syncResult = await result.current.syncOfflineData();
 
       expect(syncResult).toHaveProperty('success');
-      expect(syncResult).toHaveProperty('itemssynced');
+      expect(syncResult).toHaveProperty('itemsSynced');
       expect(syncResult).toHaveProperty('failed');
       expect(syncResult).toHaveProperty('errors');
     });

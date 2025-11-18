@@ -31,7 +31,7 @@ describe('SyncManager', () => {
       const result = await syncManager.syncOfflineData();
 
       expect(result).toHaveProperty('success');
-      expect(result).toHaveProperty('itemssynced');
+      expect(result).toHaveProperty('itemsSynced');
       expect(result).toHaveProperty('failed');
       expect(result).toHaveProperty('errors');
     });
@@ -39,7 +39,7 @@ describe('SyncManager', () => {
     it('should return zero items synced initially', async () => {
       const result = await syncManager.syncOfflineData();
 
-      expect(typeof result.itemssynced).toBe('number');
+      expect(typeof result.itemsSynced).toBe('number');
       expect(typeof result.failed).toBe('number');
       expect(Array.isArray(result.errors)).toBe(true);
     });

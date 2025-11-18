@@ -4,7 +4,7 @@ import { retry } from './retry';
 
 export interface SyncResult {
   success: boolean;
-  itemssynced: number;
+  itemsSynced: number;
   failed: number;
   errors: string[];
 }
@@ -16,13 +16,13 @@ export class SyncManager {
   async syncOfflineData(onSyncCallback?: (itemsSynced: number) => void): Promise<SyncResult> {
     if (this.isSyncing) {
       logger.warn('Sync already in progress, skipping duplicate sync');
-      return { success: false, itemssynced: 0, failed: 0, errors: ['Sync already in progress'] };
+      return { success: false, itemsSynced: 0, failed: 0, errors: ['Sync already in progress'] };
     }
 
     this.isSyncing = true;
     const result: SyncResult = {
       success: true,
-      itemssynced: 0,
+      itemsSynced: 0,
       failed: 0,
       errors: [],
     };
@@ -41,9 +41,9 @@ export class SyncManager {
         try {
           await this.syncItem(item);
           await offlineManager.removeSyncQueueItem(item.id);
-          result.itemssynced++;
+          result.itemsSynced++;
 
-          onSyncCallback?.(result.itemssynced);
+          onSyncCallback?.(result.itemsSynced);
         } catch (error) {
           logger.error('Failed to sync item', { itemId: item.id, error });
           result.failed++;
@@ -52,7 +52,7 @@ export class SyncManager {
       }
 
       logger.info('Sync completed', {
-        synced: result.itemssynced,
+        synced: result.itemsSynced,
         failed: result.failed,
       });
     } catch (error) {
