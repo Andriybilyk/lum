@@ -12,7 +12,7 @@ interface UseOfflineResult {
 }
 
 export const useOffline = (): UseOfflineResult => {
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isOnline, setIsOnline] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
   const [hasPendingSync, setHasPendingSync] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<number | null>(null);
@@ -50,8 +50,15 @@ export const useOffline = (): UseOfflineResult => {
       setHasPendingSync(true);
     };
 
+    const checkConnection = () => {
+      setIsOnline(navigator.onLine);
+      logger.info('Current online status:', navigator.onLine);
+    };
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+
+    checkConnection();
 
     return () => {
       window.removeEventListener('online', handleOnline);

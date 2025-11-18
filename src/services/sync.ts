@@ -28,13 +28,6 @@ export class SyncManager {
     };
 
     try {
-      if (!offlineManager.isOnline()) {
-        logger.warn('Device is offline, cannot sync data');
-        result.success = false;
-        result.errors.push('Device is offline');
-        return result;
-      }
-
       const queue = await offlineManager.getSyncQueue();
 
       if (queue.length === 0) {

@@ -133,24 +133,28 @@ export const TelegramAppProvider: React.FC<{ children: React.ReactNode }> = ({ c
       const pendingEntries = telegramSync.getPendingSyncEntries(userId);
 
       if (pendingEntries.length > 0) {
-        const response = await fetch('/api/telegram/sync', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId,
-            entries: pendingEntries,
-            timestamp: new Date().toISOString(),
-          }),
-        });
+        try {
+          const response = await fetch('/api/telegram/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId,
+              entries: pendingEntries,
+              timestamp: new Date().toISOString(),
+            }),
+          });
 
-        if (response.ok) {
-          const entryIds = pendingEntries.map(e => e.id || '').filter(Boolean);
-          telegramSync.markSynced(userId, entryIds);
-          logger.info('Sync successful for Telegram user:', userId);
-        } else {
-          const entryIds = pendingEntries.map(e => e.id || '').filter(Boolean);
-          telegramSync.markSyncFailed(userId, entryIds);
-          logger.error('Sync failed for Telegram user:', userId);
+          if (response.ok) {
+            const entryIds = pendingEntries.map(e => e.id || '').filter(Boolean);
+            telegramSync.markSynced(userId, entryIds);
+            logger.info('Sync successful for Telegram user:', userId);
+          } else {
+            const entryIds = pendingEntries.map(e => e.id || '').filter(Boolean);
+            telegramSync.markSyncFailed(userId, entryIds);
+            logger.error('Sync failed for Telegram user:', userId);
+          }
+        } catch (fetchError) {
+          logger.warn('Sync API not available, data saved locally:', fetchError);
         }
       }
 
