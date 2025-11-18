@@ -163,7 +163,7 @@ export default function TelegramMiniApp() {
           {activeTab === 'dashboard' && <EmployeeStats />}
           {activeTab === 'reports' && <EmployeeReports />}
           {activeTab === 'settings' && <Settings />}
-          <EmployeeNav />
+          <EmployeeNav activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
       </div>
     );
@@ -177,7 +177,7 @@ export default function TelegramMiniApp() {
           {activeTab === 'employees' && <ManagerEmployees />}
           {activeTab === 'reports' && <ManagerReports />}
           {activeTab === 'settings' && <Settings />}
-          <ManagerNav />
+          <ManagerNav activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
       </div>
     );
