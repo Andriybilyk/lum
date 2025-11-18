@@ -39,25 +39,36 @@ export const useOffline = (): UseOfflineResult => {
 
   useEffect(() => {
     const handleOnline = async () => {
-      logger.info('Connection restored, syncing offline data');
+      logger.info('✅ Connection restored, syncing offline data');
       setIsOnline(true);
       await syncOfflineData();
     };
 
     const handleOffline = () => {
-      logger.info('Connection lost');
+      logger.info('❌ Connection lost');
       setIsOnline(false);
       setHasPendingSync(true);
     };
 
     const checkConnection = () => {
-      setIsOnline(navigator.onLine);
-      logger.info('Current online status:', navigator.onLine);
+      // Для Telegram Mini App: навіть якщо navigator.onLine = false,
+      // ми припускаємо що користувач онлайн, доки не отримаємо 'offline' подію
+      const isCurrentlyOnline = navigator.onLine;
+
+      // Логування для debug
+      logger.info('🔍 Checking connection status');
+      logger.info('🔍 navigator.onLine:', isCurrentlyOnline);
+
+      // Встановлюємо true за замовчуванням для Telegram Mini App
+      // (навіть якщо navigator.onLine говорить false)
+      setIsOnline(true);
+      logger.info('✅ Setting isOnline to TRUE (default for Telegram Mini App)');
     };
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
+    // Перевіряємо стан при завантаженні
     checkConnection();
 
     return () => {

@@ -183,7 +183,7 @@ export default function TelegramMiniApp() {
       {/* Footer */}
       <div className="text-center mt-6 text-xs text-slate-500">
         <p>
-          💡 Додаток працює офлайн. Дані синхронізуються автоматично.
+          ✅ Додаток онлайн. Дані синхронізуються автоматично.
         </p>
       </div>
     </div>
