@@ -13,9 +13,10 @@ import { motion } from 'framer-motion';
 
 interface EmployeeRegistrationProps {
   onBack?: () => void;
+  isTelegramMiniApp?: boolean;
 }
 
-export default function EmployeeRegistration({ onBack }: EmployeeRegistrationProps = {}) {
+export default function EmployeeRegistration({ onBack, isTelegramMiniApp = false }: EmployeeRegistrationProps = {}) {
   const { setUser } = useUser();
   const { users, levels, addUser, isLoading, isConfigured } = useData();
   const navigate = useNavigate();
@@ -133,7 +134,9 @@ export default function EmployeeRegistration({ onBack }: EmployeeRegistrationPro
     if (user) {
       logger.info('👤 Selected existing employee:', user);
       setUser(user);
-      navigate('/employee');
+      if (!isTelegramMiniApp) {
+        navigate('/employee');
+      }
     }
   };
 
@@ -172,7 +175,9 @@ export default function EmployeeRegistration({ onBack }: EmployeeRegistrationPro
       logger.info('Before addUser - User object:', { ...user, telegramId }, 'EmployeeRegistration');
       await addUser(user as any);
       setUser(user as any);
-      navigate('/employee');
+      if (!isTelegramMiniApp) {
+        navigate('/employee');
+      }
     } catch (err) {
       logger.error('Failed to add employee', err);
       toast({

@@ -12,9 +12,10 @@ import { useToast } from '@/components/ui/use-toast';
 
 interface ManagerRegistrationProps {
   onBack?: () => void;
+  isTelegramMiniApp?: boolean;
 }
 
-export default function ManagerRegistration({ onBack }: ManagerRegistrationProps = {}) {
+export default function ManagerRegistration({ onBack, isTelegramMiniApp = false }: ManagerRegistrationProps = {}) {
   const { setUser } = useUser();
   const { users, levels, addUser, isLoading } = useData();
   const navigate = useNavigate();
@@ -97,7 +98,9 @@ export default function ManagerRegistration({ onBack }: ManagerRegistrationProps
     if (user) {
       logger.info('👤 Selected existing manager:', user);
       setUser(user);
-      navigate('/manager');
+      if (!isTelegramMiniApp) {
+        navigate('/manager');
+      }
     }
   };
 
@@ -128,7 +131,9 @@ export default function ManagerRegistration({ onBack }: ManagerRegistrationProps
     logger.info('Before addUser - User object:', { ...user, telegramId }, 'ManagerRegistration');
     await addUser(user);
     setUser(user);
-    navigate('/manager');
+    if (!isTelegramMiniApp) {
+      navigate('/manager');
+    }
   };
 
   if (isLoading) {
