@@ -10,7 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
 
-export default function ManagerRegistration() {
+interface ManagerRegistrationProps {
+  onBack?: () => void;
+}
+
+export default function ManagerRegistration({ onBack }: ManagerRegistrationProps = {}) {
   const { setUser } = useUser();
   const { users, levels, addUser, isLoading } = useData();
   const navigate = useNavigate();
@@ -276,7 +280,7 @@ export default function ManagerRegistration() {
 
           <Button
             variant="ghost"
-            onClick={() => navigate('/')}
+            onClick={() => onBack ? onBack() : navigate('/')}
             className="w-full mt-4 text-slate-600 dark:text-slate-400"
           >
             Назад на Головну

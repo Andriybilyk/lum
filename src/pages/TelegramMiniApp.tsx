@@ -163,11 +163,11 @@ export default function TelegramMiniApp() {
 
     // Якщо роль вибрана - показуємо відповідну реєстрацію
     if (selectedRole === 'employee') {
-      return <EmployeeRegistration />;
+      return <EmployeeRegistration onBack={() => setSelectedRole(null)} />;
     }
 
     if (selectedRole === 'manager') {
-      return <ManagerRegistration />;
+      return <ManagerRegistration onBack={() => setSelectedRole(null)} />;
     }
   }
 
