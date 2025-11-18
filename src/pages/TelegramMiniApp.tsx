@@ -1,10 +1,8 @@
-import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Clock, Plus, RotateCw } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useTelegramApp } from '@/contexts/TelegramAppContext';
-import EmployeeRegistration from '@/components/employee/EmployeeRegistration';
 
 export default function TelegramMiniApp() {
   const { toast } = useToast();
@@ -18,15 +16,6 @@ export default function TelegramMiniApp() {
     addHours,
     syncWithServer,
   } = useTelegramApp();
-  const [showRegistration, setShowRegistration] = useState(false);
-
-  useEffect(() => {
-    // Якщо ініціалізація закінчена, але немає користувача,
-    // показуємо реєстрацію
-    if (isInitialized && !user) {
-      setShowRegistration(true);
-    }
-  }, [isInitialized, user]);
 
   const handleAddHours = async (hours: number) => {
     try {
@@ -57,9 +46,23 @@ export default function TelegramMiniApp() {
     );
   }
 
-  // Показуємо реєстрацію, якщо користувача немає
-  if (!user || showRegistration) {
-    return <EmployeeRegistration />;
+  // Якщо користувача немає в Telegram - показуємо помилку
+  // (це не повинно статися в нормальних умовах)
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-4 flex items-center justify-center">
+        <Card className="p-8 max-w-md w-full text-center">
+          <div className="text-5xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold text-slate-800 mb-2">Помилка ініціалізації</h2>
+          <p className="text-slate-600 mb-4">
+            Не вдалося отримати дані з Telegram. Переконайтесь, що ви відкрили додаток через Telegram Mini App.
+          </p>
+          <p className="text-sm text-slate-500">
+            Якщо проблема не зникає, спробуйте перезапустити бот.
+          </p>
+        </Card>
+      </div>
+    );
   }
 
   return (
