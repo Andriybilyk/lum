@@ -1,39 +1,64 @@
-import { Card } from '@/components/ui/card';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Clock, Plus, RotateCw } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useTelegramApp } from '@/contexts/TelegramAppContext';
+import { useData } from '@/contexts/DataContext';
+import { useUser } from '@/contexts/UserContext';
+import EmployeeRegistration from '@/components/employee/EmployeeRegistration';
+import ManagerRegistration from '@/components/manager/ManagerRegistration';
+import EmployeeNav from '@/components/employee/EmployeeNav';
+import EmployeeStats from '@/components/employee/EmployeeStats';
+import EmployeeReports from '@/components/employee/EmployeeReports';
+import Settings from '@/components/Settings';
+import ManagerNav from '@/components/manager/ManagerNav';
+import ManagerStats from '@/components/manager/ManagerStats';
+import ManagerEmployees from '@/components/manager/ManagerEmployees';
+import ManagerReports from '@/components/manager/ManagerReports';
+import LoadingScreen from '@/components/LoadingScreen';
+import { motion } from 'framer-motion';
+import { Clock } from 'lucide-react';
+
+type UserRole = 'employee' | 'manager' | null;
 
 export default function TelegramMiniApp() {
   const { toast } = useToast();
   const {
-    user,
+    user: telegramUser,
     isInitialized,
-    todayHours,
-    monthProgress,
-    recentEntries,
-    isSyncing,
-    addHours,
-    syncWithServer,
   } = useTelegramApp();
+  const { users, isLoading } = useData();
+  const { user: appUser, setUser } = useUser();
+  const [selectedRole, setSelectedRole] = useState<UserRole>(null);
+  const [activeTab, setActiveTab] = useState('dashboard');
 
-  const handleAddHours = async (hours: number) => {
-    try {
-      await addHours(hours);
-      toast({
-        title: 'Успішно',
-        description: `Додано ${hours} годин`,
-      });
-    } catch {
-      toast({
-        title: 'Помилка',
-        description: 'Не вдалося додати години',
-        variant: 'destructive',
-      });
+  useEffect(() => {
+    // Перевіряємо чи користувач вже зареєстрований через Telegram ID
+    if (isInitialized && telegramUser && users.length > 0 && !appUser) {
+      if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+        // @ts-ignore
+        const webApp = window.Telegram.WebApp;
+        // @ts-ignore
+        const tgUser = webApp.initDataUnsafe?.user;
+        if (tgUser) {
+          const existingUser = users.find(u => u.telegramId === tgUser.id.toString());
+          if (existingUser) {
+            // Користувач знайдений - автоматично логінимо
+            setUser(existingUser);
+          }
+        }
+      }
     }
-  };
+  }, [isInitialized, telegramUser, users, appUser, setUser]);
 
-  if (!isInitialized) {
+  useEffect(() => {
+    const handleChangeTab = (event: any) => {
+      setActiveTab(event.detail);
+    };
+    window.addEventListener('changeTab', handleChangeTab);
+    return () => window.removeEventListener('changeTab', handleChangeTab);
+  }, []);
+
+  if (!isInitialized || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -46,149 +71,117 @@ export default function TelegramMiniApp() {
     );
   }
 
-  // Якщо користувача немає в Telegram - показуємо помилку
-  // (це не повинно статися в нормальних умовах)
-  if (!user) {
+  // Якщо користувача немає, показуємо вибір ролі або реєстрацію
+  if (!appUser) {
+    // Якщо роль ще не вибрана - показуємо меню вибору
+    if (!selectedRole) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-400 p-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="w-full max-w-md"
+          >
+            <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20">
+              <div className="text-center mb-8">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                  className="text-6xl mb-4"
+                >
+                  ⏰
+                </motion.div>
+                <h1 className="text-3xl font-bold text-white mb-2">
+                  Облік Часу
+                </h1>
+                <p className="text-white/80 text-sm">
+                  Керуйте робочими годинами та процесами
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <Button
+                    onClick={() => setSelectedRole('employee')}
+                    className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-2xl shadow-lg transition-all duration-300 hover:scale-105"
+                  >
+                    <span className="mr-2">👤</span>
+                    Я Працівник
+                  </Button>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <Button
+                    onClick={() => setSelectedRole('manager')}
+                    className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white rounded-2xl shadow-lg transition-all duration-300 hover:scale-105"
+                  >
+                    <span className="mr-2">👔</span>
+                    Я Менеджер
+                  </Button>
+                </motion.div>
+              </div>
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="text-center text-white/60 text-xs mt-8"
+              >
+                Оберіть свою роль для початку роботи
+              </motion.p>
+            </div>
+          </motion.div>
+        </div>
+      );
+    }
+
+    // Якщо роль вибрана - показуємо відповідну реєстрацію
+    if (selectedRole === 'employee') {
+      return <EmployeeRegistration />;
+    }
+
+    if (selectedRole === 'manager') {
+      return <ManagerRegistration />;
+    }
+  }
+
+  // Показуємо повний дашборд залежно від ролі користувача
+  if (appUser?.role === 'employee') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-4 flex items-center justify-center">
-        <Card className="p-8 max-w-md w-full text-center">
-          <div className="text-5xl mb-4">⚠️</div>
-          <h2 className="text-xl font-bold text-slate-800 mb-2">Помилка ініціалізації</h2>
-          <p className="text-slate-600 mb-4">
-            Не вдалося отримати дані з Telegram. Переконайтесь, що ви відкрили додаток через Telegram Mini App.
-          </p>
-          <p className="text-sm text-slate-500">
-            Якщо проблема не зникає, спробуйте перезапустити бот.
-          </p>
-        </Card>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+        <div className="max-w-md mx-auto pb-20">
+          {activeTab === 'dashboard' && <EmployeeStats />}
+          {activeTab === 'reports' && <EmployeeReports />}
+          {activeTab === 'settings' && <Settings />}
+          <EmployeeNav />
+        </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-4">
-      {/* Header */}
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">📊 Мій Статус</h1>
-        {user && (
-          <p className="text-sm text-slate-600 mt-1">
-            Привіт, {user.first_name}!
-          </p>
-        )}
-      </div>
-
-      {/* Today's Hours */}
-      <Card className="p-6 mb-4 bg-gradient-to-br from-blue-500 to-cyan-400 text-white border-0">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-sm opacity-80">Сьогодні</p>
-            <p className="text-4xl font-bold">{todayHours.toFixed(1)}h</p>
-          </div>
-          <Clock className="w-12 h-12 opacity-50" />
-        </div>
-        <p className="text-xs opacity-80">
-          {monthProgress}% від місячного плану (160 годин)
-        </p>
-      </Card>
-
-      {/* Month Progress */}
-      <Card className="p-4 mb-4">
-        <div className="mb-2">
-          <div className="flex justify-between text-sm mb-1">
-            <span>Прогрес за місяць</span>
-            <span className="font-bold">{monthProgress}%</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-            <div
-              className="bg-gradient-to-r from-green-400 to-green-600 h-full rounded-full transition-all"
-              style={{ width: `${Math.min(monthProgress, 100)}%` }}
-            />
-          </div>
-        </div>
-      </Card>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 gap-2 mb-6">
-        <Button
-          onClick={() => handleAddHours(0.5)}
-          className="bg-blue-500 hover:bg-blue-600"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          +30 хв
-        </Button>
-        <Button
-          onClick={() => handleAddHours(1)}
-          className="bg-blue-500 hover:bg-blue-600"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          +1h
-        </Button>
-        <Button
-          onClick={() => handleAddHours(4)}
-          className="bg-green-500 hover:bg-green-600"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          +4h
-        </Button>
-        <Button
-          onClick={() => handleAddHours(8)}
-          className="bg-green-500 hover:bg-green-600"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          +8h
-        </Button>
-      </div>
-
-      {/* Recent Entries */}
-      <div className="mb-6">
-        <h3 className="text-sm font-semibold text-slate-700 mb-3">
-          Останні записи
-        </h3>
-        <div className="space-y-2">
-          {recentEntries.map((entry) => (
-            <Card key={entry.date} className="p-3 flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">
-                  {new Date(entry.date).toLocaleDateString('uk-UA', {
-                    weekday: 'short',
-                    day: 'numeric',
-                    month: 'short',
-                  })}
-                </p>
-                <p className="text-xs text-slate-500">{entry.hours} годин</p>
-              </div>
-              <div className="text-right">
-                {entry.synced === 'synced' && (
-                  <span className="text-green-600 text-xs">✅ Синхр.</span>
-                )}
-                {entry.synced === 'pending' && (
-                  <span className="text-yellow-600 text-xs">⏳ Чекаємо</span>
-                )}
-                {entry.synced === 'error' && (
-                  <span className="text-red-600 text-xs">❌ Помилка</span>
-                )}
-              </div>
-            </Card>
-          ))}
+  if (appUser?.role === 'manager') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 dark:from-slate-900 dark:to-slate-800">
+        <div className="max-w-4xl mx-auto pb-20">
+          {activeTab === 'dashboard' && <ManagerStats />}
+          {activeTab === 'employees' && <ManagerEmployees />}
+          {activeTab === 'reports' && <ManagerReports />}
+          {activeTab === 'settings' && <Settings />}
+          <ManagerNav />
         </div>
       </div>
+    );
+  }
 
-      {/* Sync Status */}
-      <Button
-        onClick={() => syncWithServer()}
-        disabled={isSyncing}
-        className="w-full bg-slate-500 hover:bg-slate-600"
-      >
-        <RotateCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-        {isSyncing ? 'Синхронізація...' : 'Синхронізувати'}
-      </Button>
-
-      {/* Footer */}
-      <div className="text-center mt-6 text-xs text-slate-500">
-        <p>
-          ✅ Додаток онлайн. Дані синхронізуються автоматично.
-        </p>
-      </div>
-    </div>
-  );
+  return null;
 }
