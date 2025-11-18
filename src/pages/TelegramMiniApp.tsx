@@ -118,7 +118,10 @@ export default function TelegramMiniApp() {
                   transition={{ delay: 0.3 }}
                 >
                   <Button
-                    onClick={() => setSelectedRole('employee')}
+                    onClick={() => {
+                      setSelectedRole('employee');
+                      setHasLoggedOut(false);
+                    }}
                     className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-2xl shadow-lg transition-all duration-300 hover:scale-105"
                   >
                     <span className="mr-2">👤</span>
@@ -132,7 +135,10 @@ export default function TelegramMiniApp() {
                   transition={{ delay: 0.4 }}
                 >
                   <Button
-                    onClick={() => setSelectedRole('manager')}
+                    onClick={() => {
+                      setSelectedRole('manager');
+                      setHasLoggedOut(false);
+                    }}
                     className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white rounded-2xl shadow-lg transition-all duration-300 hover:scale-105"
                   >
                     <span className="mr-2">👔</span>
