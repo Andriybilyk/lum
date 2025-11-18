@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Clock, Plus, RotateCw } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useTelegramApp } from '@/contexts/TelegramAppContext';
+import EmployeeRegistration from '@/components/employee/EmployeeRegistration';
 
 export default function TelegramMiniApp() {
   const { toast } = useToast();
@@ -17,8 +18,15 @@ export default function TelegramMiniApp() {
     addHours,
     syncWithServer,
   } = useTelegramApp();
+  const [showRegistration, setShowRegistration] = useState(false);
+
   useEffect(() => {
-  }, [isInitialized]);
+    // Якщо ініціалізація закінчена, але немає користувача,
+    // показуємо реєстрацію
+    if (isInitialized && !user) {
+      setShowRegistration(true);
+    }
+  }, [isInitialized, user]);
 
   const handleAddHours = async (hours: number) => {
     try {
@@ -47,6 +55,11 @@ export default function TelegramMiniApp() {
         </div>
       </div>
     );
+  }
+
+  // Показуємо реєстрацію, якщо користувача немає
+  if (!user || showRegistration) {
+    return <EmployeeRegistration />;
   }
 
   return (

@@ -84,8 +84,13 @@ export const TelegramAppProvider: React.FC<{ children: React.ReactNode }> = ({ c
   useEffect(() => {
     const initTelegram = async () => {
       try {
+        logger.info('🔵 TelegramAppContext: Starting initialization');
+        logger.info('🔵 window.Telegram exists?', typeof window.Telegram !== 'undefined');
+
         if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
           const app = window.Telegram.WebApp as any;
+          logger.info('🟢 WebApp found, calling ready() and expand()');
+
           if (typeof app.ready === 'function') {
             app.ready();
           }
@@ -93,8 +98,12 @@ export const TelegramAppProvider: React.FC<{ children: React.ReactNode }> = ({ c
             app.expand();
           }
 
+          logger.info('🟢 Checking initDataUnsafe');
           const tgUser = app.initDataUnsafe?.user;
+          logger.info('🟢 User data:', tgUser);
+
           if (tgUser) {
+            logger.info('🟢🟢🟢 User found! ID:', tgUser.id);
             setUser(tgUser as TelegramUser);
             localStorage.setItem('telegram_user_id', tgUser.id.toString());
             localStorage.setItem('telegram_user_name', tgUser.first_name);
@@ -102,11 +111,32 @@ export const TelegramAppProvider: React.FC<{ children: React.ReactNode }> = ({ c
             telegramSync.init();
             loadUserData(tgUser.id.toString());
             setupAutoSync(tgUser.id.toString());
+          } else {
+            logger.warn('⚠️ No user data in Telegram WebApp');
+            logger.warn('⚠️ initDataUnsafe:', app.initDataUnsafe);
+          }
+        } else {
+          logger.warn('⚠️ Telegram WebApp not available - might be testing in browser');
+          // Спробуємо завантажити з localStorage для тестування
+          const savedUserId = localStorage.getItem('telegram_user_id');
+          if (savedUserId) {
+            logger.info('📦 Loading saved user data from localStorage:', savedUserId);
+            const savedUserName = localStorage.getItem('telegram_user_name') || 'User';
+            const testUser: TelegramUser = {
+              id: parseInt(savedUserId),
+              is_bot: false,
+              first_name: savedUserName,
+            };
+            setUser(testUser);
+            telegramSync.init();
+            loadUserData(savedUserId);
+            setupAutoSync(savedUserId);
           }
         }
+        logger.info('🟢 Initialization complete');
         setIsInitialized(true);
       } catch (error) {
-        logger.error('Telegram initialization error:', error);
+        logger.error('❌ Telegram initialization error:', error);
         setIsInitialized(true);
       }
     };
