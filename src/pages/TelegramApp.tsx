@@ -36,8 +36,8 @@ export default function TelegramApp() {
 
   const initializeTelegram = () => {
     try {
-      if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
-        const app = window.Telegram.WebApp.instance;
+      if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+        const app = window.Telegram.WebApp;
 
         // Розширити на весь екран
         app.expand();

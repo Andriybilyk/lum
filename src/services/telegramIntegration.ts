@@ -201,8 +201,8 @@ class TelegramIntegrationService {
 
   showNotification(type: 'success' | 'error' | 'warning' = 'success'): void {
     try {
-      if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
-        const app = window.Telegram.WebApp.instance as TelegramWebAppInstance;
+      if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+        const app = window.Telegram.WebApp as TelegramWebAppInstance;
         if (app.HapticFeedback) {
           app.HapticFeedback.notificationOccurred(type);
         }
@@ -238,7 +238,7 @@ class TelegramIntegrationService {
   }
 
   getInitData(): string {
-    if (typeof window !== 'undefined' && window.Telegram?.WebApp?.instance) {
+    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
       // Отримати raw init data для верифікації на сервері
       return (window.location.hash?.split('#')[1] || '');
     }

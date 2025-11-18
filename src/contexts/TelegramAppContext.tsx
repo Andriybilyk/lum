@@ -6,11 +6,11 @@ declare global {
   interface Window {
     Telegram?: {
       WebApp: {
-        instance?: {
-          ready: () => void;
-          expand: () => void;
-          initDataUnsafe?: { user: TelegramUserData };
-        };
+        ready: () => void;
+        expand: () => void;
+        initDataUnsafe?: { user: TelegramUserData };
+        version?: string;
+        platform?: string;
       };
     };
   }

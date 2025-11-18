@@ -71,11 +71,13 @@ function AppContent() {
         <Route
           path="/telegram/quick"
           element={
-            <TelegramAppProvider>
-              <Suspense fallback={<LoadingScreen />}>
-                <TelegramMiniApp />
-              </Suspense>
-            </TelegramAppProvider>
+            <DataProvider>
+              <TelegramAppProvider>
+                <Suspense fallback={<LoadingScreen />}>
+                  <TelegramMiniApp />
+                </Suspense>
+              </TelegramAppProvider>
+            </DataProvider>
           }
         />
       </Routes>
