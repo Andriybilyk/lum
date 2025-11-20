@@ -43,6 +43,15 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
 
   const stats = useTeamStats(teamMemberIds);
 
+  // Забезпечуємо значення за замовчуванням для stats
+  const safeStats = {
+    activeToday: stats?.activeToday ?? 0,
+    totalEarnings: stats?.totalEarnings ?? 0,
+    totalHoursThisMonth: stats?.totalHoursThisMonth ?? 0,
+    hoursEarnings: stats?.hoursEarnings ?? 0,
+    processEarnings: stats?.processEarnings ?? 0,
+  };
+
   const pendingAdditionalWorks = useMemo(() => {
     return additionalWorks.filter(w => w.managerId === user?.id && w.status === 'pending').length;
   }, [additionalWorks, user?.id]);
@@ -89,7 +98,7 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
           <div className="mt-2 pt-2 border-t border-white/20">
             <div className="flex items-center gap-1">
               <Clock className="w-3 h-3 opacity-80" />
-              <span className="text-sm font-semibold">{stats.activeToday}</span>
+              <span className="text-sm font-semibold">{safeStats.activeToday}</span>
               <span className="text-xs opacity-80">активних сьогодні</span>
             </div>
           </div>
@@ -102,12 +111,12 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
           <div className="flex items-center justify-between mb-2">
             <TrendingUp className="w-5 h-5 opacity-80" />
           </div>
-          <div className="text-3xl font-bold mb-1">{(stats.totalEarnings / 1000).toFixed(0)}k грн</div>
+          <div className="text-3xl font-bold mb-1">{(safeStats.totalEarnings / 1000).toFixed(0)}k грн</div>
           <div className="text-xs opacity-90">Заробіток Команди</div>
           <div className="mt-2 pt-2 border-t border-white/20">
             <div className="flex items-center gap-1">
               <Briefcase className="w-3 h-3 opacity-80" />
-              <span className="text-sm font-semibold">{stats.totalHoursThisMonth.toFixed(0)}</span>
+              <span className="text-sm font-semibold">{safeStats.totalHoursThisMonth.toFixed(0)}</span>
               <span className="text-xs opacity-80">годин за місяць</span>
             </div>
           </div>
