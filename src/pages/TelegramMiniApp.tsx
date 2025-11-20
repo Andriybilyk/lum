@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTelegramApp } from '@/contexts/TelegramAppContext';
 import { useData } from '@/contexts/DataContext';
@@ -49,24 +49,21 @@ export default function TelegramMiniApp() {
     }
   }, [isInitialized, telegramUser, users, appUser, hasLoggedOut, setUser]);
 
-  useEffect(() => {
-    const handleChangeTab = (event: any) => {
-      setActiveTab(event.detail);
-    };
-    window.addEventListener('changeTab', handleChangeTab);
-    return () => window.removeEventListener('changeTab', handleChangeTab);
+  const handleChangeTab = useCallback((event: any) => {
+    setActiveTab(event.detail);
   }, []);
 
-  const handleLogout = () => {
-    // Очищуємо користувача з контексту
+  useEffect(() => {
+    window.addEventListener('changeTab', handleChangeTab);
+    return () => window.removeEventListener('changeTab', handleChangeTab);
+  }, [handleChangeTab]);
+
+  const handleLogout = useCallback(() => {
     setUser(null as any);
-    // Скидаємо вибрану роль
     setSelectedRole(null);
-    // Повертаємося на перший таб
     setActiveTab('dashboard');
-    // Встановлюємо прапорець що користувач вийшов вручну
     setHasLoggedOut(true);
-  };
+  }, [setUser]);
 
   if (!isInitialized || isLoading) {
     return (

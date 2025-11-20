@@ -7,7 +7,7 @@ export const CONFIG = {
   // Google Sheets Configuration
   GOOGLE_SHEETS: {
     // API limits and performance
-    CACHE_DURATION: 15 * 60 * 1000, // 15 minutes in milliseconds
+    CACHE_DURATION: 5 * 60 * 1000, // 5 minutes in milliseconds
     DELAY_BETWEEN_REQUESTS: 2100, // 2.1 seconds to respect rate limit (60 req/min)
     RETRY_ATTEMPTS: 3,
     RETRY_DELAY: 1000, // 1 second between retries

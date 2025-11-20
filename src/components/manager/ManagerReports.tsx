@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { useData } from '@/contexts/DataContext';
 import { Card } from '@/components/ui/card';
@@ -18,15 +18,18 @@ export default function ManagerReports() {
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const [selectedEmployee, setSelectedEmployee] = useState<{ id: string; name: string } | null>(null);
 
-  const reportData = getTeamReport(selectedMonth);
+  const teamReport = useMemo(() => {
+    const reportData = getTeamReport(selectedMonth);
+    return reportData.filter(emp => {
+      const empUser = users.find(u => u.id === emp.employeeId);
+      return empUser && (empUser.managerId === user?.id || empUser.id === user?.id);
+    });
+  }, [getTeamReport, selectedMonth, users, user?.id]);
 
-  const teamReport = reportData.filter(emp => {
-    const empUser = users.find(u => u.id === emp.employeeId);
-    return empUser && (empUser.managerId === user?.id || empUser.id === user?.id);
-  });
-
-  const totalTeamHours = teamReport.reduce((sum, emp) => sum + emp.hours, 0);
-  const totalTeamEarnings = teamReport.reduce((sum, emp) => sum + emp.earnings, 0);
+  const { totalTeamHours, totalTeamEarnings } = useMemo(() => ({
+    totalTeamHours: teamReport.reduce((sum, emp) => sum + emp.hours, 0),
+    totalTeamEarnings: teamReport.reduce((sum, emp) => sum + emp.earnings, 0),
+  }), [teamReport]);
 
   const exportData = useMemo(() => {
     return teamReport.map((emp) => {

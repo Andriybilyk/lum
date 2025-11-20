@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { useData } from '@/contexts/DataContext';
 import { useNavigate } from 'react-router-dom';
@@ -56,10 +56,10 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
     return additionalWorks.filter(w => w.managerId === user?.id && w.status === 'pending').length;
   }, [additionalWorks, user?.id]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     navigate('/');
-  };
+  }, [logout, navigate]);
 
   return (
     <FeatureErrorBoundary featureName="ManagerStats">
