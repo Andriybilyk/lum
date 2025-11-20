@@ -335,22 +335,30 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Load objects
       try {
+        logger.info('📦 Loading objects from:', CONFIG.GOOGLE_SHEETS.RANGES.OBJECTS, 'DataContext');
         const objectsData = await readSheet(CONFIG.GOOGLE_SHEETS.RANGES.OBJECTS);
+        logger.info('📦 Raw objects data:', objectsData, 'DataContext');
+        logger.info('📦 Objects data length:', objectsData.length, 'DataContext');
         if (objectsData.length > 1) {
           const loadedObjects = objectsData.slice(1).map((row: string[]) => {
             const rawId = String(row[0]);
             const cleanedId = rawId.replace(/^['`]/, '').replace(/[\s,]/g, '').trim();
-            return {
+            const obj = {
               id: cleanedId,
               name: row[1],
               isBusinessTrip: row[2] === 'true',
             };
+            logger.debug('📦 Parsed object:', obj, 'DataContext');
+            return obj;
           });
           setObjects(loadedObjects);
-          logger.debug('✅ Loaded objects:', loadedObjects.length, 'DataContext');
+          logger.info('✅ Loaded objects:', loadedObjects.length, 'DataContext');
+          logger.info('✅ Objects:', loadedObjects, 'DataContext');
+        } else {
+          logger.warn('⚠️ Objects sheet is empty or has only header row', 'DataContext');
         }
       } catch (error) {
-        logger.warn('Could not load objects:', error);
+        logger.error('❌ Could not load objects:', error, 'DataContext');
       }
 
       await delay(CONFIG.GOOGLE_SHEETS.DELAY_BETWEEN_REQUESTS);
