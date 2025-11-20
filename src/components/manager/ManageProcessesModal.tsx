@@ -33,7 +33,7 @@ export default function ManageProcessesModal({ open, onClose }: ManageProcessesM
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null);
 
   // Фільтруємо тільки стандартні процеси (без прив'язки до об'єкта)
-  const standardProcesses = processTypes.filter(p => !p.name.includes(' - '));
+  const standardProcesses = processTypes.filter(p => p.name && !p.name.includes(' - '));
 
   const handleAddProcess = async () => {
     if (!newProcess.name || !newProcess.rate || !newProcess.unit) {
