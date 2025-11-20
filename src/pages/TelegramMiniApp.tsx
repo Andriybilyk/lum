@@ -178,7 +178,7 @@ export default function TelegramMiniApp() {
         <div className="max-w-md mx-auto pb-20">
           {activeTab === 'dashboard' && <EmployeeStats />}
           {activeTab === 'reports' && <EmployeeReports />}
-          {activeTab === 'settings' && <Settings />}
+          {activeTab === 'settings' && <Settings onLogout={handleLogout} />}
           <EmployeeNav activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />
         </div>
       </div>
@@ -192,7 +192,7 @@ export default function TelegramMiniApp() {
           {activeTab === 'dashboard' && <ManagerStats setActiveTab={setActiveTab} />}
           {activeTab === 'employees' && <ManagerEmployees />}
           {activeTab === 'reports' && <ManagerReports />}
-          {activeTab === 'settings' && <Settings />}
+          {activeTab === 'settings' && <Settings onLogout={handleLogout} />}
           <ManagerNav activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />
         </div>
       </div>

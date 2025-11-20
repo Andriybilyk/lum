@@ -10,15 +10,23 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-export default function Settings() {
+interface SettingsProps {
+  onLogout?: () => void;
+}
+
+export default function Settings({ onLogout }: SettingsProps = {}) {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useUser();
   const { syncWithGoogleSheets, loadFromGoogleSheets, isSyncing, isConfigured } = useData();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout();
-    navigate('/');
+    if (onLogout) {
+      onLogout();
+    } else {
+      logout();
+      navigate('/');
+    }
   };
 
   const handleManualSync = async () => {
