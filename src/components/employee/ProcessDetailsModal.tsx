@@ -47,6 +47,7 @@ export default function ProcessDetailsModal({ open, onClose, month, year }: Proc
     setEditProcessData({
       date: entry.date,
       processName: entry.processName,
+      object: entry.object || '',
       volume: entry.volume,
       unit: entry.unit,
       rate: entry.rate
@@ -72,6 +73,7 @@ export default function ProcessDetailsModal({ open, onClose, month, year }: Proc
       await updateProcess(entryId, {
         date: editProcessData.date,
         processName: editProcessData.processName,
+        object: editProcessData.object,
         volume,
         unit: editProcessData.unit,
         rate,
@@ -161,7 +163,7 @@ export default function ProcessDetailsModal({ open, onClose, month, year }: Proc
                   editingProcess === entry.id ? (
                     <Card key={entry.id} className="p-3">
                       <div className="space-y-3">
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-3 gap-2">
                           <div>
                             <Label htmlFor={`date-${entry.id}`} className="text-xs">Дата</Label>
                             <Input
@@ -178,6 +180,15 @@ export default function ProcessDetailsModal({ open, onClose, month, year }: Proc
                               id={`process-${entry.id}`}
                               value={editProcessData.processName}
                               onChange={(e) => setEditProcessData({...editProcessData, processName: e.target.value})}
+                              className="h-8"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor={`object-${entry.id}`} className="text-xs">Об'єкт</Label>
+                            <Input
+                              id={`object-${entry.id}`}
+                              value={editProcessData.object || ''}
+                              onChange={(e) => setEditProcessData({...editProcessData, object: e.target.value})}
                               className="h-8"
                             />
                           </div>
