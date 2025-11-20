@@ -117,11 +117,11 @@ export default function ManagerReports() {
                           ? 'bg-gradient-to-br from-purple-500 to-pink-400'
                           : 'bg-gradient-to-br from-blue-500 to-cyan-400'
                       }`}>
-                        {emp.name.charAt(0)}
+                        {emp.name ? emp.name.charAt(0) : '?'}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <p className="font-medium text-slate-800 dark:text-white">{emp.name}</p>
+                          <p className="font-medium text-slate-800 dark:text-white">{emp.name || 'Без імені'}</p>
                           {isManager && (
                             <span className="text-xs bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded">
                               Менеджер
@@ -145,7 +145,7 @@ export default function ManagerReports() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => setSelectedEmployee({ id: emp.employeeId, name: emp.name })}
+                        onClick={() => setSelectedEmployee({ id: emp.employeeId, name: emp.name || 'Без імені' })}
                         className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                         title="Детальна інформація"
                       >
