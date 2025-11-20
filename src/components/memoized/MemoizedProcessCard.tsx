@@ -34,7 +34,7 @@ const MemoizedProcessCardComponent = memo(
               {process.processName}
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              {process.date} • {process.volume} {process.unit} × ₴{process.rate?.toFixed(0) || (process.salary / process.volume).toFixed(0)}
+              {process.date} • {process.volume} {process.unit} × ₴{process.rate?.toFixed(0) || (process.volume ? (process.salary / process.volume).toFixed(0) : '0')}
             </p>
           </div>
           <div className="flex items-center gap-2">
