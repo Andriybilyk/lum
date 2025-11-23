@@ -42,8 +42,11 @@ export default function EmployeeRegistration({ onBack, isTelegramMiniApp = false
 
   // Отримати Telegram ID при завантаженні
   useEffect(() => {
-    logger.info('📱 ========== TELEGRAM REGISTRATION START ==========');
+    logger.info('📱📱📱 ========== EMPLOYEE REGISTRATION INITIALIZATION ==========');
     logger.info('📱 propTelegramUser:', propTelegramUser);
+    logger.info('📱 propTelegramUser type:', typeof propTelegramUser);
+    logger.info('📱 propTelegramUser is null?', propTelegramUser === null);
+    logger.info('📱 isTelegramMiniApp:', isTelegramMiniApp);
 
     // Якщо передано telegramUser через пропси (Telegram Mini App контекст)
     if (propTelegramUser) {
@@ -59,6 +62,8 @@ export default function EmployeeRegistration({ onBack, isTelegramMiniApp = false
         name: tgUserName
       }));
       return;
+    } else {
+      logger.warn('⚠️⚠️⚠️ propTelegramUser is NULL or undefined!');
     }
 
     // Fallback: отримуємо дані напряму з window.Telegram

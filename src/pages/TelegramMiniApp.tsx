@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useTelegramApp } from '@/contexts/TelegramAppContext';
 import { useData } from '@/contexts/DataContext';
 import { useUser } from '@/contexts/UserContext';
+import { logger } from '@/utils/logger';
 import EmployeeRegistration from '@/components/employee/EmployeeRegistration';
 import ManagerRegistration from '@/components/manager/ManagerRegistration';
 import EmployeeNav from '@/components/employee/EmployeeNav';
@@ -160,10 +161,12 @@ export default function TelegramMiniApp() {
 
     // Якщо роль вибрана - показуємо відповідну реєстрацію
     if (selectedRole === 'employee') {
+      logger.info('🔵🔵🔵 TelegramMiniApp: Rendering EmployeeRegistration with telegramUser:', telegramUser);
       return <EmployeeRegistration onBack={() => setSelectedRole(null)} isTelegramMiniApp={true} telegramUser={telegramUser} />;
     }
 
     if (selectedRole === 'manager') {
+      logger.info('🔵🔵🔵 TelegramMiniApp: Rendering ManagerRegistration with telegramUser:', telegramUser);
       return <ManagerRegistration onBack={() => setSelectedRole(null)} isTelegramMiniApp={true} telegramUser={telegramUser} />;
     }
   }
