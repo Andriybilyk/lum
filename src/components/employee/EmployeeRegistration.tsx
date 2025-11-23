@@ -136,6 +136,11 @@ export default function EmployeeRegistration({ onBack, isTelegramMiniApp = false
     return users.filter(u => u.role === 'employee');
   }, [users]);
 
+  const existingUserWithTelegramId = useMemo(() => {
+    if (!telegramId) return null;
+    return users.find(u => u.telegramId === telegramId && u.role === 'employee');
+  }, [users, telegramId]);
+
   const managerUsers = useMemo(() => {
     return users.filter(u => u.role === 'manager');
   }, [users]);
@@ -248,22 +253,19 @@ export default function EmployeeRegistration({ onBack, isTelegramMiniApp = false
             </p>
           </div>
 
-          {employeeUsers.length > 0 && authMode === 'select' ? (
+          {existingUserWithTelegramId && authMode === 'select' ? (
             <div className="space-y-4">
               <div>
-                <Label className="text-slate-700 dark:text-slate-300">Оберіть працівника</Label>
+                <Label className="text-slate-700 dark:text-slate-300">Знайдено існуючий акаунт</Label>
                 <div className="mt-3 space-y-2">
-                  {employeeUsers.map((employee) => (
-                    <Button
-                      key={employee.id}
-                      onClick={() => handleSelectUser(employee.id)}
-                      variant="outline"
-                      className="w-full justify-start h-12 rounded-xl"
-                    >
-                      <span className="mr-2">👤</span>
-                      {employee.name} (₴{employee.hourlyRate}/год)
-                    </Button>
-                  ))}
+                  <Button
+                    onClick={() => handleSelectUser(existingUserWithTelegramId.id)}
+                    variant="outline"
+                    className="w-full justify-start h-12 rounded-xl bg-blue-50 dark:bg-blue-950/20 border-blue-300 dark:border-blue-700"
+                  >
+                    <span className="mr-2">👤</span>
+                    {existingUserWithTelegramId.name} (₴{existingUserWithTelegramId.hourlyRate}/год)
+                  </Button>
                 </div>
               </div>
 
@@ -279,9 +281,9 @@ export default function EmployeeRegistration({ onBack, isTelegramMiniApp = false
               <Button
                 onClick={() => setAuthMode('create')}
                 variant="ghost"
-                className="w-full text-blue-600 dark:text-blue-400"
+                className="w-full text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/20"
               >
-                Створити нового працівника
+                Зареєструвати нового працівника
               </Button>
             </div>
           ) : (

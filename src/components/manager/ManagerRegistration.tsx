@@ -108,6 +108,11 @@ export default function ManagerRegistration({ onBack, isTelegramMiniApp = false,
     return users.filter(u => u.role === 'manager');
   }, [users]);
 
+  const existingUserWithTelegramId = useMemo(() => {
+    if (!telegramId) return null;
+    return users.find(u => u.telegramId === telegramId && u.role === 'manager');
+  }, [users, telegramId]);
+
   const handleLevelChange = (value: string) => {
     const selectedLevel = levels.find(l => l.name === value);
 
@@ -194,22 +199,19 @@ export default function ManagerRegistration({ onBack, isTelegramMiniApp = false,
             </p>
           </div>
 
-          {managerUsers.length > 0 && authMode === 'select' ? (
+          {existingUserWithTelegramId && authMode === 'select' ? (
             <div className="space-y-4">
               <div>
-                <Label className="text-slate-700 dark:text-slate-300">Оберіть менеджера</Label>
+                <Label className="text-slate-700 dark:text-slate-300">Знайдено існуючий акаунт</Label>
                 <div className="mt-3 space-y-2">
-                  {managerUsers.map((manager) => (
-                    <Button
-                      key={manager.id}
-                      onClick={() => handleSelectUser(manager.id)}
-                      variant="outline"
-                      className="w-full justify-start h-12 rounded-xl"
-                    >
-                      <span className="mr-2">👤</span>
-                      {manager.name} (₴{manager.hourlyRate}/год)
-                    </Button>
-                  ))}
+                  <Button
+                    onClick={() => handleSelectUser(existingUserWithTelegramId.id)}
+                    variant="outline"
+                    className="w-full justify-start h-12 rounded-xl bg-purple-50 dark:bg-purple-950/20 border-purple-300 dark:border-purple-700"
+                  >
+                    <span className="mr-2">👤</span>
+                    {existingUserWithTelegramId.name} (₴{existingUserWithTelegramId.hourlyRate}/год)
+                  </Button>
                 </div>
               </div>
 
@@ -225,9 +227,9 @@ export default function ManagerRegistration({ onBack, isTelegramMiniApp = false,
               <Button
                 onClick={() => setAuthMode('create')}
                 variant="ghost"
-                className="w-full text-purple-600 dark:text-purple-400"
+                className="w-full text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/20"
               >
-                Створити нового менеджера
+                Зареєструвати нового менеджера
               </Button>
             </div>
           ) : (
