@@ -137,8 +137,33 @@ export default function EmployeeRegistration({ onBack, isTelegramMiniApp = false
   }, [users]);
 
   const existingUserWithTelegramId = useMemo(() => {
-    if (!telegramId) return null;
-    return users.find(u => u.telegramId === telegramId && u.role === 'employee');
+    logger.info('🔍🔍🔍 CHECKING FOR EXISTING USER (Employee)');
+    logger.info('🔍 Current telegramId:', telegramId);
+    logger.info('🔍 telegramId type:', typeof telegramId);
+    logger.info('🔍 Total users:', users.length);
+    logger.info('🔍 All users with telegramId:', users.filter(u => u.telegramId).map(u => ({
+      id: u.id,
+      name: u.name,
+      role: u.role,
+      telegramId: u.telegramId,
+      telegramIdType: typeof u.telegramId
+    })));
+
+    if (!telegramId) {
+      logger.warn('⚠️ No telegramId set yet, returning null');
+      return null;
+    }
+
+    const found = users.find(u => {
+      const match = u.telegramId === telegramId && u.role === 'employee';
+      if (u.telegramId) {
+        logger.info(`Comparing user ${u.name}: u.telegramId='${u.telegramId}' (${typeof u.telegramId}) === telegramId='${telegramId}' (${typeof telegramId}) && role='${u.role}' => ${match}`);
+      }
+      return match;
+    });
+
+    logger.info('🔍 Found existing user:', found);
+    return found;
   }, [users, telegramId]);
 
   const managerUsers = useMemo(() => {

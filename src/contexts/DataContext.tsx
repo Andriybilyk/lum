@@ -571,7 +571,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           newUser.role,
           newUser.level,
           newUser.hourlyRate,
-          newUser.managerId ? parseInt(newUser.managerId) : ''
+          newUser.managerId ? parseInt(newUser.managerId) : '',
+          newUser.telegramId || ''
         ];
         logger.info('Row data to append:', rowData, 'DataContext');
         const result = await appendSheet(CONFIG.GOOGLE_SHEETS.RANGES.USERS, [rowData]);

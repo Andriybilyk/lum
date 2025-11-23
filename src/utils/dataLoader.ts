@@ -76,15 +76,20 @@ function processUsers(result: PromiseSettledResult<any[]>): User[] {
     return [];
   }
 
-  const users = data.slice(1).map((row: string[]) => ({
-    id: cleanId(row[0]),
-    name: row[1],
-    role: row[2] as 'employee' | 'manager',
-    level: row[3],
-    hourlyRate: parseFloatSafe(row[4]),
-    managerId: cleanManagerId(row[5]),
-    telegramId: cleanId(row[0]),
-  }));
+  const users = data.slice(1).map((row: string[]) => {
+    const telegramIdRaw = row[6];
+    const telegramId = telegramIdRaw ? cleanId(telegramIdRaw) : undefined;
+
+    return {
+      id: cleanId(row[0]),
+      name: row[1],
+      role: row[2] as 'employee' | 'manager',
+      level: row[3],
+      hourlyRate: parseFloatSafe(row[4]),
+      managerId: cleanManagerId(row[5]),
+      telegramId: telegramId,
+    };
+  });
 
   logger.info(`✅ Loaded ${users.length} users`, 'DataLoader');
   return users;
