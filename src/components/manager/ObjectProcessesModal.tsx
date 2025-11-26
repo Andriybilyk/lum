@@ -44,10 +44,20 @@ export default function ObjectProcessesModal({
   const [selectedStandardProcess, setSelectedStandardProcess] = useState<string>('');
 
   // Фільтруємо процеси які відносяться до цього об'єкта
-  const objectProcesses = processTypes.filter(p => p.object === objectName);
+  const objectProcesses = processTypes.filter(p =>
+    p.id &&
+    p.name &&
+    p.name.trim() !== '' &&
+    p.object === objectName
+  );
 
   // Стандартні процеси (без прив'язки до об'єкта)
-  const standardProcesses = processTypes.filter(p => !p.object || p.object === '');
+  const standardProcesses = processTypes.filter(p =>
+    p.id &&
+    p.name &&
+    p.name.trim() !== '' &&
+    (!p.object || p.object === '')
+  );
 
   const totalAmount = newProcess.rate && newProcess.plannedVolume 
     ? parseFloat(newProcess.rate) * parseFloat(newProcess.plannedVolume)

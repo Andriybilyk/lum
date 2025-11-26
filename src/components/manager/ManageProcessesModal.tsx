@@ -33,7 +33,12 @@ export default function ManageProcessesModal({ open, onClose }: ManageProcessesM
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null);
 
   // Фільтруємо тільки стандартні процеси (без прив'язки до об'єкта)
-  const standardProcesses = processTypes.filter(p => p.name && !p.name.includes(' - '));
+  const standardProcesses = processTypes.filter(p =>
+    p.id &&
+    p.name &&
+    p.name.trim() !== '' &&
+    (!p.object || p.object === '')
+  );
 
   const handleAddProcess = async () => {
     if (!newProcess.name || !newProcess.rate || !newProcess.unit) {
@@ -109,9 +114,9 @@ export default function ManageProcessesModal({ open, onClose }: ManageProcessesM
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Стандартні Процеси</DialogTitle>
+            <DialogTitle className="text-base sm:text-lg">Стандартні Процеси</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
