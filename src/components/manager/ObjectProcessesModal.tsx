@@ -44,9 +44,9 @@ export default function ObjectProcessesModal({
 
   // Фільтруємо процеси які відносяться до цього об'єкта
   const objectProcesses = processTypes.filter(p => p.object === objectName);
-  
+
   // Стандартні процеси (без прив'язки до об'єкта)
-  const standardProcesses = processTypes.filter(p => !p.name.includes(' - '));
+  const standardProcesses = processTypes.filter(p => !p.object || p.object === '');
 
   const totalAmount = newProcess.rate && newProcess.plannedVolume 
     ? parseFloat(newProcess.rate) * parseFloat(newProcess.plannedVolume)
@@ -181,9 +181,9 @@ export default function ObjectProcessesModal({
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Процеси для об'єкта: {objectName}</DialogTitle>
+            <DialogTitle className="text-sm sm:text-base">Процеси для об'єкта: <span className="text-blue-600">{objectName}</span></DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">

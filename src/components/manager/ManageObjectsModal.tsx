@@ -86,9 +86,9 @@ export default function ManageObjectsModal({ open, onClose }: ManageObjectsModal
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Керування Об'єктами</DialogTitle>
+            <DialogTitle className="text-base sm:text-lg">Керування Об'єктами</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
