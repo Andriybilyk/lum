@@ -146,24 +146,24 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-blue-600" />
-              Відпрацьовані Години - {months[parseInt(month) - 1]} {year.padStart(4, '0')}
+            <DialogTitle className="flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base">
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 flex-shrink-0" />
+              <span className="truncate">Години - {months[parseInt(month) - 1]} {year.padStart(4, '0')}</span>
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {/* Загальна статистика */}
-            <div className="grid grid-cols-2 gap-3">
-              <Card className="p-4 bg-gradient-to-br from-blue-500 to-cyan-400 text-white">
-                <p className="text-xs opacity-80">Всього Годин</p>
-                <p className="text-2xl font-bold">{totalHours.toFixed(1)}</p>
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
+              <Card className="p-3 sm:p-4 bg-gradient-to-br from-blue-500 to-cyan-400 text-white">
+                <p className="text-[10px] sm:text-xs opacity-80">Всього Годин</p>
+                <p className="text-xl sm:text-2xl font-bold">{totalHours.toFixed(1)}</p>
               </Card>
-              <Card className="p-4 bg-gradient-to-br from-green-500 to-emerald-400 text-white">
-                <p className="text-xs opacity-80">Заробіток</p>
-                <p className="text-2xl font-bold">₴{totalEarnings.toFixed(0)}</p>
+              <Card className="p-3 sm:p-4 bg-gradient-to-br from-green-500 to-emerald-400 text-white">
+                <p className="text-[10px] sm:text-xs opacity-80">Заробіток</p>
+                <p className="text-xl sm:text-2xl font-bold">₴{totalEarnings.toFixed(0)}</p>
               </Card>
             </div>
 

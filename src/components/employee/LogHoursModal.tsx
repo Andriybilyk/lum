@@ -84,11 +84,11 @@ export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="w-[95vw] max-w-md mx-auto max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Записати Робочі Години</DialogTitle>
+          <DialogTitle className="text-base sm:text-lg">Записати Робочі Години</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div>
             <Label htmlFor="date">Дата</Label>
             <Input
@@ -102,10 +102,10 @@ export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
           </div>
 
           {hoursWorkedToday > 0 && (
-            <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <p className="text-sm text-blue-800 dark:text-blue-200">
+            <div className="p-2 sm:p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                <p className="text-xs sm:text-sm text-blue-800 dark:text-blue-200">
                   Вже відпрацьовано сьогодні: <span className="font-semibold">{hoursWorkedToday} год</span>
                 </p>
               </div>
@@ -163,26 +163,26 @@ export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
             <>
               {totalHoursToday <= WORK_HOURS.MAX_DAILY_HOURS && (
                 <div className="space-y-2">
-                  <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border">
-                    <div className="space-y-1 text-sm">
-                      <div className="flex justify-between">
+                  <div className="p-2 sm:p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border">
+                    <div className="space-y-1 text-xs sm:text-sm">
+                      <div className="flex justify-between gap-2">
                         <span className="text-slate-600 dark:text-slate-400">Звичайні години:</span>
-                        <span className="font-medium">{earnings.normalHours.toFixed(1)} год × ₴{user?.hourlyRate} × {earnings.baseCoefficient}x</span>
+                        <span className="font-medium text-right">{earnings.normalHours.toFixed(1)} год × ₴{user?.hourlyRate} × {earnings.baseCoefficient}x</span>
                       </div>
                       {earnings.overtimeHours > 0 && (
-                        <div className="flex justify-between text-orange-600 dark:text-orange-400">
-                          <span>Понаднормові години:</span>
-                          <span className="font-medium">{earnings.overtimeHours.toFixed(1)} год × ₴{user?.hourlyRate} × {earnings.baseCoefficient}x × 1.5x</span>
+                        <div className="flex justify-between gap-2 text-orange-600 dark:text-orange-400">
+                          <span>Понаднормові:</span>
+                          <span className="font-medium text-right">{earnings.overtimeHours.toFixed(1)} год × ₴{user?.hourlyRate} × {earnings.baseCoefficient}x × 1.5x</span>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
-                    <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                  <div className="p-2 sm:p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                    <p className="text-xs sm:text-sm font-medium text-green-800 dark:text-green-200">
                       Очікуваний Заробіток: ₴{earnings.total.toFixed(2)}
                     </p>
-                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                    <p className="text-[10px] sm:text-xs text-green-600 dark:text-green-400 mt-0.5 sm:mt-1">
                       Всього за день: {totalHoursToday.toFixed(1)} год
                       {totalHoursToday > WORK_HOURS.NORMAL_HOURS_LIMIT && ` (${(totalHoursToday - WORK_HOURS.NORMAL_HOURS_LIMIT).toFixed(1)} год понаднормових)`}
                     </p>
@@ -191,8 +191,8 @@ export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
               )}
 
               {totalHoursToday > WORK_HOURS.MAX_DAILY_HOURS && (
-                <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
-                  <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                <div className="p-2 sm:p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+                  <p className="text-xs sm:text-sm font-medium text-red-800 dark:text-red-200">
                     ❌ Перевищено ліміт! Максимум {WORK_HOURS.MAX_DAILY_HOURS} годин на день
                   </p>
                 </div>
@@ -201,12 +201,12 @@ export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
           )}
 
           <div className="flex gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1 h-10 sm:h-11 text-sm sm:text-base">
               Скасувати
             </Button>
             <Button
               type="submit"
-              className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-500"
+              className="flex-1 h-10 sm:h-11 text-sm sm:text-base bg-gradient-to-r from-blue-600 to-cyan-500"
               disabled={totalHoursToday > WORK_HOURS.MAX_DAILY_HOURS}
             >
               Зберегти
