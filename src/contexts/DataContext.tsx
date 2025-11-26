@@ -88,6 +88,58 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [processTypes, setProcessTypes] = useState<ProcessType[]>([]);
   const [additionalWorks, setAdditionalWorks] = useState<AdditionalWork[]>([]);
 
+  // LocalStorage helpers для швидкого кешування
+  const CACHE_KEY = 'timetracker_data_cache';
+  const CACHE_VERSION = '1.0';
+
+  const loadFromLocalStorage = () => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (!cached) return null;
+
+      const parsed = JSON.parse(cached);
+      if (parsed.version !== CACHE_VERSION) {
+        logger.info('Cache version mismatch, clearing cache', 'DataContext');
+        localStorage.removeItem(CACHE_KEY);
+        return null;
+      }
+
+      const cacheAge = Date.now() - parsed.timestamp;
+      const MAX_CACHE_AGE = 24 * 60 * 60 * 1000; // 24 години
+
+      if (cacheAge > MAX_CACHE_AGE) {
+        logger.info('Cache expired, clearing cache', 'DataContext');
+        localStorage.removeItem(CACHE_KEY);
+        return null;
+      }
+
+      logger.info(`📦 Cache hit! Age: ${(cacheAge / 1000 / 60).toFixed(1)} minutes`, 'DataContext');
+      return parsed.data;
+    } catch (error) {
+      logger.warn('Failed to load from localStorage', error, 'DataContext');
+      return null;
+    }
+  };
+
+  const saveToLocalStorage = (data: any) => {
+    try {
+      const cacheData = {
+        version: CACHE_VERSION,
+        timestamp: Date.now(),
+        data: {
+          users: data.users,
+          levels: data.levels,
+          objects: data.objects,
+          processTypes: data.processTypes,
+        }
+      };
+      localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+      logger.info('💾 Data cached to localStorage', 'DataContext');
+    } catch (error) {
+      logger.warn('Failed to save to localStorage', error, 'DataContext');
+    }
+  };
+
   // Initialize and check configuration
   useEffect(() => {
     const init = async () => {
@@ -98,13 +150,36 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (apiKey && spreadsheetId && scriptUrl) {
           setIsConfigured(true);
-          setIsLoading(false);
-          // Завантажуємо дані у фоні без блокування UI
-          loadData().catch(error => {
-            logger.warn('Failed to load data from Google Sheets, using empty state', error, 'DataContext');
-            setIsConfigured(false);
+
+          // 1. Спочатку завантажуємо з localStorage для миттєвого показу
+          const cachedData = loadFromLocalStorage();
+          if (cachedData) {
+            logger.info('📦 Loading cached data from localStorage', 'DataContext');
+            setUsers(cachedData.users || []);
+            setLevels(cachedData.levels || []);
+            setObjects(cachedData.objects || []);
+            setProcessTypes(cachedData.processTypes || []);
+            // Показуємо UI швидше з кешованими даними
+            setIsLoading(false);
+          }
+
+          // 2. Потім завантажуємо свіжі дані у фоні
+          logger.info('🚀 Starting fresh data load...', 'DataContext');
+          const startTime = performance.now();
+
+          await loadData(true).catch(error => {
+            logger.warn('Failed to load data from Google Sheets, using cached state', error, 'DataContext');
+            if (!cachedData) {
+              setIsConfigured(false);
+              setIsLoading(false);
+            }
           });
+
+          const loadTime = performance.now() - startTime;
+          logger.info(`✅ Fresh data loaded in ${loadTime.toFixed(0)}ms`, 'DataContext');
+          setIsLoading(false);
         } else {
+          logger.warn('Google Sheets not configured', 'DataContext');
           setIsConfigured(false);
           setIsLoading(false);
         }
@@ -163,6 +238,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setProcessTypes(data.processTypes);
       setAssignments(data.assignments);
       setAdditionalWorks(data.additionalWorks);
+
+      // Зберігаємо в localStorage для наступного разу
+      saveToLocalStorage(data);
 
       logger.info('✅ All data loaded successfully', 'DataContext');
 
