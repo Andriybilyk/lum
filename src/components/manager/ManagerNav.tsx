@@ -1,5 +1,6 @@
 import { Users, FileText, Settings, LogOut } from 'lucide-react';
 import { logger } from '@/utils/logger';
+import { memo } from 'react';
 
 interface ManagerNavProps {
   activeTab: string;
@@ -7,7 +8,7 @@ interface ManagerNavProps {
   onLogout?: () => void;
 }
 
-export default function ManagerNav({ activeTab, setActiveTab, onLogout }: ManagerNavProps) {
+const ManagerNav = memo(function ManagerNav({ activeTab, setActiveTab, onLogout }: ManagerNavProps) {
   const tabs = [
     { id: 'dashboard', label: 'Панель', icon: Users },
     { id: 'employees', label: 'Працівники', icon: Users },
@@ -62,4 +63,6 @@ export default function ManagerNav({ activeTab, setActiveTab, onLogout }: Manage
       </div>
     </nav>
   );
-}
+});
+
+export default ManagerNav;

@@ -19,7 +19,7 @@ export default defineConfig({
   build: {
     target: 'ES2020',
     minify: 'terser',
-    chunkSizeWarningLimit: 800,
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks: {

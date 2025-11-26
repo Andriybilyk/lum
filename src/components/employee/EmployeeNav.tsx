@@ -1,5 +1,6 @@
 import { Clock, FileText, Settings, LogOut } from 'lucide-react';
 import { logger } from '@/utils/logger';
+import { memo } from 'react';
 
 interface EmployeeNavProps {
   activeTab: string;
@@ -7,7 +8,7 @@ interface EmployeeNavProps {
   onLogout?: () => void;
 }
 
-export default function EmployeeNav({ activeTab, setActiveTab, onLogout }: EmployeeNavProps) {
+const EmployeeNav = memo(function EmployeeNav({ activeTab, setActiveTab, onLogout }: EmployeeNavProps) {
   const tabs = [
     { id: 'dashboard', label: 'Панель', icon: Clock },
     { id: 'reports', label: 'Звіти', icon: FileText },
@@ -58,4 +59,6 @@ export default function EmployeeNav({ activeTab, setActiveTab, onLogout }: Emplo
       </div>
     </nav>
   );
-}
+});
+
+export default EmployeeNav;

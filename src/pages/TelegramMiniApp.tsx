@@ -1,23 +1,37 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, lazy, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { useTelegramApp } from '@/contexts/TelegramAppContext';
 import { useData } from '@/contexts/DataContext';
 import { useUser } from '@/contexts/UserContext';
 import { logger } from '@/utils/logger';
-import EmployeeRegistration from '@/components/employee/EmployeeRegistration';
-import ManagerRegistration from '@/components/manager/ManagerRegistration';
-import EmployeeNav from '@/components/employee/EmployeeNav';
-import EmployeeStats from '@/components/employee/EmployeeStats';
-import EmployeeReports from '@/components/employee/EmployeeReports';
-import Settings from '@/components/Settings';
-import ManagerNav from '@/components/manager/ManagerNav';
-import ManagerStats from '@/components/manager/ManagerStats';
-import ManagerEmployees from '@/components/manager/ManagerEmployees';
-import ManagerReports from '@/components/manager/ManagerReports';
 import { motion } from 'framer-motion';
 import { Clock } from 'lucide-react';
 
+// Lazy load компонентів для швидшого початкового завантаження
+const EmployeeRegistration = lazy(() => import('@/components/employee/EmployeeRegistration'));
+const ManagerRegistration = lazy(() => import('@/components/manager/ManagerRegistration'));
+const EmployeeNav = lazy(() => import('@/components/employee/EmployeeNav'));
+const EmployeeStats = lazy(() => import('@/components/employee/EmployeeStats'));
+const EmployeeReports = lazy(() => import('@/components/employee/EmployeeReports'));
+const Settings = lazy(() => import('@/components/Settings'));
+const ManagerNav = lazy(() => import('@/components/manager/ManagerNav'));
+const ManagerStats = lazy(() => import('@/components/manager/ManagerStats'));
+const ManagerEmployees = lazy(() => import('@/components/manager/ManagerEmployees'));
+const ManagerReports = lazy(() => import('@/components/manager/ManagerReports'));
+
 type UserRole = 'employee' | 'manager' | null;
+
+// Компонент завантаження
+const LoadingScreen = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="text-center">
+      <div className="animate-spin mb-4 mx-auto">
+        <Clock className="w-8 h-8" />
+      </div>
+      <p>Завантаження...</p>
+    </div>
+  </div>
+);
 
 export default function TelegramMiniApp() {
   const {
@@ -172,40 +186,52 @@ export default function TelegramMiniApp() {
     // Якщо роль вибрана - показуємо відповідну реєстрацію
     if (selectedRole === 'employee') {
       logger.info('🔵🔵🔵 TelegramMiniApp: Rendering EmployeeRegistration with telegramUser:', telegramUser);
-      return <EmployeeRegistration onBack={() => setSelectedRole(null)} isTelegramMiniApp={true} telegramUser={telegramUser} />;
+      return (
+        <Suspense fallback={<LoadingScreen />}>
+          <EmployeeRegistration onBack={() => setSelectedRole(null)} isTelegramMiniApp={true} telegramUser={telegramUser} />
+        </Suspense>
+      );
     }
 
     if (selectedRole === 'manager') {
       logger.info('🔵🔵🔵 TelegramMiniApp: Rendering ManagerRegistration with telegramUser:', telegramUser);
-      return <ManagerRegistration onBack={() => setSelectedRole(null)} isTelegramMiniApp={true} telegramUser={telegramUser} />;
+      return (
+        <Suspense fallback={<LoadingScreen />}>
+          <ManagerRegistration onBack={() => setSelectedRole(null)} isTelegramMiniApp={true} telegramUser={telegramUser} />
+        </Suspense>
+      );
     }
   }
 
   // Показуємо повний дашборд залежно від ролі користувача
   if (appUser?.role === 'employee') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
-        <div className="max-w-md mx-auto pb-20">
-          {activeTab === 'dashboard' && <EmployeeStats />}
-          {activeTab === 'reports' && <EmployeeReports />}
-          {activeTab === 'settings' && <Settings onLogout={handleLogout} />}
-          <EmployeeNav activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />
+      <Suspense fallback={<LoadingScreen />}>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+          <div className="max-w-md mx-auto pb-20">
+            {activeTab === 'dashboard' && <EmployeeStats />}
+            {activeTab === 'reports' && <EmployeeReports />}
+            {activeTab === 'settings' && <Settings onLogout={handleLogout} />}
+            <EmployeeNav activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />
+          </div>
         </div>
-      </div>
+      </Suspense>
     );
   }
 
   if (appUser?.role === 'manager') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 dark:from-slate-900 dark:to-slate-800">
-        <div className="max-w-4xl mx-auto pb-20">
-          {activeTab === 'dashboard' && <ManagerStats setActiveTab={setActiveTab} />}
-          {activeTab === 'employees' && <ManagerEmployees />}
-          {activeTab === 'reports' && <ManagerReports />}
-          {activeTab === 'settings' && <Settings onLogout={handleLogout} />}
-          <ManagerNav activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />
+      <Suspense fallback={<LoadingScreen />}>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 dark:from-slate-900 dark:to-slate-800">
+          <div className="max-w-4xl mx-auto pb-20">
+            {activeTab === 'dashboard' && <ManagerStats setActiveTab={setActiveTab} />}
+            {activeTab === 'employees' && <ManagerEmployees />}
+            {activeTab === 'reports' && <ManagerReports />}
+            {activeTab === 'settings' && <Settings onLogout={handleLogout} />}
+            <ManagerNav activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />
+          </div>
         </div>
-      </div>
+      </Suspense>
     );
   }
 
