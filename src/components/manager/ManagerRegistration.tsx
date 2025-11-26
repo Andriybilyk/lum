@@ -113,8 +113,8 @@ export default function ManagerRegistration({ onBack, isTelegramMiniApp = false,
     return users.filter(u => u.role === 'manager');
   }, [users]);
 
-  const existingUserWithTelegramId = useMemo(() => {
-    logger.info('🔍🔍🔍 CHECKING FOR EXISTING USER (Manager)');
+  const existingUsersWithTelegramId = useMemo(() => {
+    logger.info('🔍🔍🔍 CHECKING FOR EXISTING USERS (Manager)');
     logger.info('🔍 Current telegramId:', telegramId);
     logger.info('🔍 telegramId type:', typeof telegramId);
     logger.info('🔍 Total users:', users.length);
@@ -127,11 +127,11 @@ export default function ManagerRegistration({ onBack, isTelegramMiniApp = false,
     })));
 
     if (!telegramId) {
-      logger.warn('⚠️ No telegramId set yet, returning null');
-      return null;
+      logger.warn('⚠️ No telegramId set yet, returning empty array');
+      return [];
     }
 
-    const found = users.find(u => {
+    const found = users.filter(u => {
       const match = u.telegramId === telegramId && u.role === 'manager';
       if (u.telegramId) {
         logger.info(`Comparing user ${u.name}: u.telegramId='${u.telegramId}' (${typeof u.telegramId}) === telegramId='${telegramId}' (${typeof telegramId}) && role='${u.role}' => ${match}`);
@@ -139,7 +139,7 @@ export default function ManagerRegistration({ onBack, isTelegramMiniApp = false,
       return match;
     });
 
-    logger.info('🔍 Found existing user:', found);
+    logger.info('🔍 Found existing users:', found);
     return found;
   }, [users, telegramId]);
 
@@ -244,19 +244,29 @@ export default function ManagerRegistration({ onBack, isTelegramMiniApp = false,
             </p>
           </div>
 
-          {existingUserWithTelegramId && authMode === 'select' ? (
+          {existingUsersWithTelegramId.length > 0 && authMode === 'select' ? (
             <div className="space-y-4">
               <div>
-                <Label className="text-slate-700 dark:text-slate-300">Знайдено існуючий акаунт</Label>
-                <div className="mt-3 space-y-2">
-                  <Button
-                    onClick={() => handleSelectUser(existingUserWithTelegramId.id)}
-                    variant="outline"
-                    className="w-full justify-start h-12 rounded-xl bg-purple-50 dark:bg-purple-950/20 border-purple-300 dark:border-purple-700"
-                  >
-                    <span className="mr-2">👤</span>
-                    {existingUserWithTelegramId.name} (₴{existingUserWithTelegramId.hourlyRate}/год)
-                  </Button>
+                <Label className="text-slate-700 dark:text-slate-300">
+                  {existingUsersWithTelegramId.length === 1
+                    ? 'Знайдено існуючий акаунт'
+                    : `Знайдено ${existingUsersWithTelegramId.length} акаунтів`}
+                </Label>
+                <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
+                  {existingUsersWithTelegramId.map((manager) => (
+                    <Button
+                      key={manager.id}
+                      onClick={() => handleSelectUser(manager.id)}
+                      variant="outline"
+                      className="w-full justify-start h-12 rounded-xl bg-purple-50 dark:bg-purple-950/20 border-purple-300 dark:border-purple-700 hover:bg-purple-100 dark:hover:bg-purple-950/40"
+                    >
+                      <span className="mr-2">👤</span>
+                      <div className="flex-1 text-left">
+                        <div className="font-semibold">{manager.name}</div>
+                        <div className="text-xs text-slate-500">₴{manager.hourlyRate}/год · {manager.level}</div>
+                      </div>
+                    </Button>
+                  ))}
                 </div>
               </div>
 
