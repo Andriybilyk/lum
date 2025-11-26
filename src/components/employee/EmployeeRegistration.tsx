@@ -306,22 +306,31 @@ export default function EmployeeRegistration({ onBack, isTelegramMiniApp = false
                     ? 'Знайдено існуючий акаунт'
                     : `Знайдено ${existingUsersWithTelegramId.length} акаунтів`}
                 </Label>
-                <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
-                  {existingUsersWithTelegramId.map((employee) => (
-                    <Button
-                      key={employee.id}
-                      onClick={() => handleSelectUser(employee.id)}
-                      variant="outline"
-                      className="w-full justify-start h-12 rounded-xl bg-blue-50 dark:bg-blue-950/20 border-blue-300 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-950/40"
-                    >
-                      <span className="mr-2">👤</span>
-                      <div className="flex-1 text-left">
-                        <div className="font-semibold">{employee.name}</div>
-                        <div className="text-xs text-slate-500">₴{employee.hourlyRate}/год · {employee.level}</div>
-                      </div>
-                    </Button>
-                  ))}
-                </div>
+                {isLoading ? (
+                  <div className="mt-3 space-y-2">
+                    <div className="h-12 bg-blue-100 dark:bg-blue-950/20 rounded-xl animate-pulse"></div>
+                  </div>
+                ) : (
+                  <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
+                    {existingUsersWithTelegramId.map((employee) => (
+                      <Button
+                        key={employee.id}
+                        onClick={() => handleSelectUser(employee.id)}
+                        variant="outline"
+                        className="w-full justify-start h-12 rounded-xl bg-blue-50 dark:bg-blue-950/20 border-blue-300 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-950/40"
+                      >
+                        <span className="mr-2">👤</span>
+                        <div className="flex-1 text-left">
+                          <div className="font-semibold">{employee.name || 'Завантаження...'}</div>
+                          <div className="text-xs text-slate-500">
+                            {employee.hourlyRate ? `₴${employee.hourlyRate}/год` : 'Завантаження...'}
+                            {employee.level && ` · ${employee.level}`}
+                          </div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="relative">

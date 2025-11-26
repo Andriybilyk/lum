@@ -252,22 +252,31 @@ export default function ManagerRegistration({ onBack, isTelegramMiniApp = false,
                     ? 'Знайдено існуючий акаунт'
                     : `Знайдено ${existingUsersWithTelegramId.length} акаунтів`}
                 </Label>
-                <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
-                  {existingUsersWithTelegramId.map((manager) => (
-                    <Button
-                      key={manager.id}
-                      onClick={() => handleSelectUser(manager.id)}
-                      variant="outline"
-                      className="w-full justify-start h-12 rounded-xl bg-purple-50 dark:bg-purple-950/20 border-purple-300 dark:border-purple-700 hover:bg-purple-100 dark:hover:bg-purple-950/40"
-                    >
-                      <span className="mr-2">👤</span>
-                      <div className="flex-1 text-left">
-                        <div className="font-semibold">{manager.name}</div>
-                        <div className="text-xs text-slate-500">₴{manager.hourlyRate}/год · {manager.level}</div>
-                      </div>
-                    </Button>
-                  ))}
-                </div>
+                {isLoading ? (
+                  <div className="mt-3 space-y-2">
+                    <div className="h-12 bg-purple-100 dark:bg-purple-950/20 rounded-xl animate-pulse"></div>
+                  </div>
+                ) : (
+                  <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
+                    {existingUsersWithTelegramId.map((manager) => (
+                      <Button
+                        key={manager.id}
+                        onClick={() => handleSelectUser(manager.id)}
+                        variant="outline"
+                        className="w-full justify-start h-12 rounded-xl bg-purple-50 dark:bg-purple-950/20 border-purple-300 dark:border-purple-700 hover:bg-purple-100 dark:hover:bg-purple-950/40"
+                      >
+                        <span className="mr-2">👤</span>
+                        <div className="flex-1 text-left">
+                          <div className="font-semibold">{manager.name || 'Завантаження...'}</div>
+                          <div className="text-xs text-slate-500">
+                            {manager.hourlyRate ? `₴${manager.hourlyRate}/год` : 'Завантаження...'}
+                            {manager.level && ` · ${manager.level}`}
+                          </div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="relative">

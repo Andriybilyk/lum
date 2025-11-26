@@ -32,8 +32,10 @@ export default function TelegramMiniApp() {
 
   useEffect(() => {
     // Перевіряємо чи користувач вже зареєстрований через Telegram ID
-    // НЕ логінимо автоматично якщо користувач вийшов вручну
-    if (isInitialized && telegramUser && users.length > 0 && !appUser && !hasLoggedOut) {
+    // НЕ логінимо автоматично якщо:
+    // - користувач вийшов вручну (hasLoggedOut)
+    // - користувач вибрав роль і дивиться на екран реєстрації (selectedRole !== null)
+    if (isInitialized && telegramUser && users.length > 0 && !appUser && !hasLoggedOut && !selectedRole) {
       if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
         // @ts-ignore
         const webApp = window.Telegram.WebApp;
@@ -42,13 +44,16 @@ export default function TelegramMiniApp() {
         if (tgUser) {
           const existingUser = users.find(u => u.telegramId === tgUser.id.toString());
           if (existingUser) {
+            logger.info('🔄 Auto-login: Found existing user, logging in automatically:', existingUser.name);
             // Користувач знайдений - автоматично логінимо
             setUser(existingUser);
+          } else {
+            logger.info('ℹ️ Auto-login: No existing user found for Telegram ID:', tgUser.id);
           }
         }
       }
     }
-  }, [isInitialized, telegramUser, users, appUser, hasLoggedOut, setUser]);
+  }, [isInitialized, telegramUser, users, appUser, hasLoggedOut, selectedRole, setUser]);
 
   const handleChangeTab = useCallback((event: any) => {
     setActiveTab(event.detail);
