@@ -1,4 +1,5 @@
 import { Users, FileText, Settings, LogOut } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface ManagerNavProps {
   activeTab: string;
@@ -26,10 +27,21 @@ export default function ManagerNav({ activeTab, setActiveTab, onLogout }: Manage
             return (
               <button
                 key={tab.id}
-                onClick={() => {
-                  if (tab.id === 'logout' && onLogout) {
-                    onLogout();
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+
+                  if (tab.id === 'logout') {
+                    logger.info('🔴 Manager Nav: Logout button clicked');
+                    logger.info('🔴 onLogout function exists?', !!onLogout);
+                    if (onLogout) {
+                      logger.info('🔴 Calling onLogout...');
+                      onLogout();
+                    } else {
+                      logger.warn('⚠️ onLogout is not defined!');
+                    }
                   } else {
+                    logger.info('Manager Nav: Switching to tab:', tab.id);
                     setActiveTab(tab.id);
                   }
                 }}

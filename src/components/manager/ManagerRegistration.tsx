@@ -143,6 +143,20 @@ export default function ManagerRegistration({ onBack, isTelegramMiniApp = false,
     return found;
   }, [users, telegramId]);
 
+  // Перевіряємо чи дані користувачів повністю завантажені
+  const isUserDataComplete = useMemo(() => {
+    if (existingUsersWithTelegramId.length === 0) return true;
+
+    const allComplete = existingUsersWithTelegramId.every(user =>
+      user.name &&
+      user.hourlyRate !== undefined &&
+      user.level
+    );
+
+    logger.info('🔍 User data complete check:', { allComplete, users: existingUsersWithTelegramId });
+    return allComplete;
+  }, [existingUsersWithTelegramId]);
+
   const handleLevelChange = (value: string) => {
     const selectedLevel = levels.find(l => l.name === value);
 
@@ -252,9 +266,11 @@ export default function ManagerRegistration({ onBack, isTelegramMiniApp = false,
                     ? 'Знайдено існуючий акаунт'
                     : `Знайдено ${existingUsersWithTelegramId.length} акаунтів`}
                 </Label>
-                {isLoading ? (
+                {isLoading || !isUserDataComplete ? (
                   <div className="mt-3 space-y-2">
-                    <div className="h-12 bg-purple-100 dark:bg-purple-950/20 rounded-xl animate-pulse"></div>
+                    {existingUsersWithTelegramId.map((manager) => (
+                      <div key={manager.id} className="h-12 bg-purple-100 dark:bg-purple-950/20 rounded-xl animate-pulse"></div>
+                    ))}
                   </div>
                 ) : (
                   <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">

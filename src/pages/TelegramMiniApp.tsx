@@ -65,11 +65,16 @@ export default function TelegramMiniApp() {
   }, [handleChangeTab]);
 
   const handleLogout = useCallback(() => {
+    logger.info('🚪🚪🚪 LOGOUT TRIGGERED');
+    logger.info('Current state:', { appUser, selectedRole, hasLoggedOut });
+
     setUser(null as any);
     setSelectedRole(null);
     setActiveTab('dashboard');
     setHasLoggedOut(true);
-  }, [setUser]);
+
+    logger.info('✅ Logout complete - hasLoggedOut set to true');
+  }, [setUser, appUser, selectedRole, hasLoggedOut]);
 
   if (!isInitialized || isLoading) {
     return (
