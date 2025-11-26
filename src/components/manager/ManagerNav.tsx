@@ -18,13 +18,13 @@ const ManagerNav = memo(function ManagerNav({ activeTab, setActiveTab, onLogout 
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 shadow-lg">
-      <div className="max-w-md mx-auto px-2 py-2">
-        <div className="flex items-center justify-around">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 shadow-lg z-50 safe-bottom">
+      <div className="max-w-screen-lg mx-auto px-1 sm:px-2 py-1.5 sm:py-2">
+        <div className="flex items-center justify-around gap-0.5 sm:gap-1">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
-            
+
             return (
               <button
                 key={tab.id}
@@ -46,7 +46,7 @@ const ManagerNav = memo(function ManagerNav({ activeTab, setActiveTab, onLogout 
                     setActiveTab(tab.id);
                   }
                 }}
-                className={`flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all duration-200 ${
+                className={`flex flex-col items-center justify-center px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl transition-all duration-200 active:scale-95 min-w-0 flex-1 ${
                   isActive
                     ? 'bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-lg scale-105'
                     : tab.id === 'logout'
@@ -54,8 +54,8 @@ const ManagerNav = memo(function ManagerNav({ activeTab, setActiveTab, onLogout 
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
-                <Icon className={`w-5 h-5 mb-1 ${isActive ? 'animate-pulse' : ''}`} />
-                <span className="text-xs font-medium">{tab.label}</span>
+                <Icon className={`w-4 h-4 sm:w-5 sm:h-5 mb-0.5 sm:mb-1 flex-shrink-0 ${isActive ? 'animate-pulse' : ''}`} />
+                <span className="text-[9px] sm:text-[10px] md:text-xs font-medium truncate max-w-full">{tab.label}</span>
               </button>
             );
           })}

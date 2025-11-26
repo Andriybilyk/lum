@@ -108,32 +108,32 @@ export default function TelegramMiniApp() {
     // Якщо роль ще не вибрана - показуємо меню вибору
     if (!selectedRole) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-400 p-4">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-400 px-3 py-4 sm:p-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="w-full max-w-md"
           >
-            <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20">
-              <div className="text-center mb-8">
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl border border-white/20">
+              <div className="text-center mb-6 sm:mb-8">
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                  className="text-6xl mb-4"
+                  className="text-5xl sm:text-6xl mb-3 sm:mb-4"
                 >
                   ⏰
                 </motion.div>
-                <h1 className="text-3xl font-bold text-white mb-2">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1.5 sm:mb-2">
                   Облік Часу
                 </h1>
-                <p className="text-white/80 text-sm">
+                <p className="text-white/80 text-xs sm:text-sm px-2">
                   Керуйте робочими годинами та процесами
                 </p>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -144,9 +144,9 @@ export default function TelegramMiniApp() {
                       setSelectedRole('employee');
                       setHasLoggedOut(false);
                     }}
-                    className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-2xl shadow-lg transition-all duration-300 hover:scale-105"
+                    className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl sm:rounded-2xl shadow-lg transition-all duration-300 active:scale-95"
                   >
-                    <span className="mr-2">👤</span>
+                    <span className="mr-1.5 sm:mr-2">👤</span>
                     Я Працівник
                   </Button>
                 </motion.div>
@@ -161,9 +161,9 @@ export default function TelegramMiniApp() {
                       setSelectedRole('manager');
                       setHasLoggedOut(false);
                     }}
-                    className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white rounded-2xl shadow-lg transition-all duration-300 hover:scale-105"
+                    className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white rounded-xl sm:rounded-2xl shadow-lg transition-all duration-300 active:scale-95"
                   >
-                    <span className="mr-2">👔</span>
+                    <span className="mr-1.5 sm:mr-2">👔</span>
                     Я Менеджер
                   </Button>
                 </motion.div>
@@ -173,7 +173,7 @@ export default function TelegramMiniApp() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
-                className="text-center text-white/60 text-xs mt-8"
+                className="text-center text-white/60 text-[10px] sm:text-xs mt-6 sm:mt-8"
               >
                 Оберіть свою роль для початку роботи
               </motion.p>

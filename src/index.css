@@ -72,5 +72,67 @@
     }
     body {
       @apply bg-background text-foreground;
+      /* Заборона виділення тексту на touch пристроях */
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      /* Плавна прокрутка */
+      scroll-behavior: smooth;
+      /* Оптимізація для touch */
+      touch-action: manipulation;
+    }
+
+    /* Safe area для iOS (iPhone X і новіші) */
+    body {
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+
+    /* Забезпечення коректного розміру на мобільних */
+    html, body, #root {
+      width: 100%;
+      min-height: 100vh;
+      /* Для iOS, щоб враховувати висоту адресної строки */
+      min-height: -webkit-fill-available;
+      overflow-x: hidden;
+    }
+
+    /* Оптимізація для дотиків */
+    button, a, [role="button"] {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Покращення читабельності тексту */
+    body {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+  }
+
+  /* Адаптивні утиліти для різних розмірів екранів */
+  @layer utilities {
+    /* Для дуже маленьких екранів (менше 375px) */
+    @media (max-width: 374px) {
+      .text-xs { font-size: 0.65rem; }
+      .text-sm { font-size: 0.75rem; }
+      .text-base { font-size: 0.85rem; }
+    }
+
+    /* Адаптивні відступи для контейнерів */
+    .container-responsive {
+      @apply px-3 sm:px-4 md:px-6 lg:px-8;
+    }
+
+    /* Адаптивний padding для карток */
+    .card-responsive {
+      @apply p-3 sm:p-4 md:p-5 lg:p-6;
+    }
+
+    /* Безпечна зона для fixed елементів знизу */
+    .safe-bottom {
+      padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
     }
   }
