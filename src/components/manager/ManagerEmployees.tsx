@@ -90,46 +90,47 @@ export default function ManagerEmployees() {
   }, []);
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">
+    <div className="container-responsive space-y-3 sm:space-y-4 pb-20 sm:pb-24">
+      {/* Заголовок по центру */}
+      <div className="pt-3 sm:pt-4 pb-2 text-center">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800 dark:text-white">
           👥 Команда
         </h2>
-        <div className="flex gap-2 flex-wrap">
-          <Button
-            onClick={() => setShowAddEmployee(true)}
-            variant="outline"
-            size="sm"
-            className="gap-2"
-          >
-            ➕ Додати Працівника
-          </Button>
-          <Button
-            onClick={() => setShowManageObjects(true)}
-            variant="outline"
-            size="sm"
-            className="gap-2"
-          >
-            📦 Об'єкти
-          </Button>
-          <Button
-            onClick={() => setShowManageProcesses(true)}
-            variant="outline"
-            size="sm"
-            className="gap-2"
-          >
-            ⚙️ Процеси
-          </Button>
-          <Button
-            onClick={() => setShowEditLevels(true)}
-            variant="outline"
-            size="sm"
-            className="gap-2"
-          >
-            <Settings className="w-4 h-4" />
-            Рівні
-          </Button>
-        </div>
+      </div>
+
+      {/* Кнопки керування - як у головному меню */}
+      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+        <Button
+          onClick={() => setShowAddEmployee(true)}
+          className="h-16 sm:h-20 text-base sm:text-lg font-semibold bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 rounded-xl sm:rounded-2xl shadow-lg active:scale-95 transition-transform flex flex-col items-center justify-center gap-1 sm:gap-2"
+        >
+          <span className="text-2xl sm:text-3xl">➕</span>
+          <span>Додати Працівника</span>
+        </Button>
+
+        <Button
+          onClick={() => setShowManageObjects(true)}
+          className="h-16 sm:h-20 text-base sm:text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 rounded-xl sm:rounded-2xl shadow-lg active:scale-95 transition-transform flex flex-col items-center justify-center gap-1 sm:gap-2"
+        >
+          <span className="text-2xl sm:text-3xl">📦</span>
+          <span>Об'єкти</span>
+        </Button>
+
+        <Button
+          onClick={() => setShowManageProcesses(true)}
+          className="h-16 sm:h-20 text-base sm:text-lg font-semibold bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 rounded-xl sm:rounded-2xl shadow-lg active:scale-95 transition-transform flex flex-col items-center justify-center gap-1 sm:gap-2"
+        >
+          <span className="text-2xl sm:text-3xl">⚙️</span>
+          <span>Процеси</span>
+        </Button>
+
+        <Button
+          onClick={() => setShowEditLevels(true)}
+          className="h-16 sm:h-20 text-base sm:text-lg font-semibold bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-700 hover:to-amber-600 rounded-xl sm:rounded-2xl shadow-lg active:scale-95 transition-transform flex flex-col items-center justify-center gap-1 sm:gap-2"
+        >
+          <Settings className="w-6 h-6 sm:w-8 sm:h-8" />
+          <span>Рівні</span>
+        </Button>
       </div>
 
       {teamMembers.length > 3 && (

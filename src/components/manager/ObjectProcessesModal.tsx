@@ -19,6 +19,7 @@ interface ObjectProcessesModalProps {
 export default function ObjectProcessesModal({
   open,
   onClose,
+  objectId,
   objectName
 }: ObjectProcessesModalProps) {
   const { processTypes, addProcessType, updateProcessType, deleteProcessType } = useData();
