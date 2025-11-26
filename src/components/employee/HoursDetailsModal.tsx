@@ -59,16 +59,38 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
   const handleSaveHour = async (entryId: string) => {
     setIsLoading(true);
     try {
-      const hours = typeof editHourData.hours === 'string' 
-        ? parseFloat(editHourData.hours) 
+      const newHours = typeof editHourData.hours === 'string'
+        ? parseFloat(editHourData.hours)
         : editHourData.hours;
-      
+
+      // Validation: Check if total hours for the day will exceed 12 hours
+      // Calculate daily hours EXCLUDING the current entry being edited
+      const otherHoursOnSameDay = hours
+        .filter((h) =>
+          h.userId === user?.id &&
+          h.date === editHourData.date &&
+          h.id !== entryId  // Exclude the current entry
+        )
+        .reduce((sum, h) => sum + h.hours, 0);
+
+      const totalHoursForDay = otherHoursOnSameDay + newHours;
+
+      if (totalHoursForDay > 12) {
+        toast({
+          title: 'Помилка',
+          description: `Перевищено максимум годин на день. Вже відпрацьовано ${otherHoursOnSameDay.toFixed(1)} год. Максимум 12 год/день.`,
+          variant: 'destructive'
+        });
+        setIsLoading(false);
+        return;
+      }
+
       const rate = user?.hourlyRate || 0;
-      const salary = hours * rate * (editHourData.isBusinessTrip ? 1.2 : 1);
-      
+      const salary = newHours * rate * (editHourData.isBusinessTrip ? 1.2 : 1);
+
       await updateHours(entryId, {
         date: editHourData.date,
-        hours,
+        hours: newHours,
         object: editHourData.object,
         isBusinessTrip: editHourData.isBusinessTrip,
         salary
@@ -76,12 +98,12 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
 
       await new Promise(resolve => setTimeout(resolve, 1500));
       await loadFromGoogleSheets();
-      
+
       toast({
         title: 'Успішно',
         description: 'Запис годин оновлено'
       });
-      
+
       setEditingHour(null);
     } catch (error) {
       toast({
@@ -177,6 +199,7 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
                               onChange={(e) => setEditHourData({...editHourData, hours: parseFloat(e.target.value)})}
                               className="h-8"
                               max={12}
+                              min={0.5}
                               step={0.5}
                             />
                           </div>
@@ -190,6 +213,23 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
                             className="h-8"
                           />
                         </div>
+                        {(() => {
+                          // Calculate other hours on the same day (excluding current entry)
+                          const otherHoursToday = hours
+                            .filter((h) =>
+                              h.userId === user?.id &&
+                              h.date === editHourData.date &&
+                              h.id !== entry.id
+                            )
+                            .reduce((sum, h) => sum + h.hours, 0);
+                          const availableHours = 12 - otherHoursToday;
+
+                          return otherHoursToday > 0 ? (
+                            <p className="text-xs text-slate-600 dark:text-slate-400">
+                              Інші записи на {editHourData.date}: {otherHoursToday.toFixed(1)} год. Доступно: {availableHours.toFixed(1)} год.
+                            </p>
+                          ) : null;
+                        })()}
                         <div className="flex items-center gap-2">
                           <input
                             id={`hour-trip-${entry.id}`}
