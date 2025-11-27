@@ -63,55 +63,54 @@ export default function AddEmployeeToTeamModal({ open, onClose }: AddEmployeeToT
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Додати Працівника до Команди</DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl font-bold">👥 Додати Працівника до Команди</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 sm:space-y-5">
           {currentTeamEmployees.length > 0 && (
             <div>
-              <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <h3 className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-300 mb-3">
                 У вашій команді ({currentTeamEmployees.length}):
               </h3>
               <div className="space-y-2">
                 {currentTeamEmployees.map((emp) => (
-                  <div key={emp.id} className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm">
-                    <p className="font-medium text-slate-800 dark:text-white">{emp.name}</p>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">{emp.level} • ₴{emp.hourlyRate}/год</p>
+                  <div key={emp.id} className="p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border-2 border-blue-200 dark:border-blue-800">
+                    <p className="font-semibold text-base sm:text-lg text-slate-800 dark:text-white">{emp.name}</p>
+                    <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-1">{emp.level} • ₴{emp.hourlyRate}/год</p>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          <div className="border-t pt-4">
+          <div className="border-t pt-4 sm:pt-5">
             {availableEmployees.length === 0 ? (
-              <p className="text-center text-slate-500 text-sm py-4">
+              <p className="text-center text-slate-500 text-base sm:text-lg py-6 sm:py-8">
                 Немає доступних працівників для додавання
               </p>
             ) : (
               <>
-                <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <h3 className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-300 mb-3">
                   Доступні працівники:
                 </h3>
-                <div className="space-y-2 max-h-80 overflow-y-auto">
+                <div className="space-y-2 sm:space-y-3 max-h-80 overflow-y-auto">
                   {availableEmployees.map((emp) => (
-                    <div key={emp.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                      <div>
-                        <p className="font-medium text-slate-800 dark:text-white text-sm">{emp.name}</p>
-                        <p className="text-xs text-slate-600 dark:text-slate-400">{emp.level} • ₴{emp.hourlyRate}/год</p>
+                    <div key={emp.id} className="flex items-center justify-between gap-3 p-3 sm:p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border-2 hover:border-blue-400 dark:hover:border-blue-600 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-base sm:text-lg text-slate-800 dark:text-white truncate">{emp.name}</p>
+                        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">{emp.level} • ₴{emp.hourlyRate}/год</p>
                       </div>
                       <Button
-                        size="sm"
                         onClick={() => handleAddEmployee(emp.id)}
                         disabled={loading}
-                        className="gap-1 bg-gradient-to-r from-blue-600 to-cyan-500"
+                        className="gap-2 h-10 sm:h-12 px-4 sm:px-6 text-sm sm:text-base font-semibold bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 shadow-lg active:scale-95 transition-transform flex-shrink-0"
                       >
                         {loading ? (
-                          <Loader2 className="w-3 h-3 animate-spin" />
+                          <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                         ) : (
-                          <Plus className="w-3 h-3" />
+                          <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                         )}
                         Додати
                       </Button>
@@ -122,7 +121,7 @@ export default function AddEmployeeToTeamModal({ open, onClose }: AddEmployeeToT
             )}
           </div>
 
-          <Button variant="outline" onClick={onClose} className="w-full">
+          <Button variant="outline" onClick={onClose} className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold">
             Закрити
           </Button>
         </div>

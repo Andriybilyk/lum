@@ -86,48 +86,48 @@ export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="w-[95vw] max-w-md mx-auto max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-base sm:text-lg">Записати Робочі Години</DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl font-bold">📅 Записати Робочі Години</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           <div>
-            <Label htmlFor="date">Дата</Label>
+            <Label htmlFor="date" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Дата</Label>
             <Input
               id="date"
               type="date"
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
               required
-              className="mt-1.5"
+              className="mt-2 h-12 sm:h-14 text-base sm:text-lg"
             />
           </div>
 
           {hoursWorkedToday > 0 && (
-            <div className="p-2 sm:p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                <p className="text-xs sm:text-sm text-blue-800 dark:text-blue-200">
-                  Вже відпрацьовано сьогодні: <span className="font-semibold">{hoursWorkedToday} год</span>
+            <div className="p-3 sm:p-4 bg-blue-50 dark:bg-blue-950/20 rounded-xl border-2 border-blue-200 dark:border-blue-800">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                <p className="text-sm sm:text-base font-medium text-blue-800 dark:text-blue-200">
+                  Вже відпрацьовано сьогодні: <span className="font-bold text-base sm:text-lg">{hoursWorkedToday} год</span>
                 </p>
               </div>
             </div>
           )}
 
           <div>
-            <Label htmlFor="object">Об'єкт/Проєкт</Label>
+            <Label htmlFor="object" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Об'єкт/Проєкт</Label>
             <Select
               value={formData.object}
               onValueChange={(value) => setFormData({ ...formData, object: value })}
             >
-              <SelectTrigger id="object" className="mt-1.5">
+              <SelectTrigger id="object" className="mt-2 h-12 sm:h-14 text-base sm:text-lg">
                 <SelectValue placeholder="Оберіть об'єкт" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[60vh]">
                 {objects.map((obj) => (
-                  <SelectItem key={obj.id} value={obj.name}>
+                  <SelectItem key={obj.id} value={obj.name} className="h-12 sm:h-14 text-base sm:text-lg cursor-pointer">
                     <div className="flex items-center gap-2">
                       {obj.name}
                       {obj.isBusinessTrip && (
-                        <span className="text-xs text-orange-600">🛫 Відрядження</span>
+                        <span className="text-sm sm:text-base text-orange-600 font-medium">🛫 Відрядження</span>
                       )}
                     </div>
                   </SelectItem>
@@ -135,14 +135,14 @@ export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
               </SelectContent>
             </Select>
             {isBusinessTrip && (
-              <p className="text-xs text-orange-600 dark:text-orange-400 mt-1 flex items-center gap-1">
+              <p className="text-sm sm:text-base text-orange-600 dark:text-orange-400 mt-2 flex items-center gap-2 font-medium">
                 🛫 Цей об'єкт рахується як відрядження (коефіцієнт 1.2x)
               </p>
             )}
           </div>
 
           <div>
-            <Label htmlFor="hours">Відпрацьовано Годин</Label>
+            <Label htmlFor="hours" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Відпрацьовано Годин</Label>
             <Input
               id="hours"
               type="number"
@@ -152,37 +152,37 @@ export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
               onChange={(e) => setFormData({ ...formData, hours: e.target.value })}
               placeholder="4.0"
               required
-              className="mt-1.5"
+              className="mt-2 h-12 sm:h-14 text-base sm:text-lg"
             />
-            <p className="text-xs text-slate-500 mt-1">
-              Доступно: {Math.max(0, WORK_HOURS.MAX_DAILY_HOURS - hoursWorkedToday).toFixed(1)} год (макс. {WORK_HOURS.MAX_DAILY_HOURS} год/день)
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-2 font-medium">
+              Доступно: <span className="text-blue-600 dark:text-blue-400 font-bold">{Math.max(0, WORK_HOURS.MAX_DAILY_HOURS - hoursWorkedToday).toFixed(1)} год</span> (макс. {WORK_HOURS.MAX_DAILY_HOURS} год/день)
             </p>
           </div>
 
           {formData.hours && formData.object && (
             <>
               {totalHoursToday <= WORK_HOURS.MAX_DAILY_HOURS && (
-                <div className="space-y-2">
-                  <div className="p-2 sm:p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border">
-                    <div className="space-y-1 text-xs sm:text-sm">
-                      <div className="flex justify-between gap-2">
-                        <span className="text-slate-600 dark:text-slate-400">Звичайні години:</span>
-                        <span className="font-medium text-right">{earnings.normalHours.toFixed(1)} год × ₴{user?.hourlyRate} × {earnings.baseCoefficient}x</span>
+                <div className="space-y-3">
+                  <div className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border-2">
+                    <div className="space-y-2 text-sm sm:text-base">
+                      <div className="flex justify-between gap-3">
+                        <span className="text-slate-600 dark:text-slate-400 font-medium">Звичайні години:</span>
+                        <span className="font-semibold text-right">{earnings.normalHours.toFixed(1)} год × ₴{user?.hourlyRate} × {earnings.baseCoefficient}x</span>
                       </div>
                       {earnings.overtimeHours > 0 && (
-                        <div className="flex justify-between gap-2 text-orange-600 dark:text-orange-400">
-                          <span>Понаднормові:</span>
-                          <span className="font-medium text-right">{earnings.overtimeHours.toFixed(1)} год × ₴{user?.hourlyRate} × {earnings.baseCoefficient}x × 1.5x</span>
+                        <div className="flex justify-between gap-3 text-orange-600 dark:text-orange-400">
+                          <span className="font-medium">Понаднормові:</span>
+                          <span className="font-semibold text-right">{earnings.overtimeHours.toFixed(1)} год × ₴{user?.hourlyRate} × {earnings.baseCoefficient}x × 1.5x</span>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="p-2 sm:p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
-                    <p className="text-xs sm:text-sm font-medium text-green-800 dark:text-green-200">
-                      Очікуваний Заробіток: ₴{earnings.total.toFixed(2)}
+                  <div className="p-4 sm:p-5 bg-green-50 dark:bg-green-950/20 rounded-xl border-2 border-green-200 dark:border-green-800">
+                    <p className="text-base sm:text-lg font-bold text-green-800 dark:text-green-200">
+                      💰 Очікуваний Заробіток: ₴{earnings.total.toFixed(2)}
                     </p>
-                    <p className="text-[10px] sm:text-xs text-green-600 dark:text-green-400 mt-0.5 sm:mt-1">
+                    <p className="text-sm sm:text-base text-green-600 dark:text-green-400 mt-2 font-medium">
                       Всього за день: {totalHoursToday.toFixed(1)} год
                       {totalHoursToday > WORK_HOURS.NORMAL_HOURS_LIMIT && ` (${(totalHoursToday - WORK_HOURS.NORMAL_HOURS_LIMIT).toFixed(1)} год понаднормових)`}
                     </p>
@@ -191,8 +191,8 @@ export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
               )}
 
               {totalHoursToday > WORK_HOURS.MAX_DAILY_HOURS && (
-                <div className="p-2 sm:p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
-                  <p className="text-xs sm:text-sm font-medium text-red-800 dark:text-red-200">
+                <div className="p-4 sm:p-5 bg-red-50 dark:bg-red-950/20 rounded-xl border-2 border-red-200 dark:border-red-800">
+                  <p className="text-base sm:text-lg font-bold text-red-800 dark:text-red-200">
                     ❌ Перевищено ліміт! Максимум {WORK_HOURS.MAX_DAILY_HOURS} годин на день
                   </p>
                 </div>
@@ -200,16 +200,16 @@ export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
             </>
           )}
 
-          <div className="flex gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1 h-10 sm:h-11 text-sm sm:text-base">
+          <div className="flex gap-3 pt-3">
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1 h-12 sm:h-14 text-base sm:text-lg font-semibold">
               Скасувати
             </Button>
             <Button
               type="submit"
-              className="flex-1 h-10 sm:h-11 text-sm sm:text-base bg-gradient-to-r from-blue-600 to-cyan-500"
+              className="flex-1 h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 shadow-lg active:scale-95 transition-transform"
               disabled={totalHoursToday > WORK_HOURS.MAX_DAILY_HOURS}
             >
-              Зберегти
+              ✓ Зберегти
             </Button>
           </div>
         </form>

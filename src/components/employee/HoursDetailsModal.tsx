@@ -177,27 +177,27 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
               ) : (
                 userHours.map((entry) => (
                   editingHour === entry.id ? (
-                    <Card key={entry.id} className="p-3">
-                      <div className="space-y-3">
-                        <div className="grid grid-cols-2 gap-2">
+                    <Card key={entry.id} className="p-4 sm:p-5 border-2 border-blue-200 dark:border-blue-700">
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <Label htmlFor={`hour-date-${entry.id}`} className="text-xs">Дата</Label>
+                            <Label htmlFor={`hour-date-${entry.id}`} className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Дата</Label>
                             <Input
                               id={`hour-date-${entry.id}`}
                               type="date"
                               value={editHourData.date}
                               onChange={(e) => setEditHourData({...editHourData, date: e.target.value})}
-                              className="h-8"
+                              className="h-11 sm:h-12 mt-1.5 text-base"
                             />
                           </div>
                           <div>
-                            <Label htmlFor={`hour-hours-${entry.id}`} className="text-xs">Години</Label>
+                            <Label htmlFor={`hour-hours-${entry.id}`} className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Години</Label>
                             <Input
                               id={`hour-hours-${entry.id}`}
                               type="number"
                               value={editHourData.hours}
                               onChange={(e) => setEditHourData({...editHourData, hours: parseFloat(e.target.value)})}
-                              className="h-8"
+                              className="h-11 sm:h-12 mt-1.5 text-base"
                               max={12}
                               min={0.5}
                               step={0.5}
@@ -205,12 +205,12 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
                           </div>
                         </div>
                         <div>
-                          <Label htmlFor={`hour-object-${entry.id}`} className="text-xs">Об'єкт</Label>
+                          <Label htmlFor={`hour-object-${entry.id}`} className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Об'єкт</Label>
                           <Input
                             id={`hour-object-${entry.id}`}
                             value={editHourData.object}
                             onChange={(e) => setEditHourData({...editHourData, object: e.target.value})}
-                            className="h-8"
+                            className="h-11 sm:h-12 mt-1.5 text-base"
                           />
                         </div>
                         {(() => {
@@ -225,39 +225,39 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
                           const availableHours = 12 - otherHoursToday;
 
                           return otherHoursToday > 0 ? (
-                            <p className="text-xs text-slate-600 dark:text-slate-400">
-                              Інші записи на {editHourData.date}: {otherHoursToday.toFixed(1)} год. Доступно: {availableHours.toFixed(1)} год.
+                            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 font-medium p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                              Інші записи на {editHourData.date}: <span className="font-bold">{otherHoursToday.toFixed(1)} год</span>.
+                              Доступно: <span className="font-bold text-blue-600">{availableHours.toFixed(1)} год</span>
                             </p>
                           ) : null;
                         })()}
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
                           <input
                             id={`hour-trip-${entry.id}`}
                             name={`hour-trip-${entry.id}`}
                             type="checkbox"
                             checked={editHourData.isBusinessTrip}
                             onChange={(e) => setEditHourData({...editHourData, isBusinessTrip: e.target.checked})}
-                            className="w-4 h-4"
+                            className="w-5 h-5 cursor-pointer"
                           />
-                          <Label htmlFor={`hour-trip-${entry.id}`} className="text-xs">Відрядження (1.2x)</Label>
+                          <Label htmlFor={`hour-trip-${entry.id}`} className="text-sm sm:text-base font-medium cursor-pointer">🛫 Відрядження (1.2x)</Label>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-3 pt-2">
                           <Button
-                            size="sm"
                             onClick={() => handleSaveHour(entry.id)}
                             disabled={isLoading}
-                            className="flex-1"
+                            className="flex-1 h-11 sm:h-12 text-base font-semibold bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600"
                           >
-                            <Save className="w-3 h-3 mr-1" />
+                            <Save className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                             Зберегти
                           </Button>
                           <Button
-                            size="sm"
                             variant="outline"
                             onClick={() => setEditingHour(null)}
                             disabled={isLoading}
+                            className="h-11 sm:h-12 px-4"
                           >
-                            <X className="w-3 h-3" />
+                            <X className="w-4 h-4 sm:w-5 sm:h-5" />
                           </Button>
                         </div>
                       </div>

@@ -62,28 +62,28 @@ export default function AssignWorkModal({ open, onClose }: AssignWorkModalProps)
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Призначити Роботу</DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl font-bold">📋 Призначити Роботу</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           <div>
-            <Label htmlFor="employee">Працівник</Label>
+            <Label htmlFor="employee" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Працівник</Label>
             <Select
               value={formData.employeeId}
               onValueChange={(value) => setFormData({ ...formData, employeeId: value })}
             >
-              <SelectTrigger id="employee" className="mt-1.5">
+              <SelectTrigger id="employee" className="mt-2 h-12 sm:h-14 text-base sm:text-lg">
                 <SelectValue placeholder="Оберіть працівника" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[60vh]">
                 {user && (
-                  <SelectItem key={user.id} value={user.id}>
+                  <SelectItem key={user.id} value={user.id} className="h-12 sm:h-14 text-base sm:text-lg cursor-pointer">
                     {user.name} (Я - Менеджер)
                   </SelectItem>
                 )}
                 {employees.map((emp) => (
-                  <SelectItem key={emp.id} value={emp.id}>
+                  <SelectItem key={emp.id} value={emp.id} className="h-12 sm:h-14 text-base sm:text-lg cursor-pointer">
                     {emp.name} ({emp.level})
                   </SelectItem>
                 ))}
@@ -92,29 +92,29 @@ export default function AssignWorkModal({ open, onClose }: AssignWorkModalProps)
           </div>
 
           <div>
-            <Label htmlFor="date">Дата Виконання</Label>
+            <Label htmlFor="date" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Дата Виконання</Label>
             <Input
               id="date"
               type="date"
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
               required
-              className="mt-1.5"
+              className="mt-2 h-12 sm:h-14 text-base sm:text-lg"
             />
           </div>
 
           <div>
-            <Label htmlFor="object">Об'єкт</Label>
+            <Label htmlFor="object" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Об'єкт</Label>
             <Select
               value={formData.object}
               onValueChange={(value) => setFormData({ ...formData, object: value })}
             >
-              <SelectTrigger id="object" className="mt-1.5">
+              <SelectTrigger id="object" className="mt-2 h-12 sm:h-14 text-base sm:text-lg">
                 <SelectValue placeholder="Оберіть об'єкт" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[60vh]">
                 {objects.map((obj) => (
-                  <SelectItem key={obj.id} value={obj.name}>
+                  <SelectItem key={obj.id} value={obj.name} className="h-12 sm:h-14 text-base sm:text-lg cursor-pointer">
                     {obj.name}
                   </SelectItem>
                 ))}
@@ -123,34 +123,34 @@ export default function AssignWorkModal({ open, onClose }: AssignWorkModalProps)
           </div>
 
           <div>
-            <Label htmlFor="description">Опис Роботи</Label>
+            <Label htmlFor="description" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Опис Роботи</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Детальний опис завдання..."
               required
-              className="mt-1.5 min-h-[80px]"
+              className="mt-2 min-h-[100px] text-base sm:text-lg p-3 sm:p-4"
             />
           </div>
 
           <div>
-            <Label htmlFor="notes">Додаткові Примітки</Label>
+            <Label htmlFor="notes" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Додаткові Примітки</Label>
             <Textarea
               id="notes"
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               placeholder="Додаткова інформація..."
-              className="mt-1.5 min-h-[60px]"
+              className="mt-2 min-h-[80px] text-base sm:text-lg p-3 sm:p-4"
             />
           </div>
 
-          <div className="flex gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+          <div className="flex gap-3 pt-3">
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1 h-12 sm:h-14 text-base sm:text-lg font-semibold">
               Скасувати
             </Button>
-            <Button type="submit" className="flex-1 bg-gradient-to-r from-purple-600 to-pink-500">
-              Призначити
+            <Button type="submit" className="flex-1 h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 shadow-lg active:scale-95 transition-transform">
+              ✓ Призначити
             </Button>
           </div>
         </form>
