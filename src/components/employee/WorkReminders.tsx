@@ -180,11 +180,11 @@ export default function WorkReminders() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 sm:space-y-4">
       {/* Підтверджені нагадування */}
       {confirmedReminders.length > 0 && (
-        <div className="space-y-2">
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+        <div className="space-y-2 sm:space-y-3">
+          <h3 className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-300">
             ✅ Підтверджені Завдання
           </h3>
           {confirmedReminders.map((reminder) => {
