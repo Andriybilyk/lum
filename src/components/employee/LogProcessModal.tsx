@@ -170,51 +170,53 @@ export default function LogProcessModal({ open, onClose }: LogProcessModalProps)
           <DialogTitle className="text-lg sm:text-xl font-bold">📋 Записати Процес</DialogTitle>
         </DialogHeader>
 
-        <div className="flex gap-2 sm:gap-3 mb-4 sm:mb-5">
+        <div className="flex gap-2 mb-4">
           <Button
             type="button"
             variant={mode === 'standard' ? 'default' : 'outline'}
             onClick={() => setMode('standard')}
-            className="flex-1 h-12 sm:h-14 text-sm sm:text-base font-semibold"
+            className="flex-1 h-11 sm:h-12 text-xs sm:text-sm md:text-base font-semibold px-2 sm:px-4"
           >
-            📋 Стандартний Процес
+            <span className="hidden xs:inline">📋 Стандартний</span>
+            <span className="xs:hidden">📋 Процес</span>
           </Button>
           <Button
             type="button"
             variant={mode === 'additional' ? 'default' : 'outline'}
             onClick={() => setMode('additional')}
-            className="flex-1 h-12 sm:h-14 text-sm sm:text-base font-semibold"
+            className="flex-1 h-11 sm:h-12 text-xs sm:text-sm md:text-base font-semibold px-2 sm:px-4"
           >
-            ⭐ Додаткові Роботи
+            <span className="hidden xs:inline">⭐ Додаткові</span>
+            <span className="xs:hidden">⭐ Роботи</span>
           </Button>
         </div>
 
         {mode === 'standard' ? (
-        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div>
-            <Label htmlFor="date" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Дата</Label>
+            <Label htmlFor="date" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">Дата</Label>
             <Input
               id="date"
               type="date"
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
               required
-              className="mt-2 h-12 sm:h-14 text-base sm:text-lg"
+              className="mt-1.5 h-11 sm:h-12 text-sm sm:text-base"
             />
           </div>
 
           <div>
-            <Label htmlFor="object" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Об'єкт</Label>
+            <Label htmlFor="object" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">Об'єкт</Label>
             <Select
               value={formData.object}
               onValueChange={(value) => setFormData({ ...formData, object: value, processName: '', volume: '', unit: '', rate: '' })}
             >
-              <SelectTrigger id="object" className="mt-2 h-12 sm:h-14 text-base sm:text-lg">
+              <SelectTrigger id="object" className="mt-1.5 h-11 sm:h-12 text-sm sm:text-base">
                 <SelectValue placeholder="Оберіть об'єкт" />
               </SelectTrigger>
               <SelectContent className="max-h-[60vh]">
                 {objects.map((obj) => (
-                  <SelectItem key={obj.id} value={obj.name} className="h-12 sm:h-14 text-base sm:text-lg cursor-pointer">
+                  <SelectItem key={obj.id} value={obj.name} className="h-11 sm:h-12 text-sm sm:text-base cursor-pointer">
                     {obj.name}
                   </SelectItem>
                 ))}
@@ -223,19 +225,22 @@ export default function LogProcessModal({ open, onClose }: LogProcessModalProps)
           </div>
 
           <div>
-            <Label htmlFor="processName" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Назва Процесу</Label>
+            <Label htmlFor="processName" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">Назва Процесу</Label>
             <Select
               value={formData.processName}
               onValueChange={handleProcessSelect}
               disabled={!formData.object}
             >
-              <SelectTrigger id="processName" className="mt-2 h-12 sm:h-14 text-base sm:text-lg">
+              <SelectTrigger id="processName" className="mt-1.5 h-11 sm:h-12 text-sm sm:text-base">
                 <SelectValue placeholder={formData.object ? "Оберіть процес" : "Спочатку оберіть об'єкт"} />
               </SelectTrigger>
               <SelectContent className="max-h-[60vh]">
                 {availableProcesses.map((process) => (
-                  <SelectItem key={process.id} value={process.name} className="h-12 sm:h-14 text-base sm:text-lg cursor-pointer">
-                    {process.name} - ₴{process.rate}/{process.unit}
+                  <SelectItem key={process.id} value={process.name} className="h-11 sm:h-12 text-sm sm:text-base cursor-pointer">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 py-1">
+                      <span className="font-medium">{process.name}</span>
+                      <span className="text-xs sm:text-sm text-slate-500">₴{process.rate}/{process.unit}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -244,9 +249,9 @@ export default function LogProcessModal({ open, onClose }: LogProcessModalProps)
 
           {formData.processName && (
             <>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 <div>
-                  <Label htmlFor="volume" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Обсяг</Label>
+                  <Label htmlFor="volume" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">Обсяг</Label>
                   <Input
                     id="volume"
                     type="number"
@@ -255,50 +260,50 @@ export default function LogProcessModal({ open, onClose }: LogProcessModalProps)
                     onChange={(e) => setFormData({ ...formData, volume: e.target.value })}
                     placeholder="10"
                     required
-                    className="mt-2 h-12 sm:h-14 text-base sm:text-lg"
+                    className="mt-1.5 h-11 sm:h-12 text-sm sm:text-base"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="unit" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Одиниця</Label>
+                  <Label htmlFor="unit" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">Од.</Label>
                   <Input
                     id="unit"
                     value={formData.unit}
                     readOnly
-                    className="mt-2 h-12 sm:h-14 text-base sm:text-lg bg-slate-50 dark:bg-slate-800"
+                    className="mt-1.5 h-11 sm:h-12 text-sm sm:text-base bg-slate-50 dark:bg-slate-800"
                   />
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="rate" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Ставка за Одиницю (₴)</Label>
+                <Label htmlFor="rate" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">Ставка (₴)</Label>
                 <Input
                   id="rate"
                   type="number"
                   step="0.01"
                   value={formData.rate}
                   readOnly
-                  className="mt-2 h-12 sm:h-14 text-base sm:text-lg bg-slate-50 dark:bg-slate-800"
+                  className="mt-1.5 h-11 sm:h-12 text-sm sm:text-base bg-slate-50 dark:bg-slate-800"
                 />
               </div>
 
               {formData.volume && formData.rate && (
-                <div className="p-4 sm:p-5 bg-green-50 dark:bg-green-950/20 rounded-xl border-2 border-green-200 dark:border-green-800">
-                  <p className="text-base sm:text-lg font-bold text-green-800 dark:text-green-200">
-                    💰 Очікуваний Заробіток: ₴{(parseFloat(formData.volume) * parseFloat(formData.rate)).toFixed(2)}
+                <div className="p-3 sm:p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border-2 border-green-200 dark:border-green-800">
+                  <p className="text-sm sm:text-base font-bold text-green-800 dark:text-green-200">
+                    💰 Заробіток: ₴{(parseFloat(formData.volume) * parseFloat(formData.rate)).toFixed(2)}
                   </p>
                 </div>
               )}
             </>
           )}
 
-          <div className="flex gap-3 pt-3">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1 h-12 sm:h-14 text-base sm:text-lg font-semibold">
+          <div className="flex gap-2 sm:gap-3 pt-2">
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold">
               Скасувати
             </Button>
             <Button
               type="submit"
-              className="flex-1 h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 shadow-lg active:scale-95 transition-transform"
+              className="flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 shadow-lg active:scale-95 transition-transform"
               disabled={!formData.object || !formData.processName || !formData.volume}
             >
               ✓ Зберегти
@@ -306,31 +311,31 @@ export default function LogProcessModal({ open, onClose }: LogProcessModalProps)
           </div>
         </form>
         ) : (
-        <form onSubmit={handleAdditionalWorkSubmit} className="space-y-4 sm:space-y-5">
+        <form onSubmit={handleAdditionalWorkSubmit} className="space-y-3 sm:space-y-4">
           <div>
-            <Label htmlFor="aw-date" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Дата</Label>
+            <Label htmlFor="aw-date" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">Дата</Label>
             <Input
               id="aw-date"
               type="date"
               value={additionalWorkData.date}
               onChange={(e) => setAdditionalWorkData({ ...additionalWorkData, date: e.target.value })}
               required
-              className="mt-2 h-12 sm:h-14 text-base sm:text-lg"
+              className="mt-1.5 h-11 sm:h-12 text-sm sm:text-base"
             />
           </div>
 
           <div>
-            <Label htmlFor="aw-object" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Об'єкт</Label>
+            <Label htmlFor="aw-object" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">Об'єкт</Label>
             <Select
               value={additionalWorkData.object}
               onValueChange={(value) => setAdditionalWorkData({ ...additionalWorkData, object: value })}
             >
-              <SelectTrigger id="aw-object" className="mt-2 h-12 sm:h-14 text-base sm:text-lg">
+              <SelectTrigger id="aw-object" className="mt-1.5 h-11 sm:h-12 text-sm sm:text-base">
                 <SelectValue placeholder="Оберіть об'єкт" />
               </SelectTrigger>
               <SelectContent className="max-h-[60vh]">
                 {objects.map((obj) => (
-                  <SelectItem key={obj.id} value={obj.name} className="h-12 sm:h-14 text-base sm:text-lg cursor-pointer">
+                  <SelectItem key={obj.id} value={obj.name} className="h-11 sm:h-12 text-sm sm:text-base cursor-pointer">
                     {obj.name}
                   </SelectItem>
                 ))}
@@ -339,43 +344,43 @@ export default function LogProcessModal({ open, onClose }: LogProcessModalProps)
           </div>
 
           <div>
-            <Label htmlFor="aw-workName" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Назва Робіт</Label>
+            <Label htmlFor="aw-workName" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">Назва Робіт</Label>
             <Input
               id="aw-workName"
               value={additionalWorkData.workName}
               onChange={(e) => setAdditionalWorkData({ ...additionalWorkData, workName: e.target.value })}
-              placeholder="Наприклад: Вивіз сміття, Прибирання..."
+              placeholder="Вивіз сміття, Прибирання..."
               required
-              className="mt-2 h-12 sm:h-14 text-base sm:text-lg"
+              className="mt-1.5 h-11 sm:h-12 text-sm sm:text-base"
             />
           </div>
 
           <div>
-            <Label htmlFor="aw-description" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Опис (опціонально)</Label>
+            <Label htmlFor="aw-description" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">Опис (не обов'язково)</Label>
             <Input
               id="aw-description"
               value={additionalWorkData.description}
               onChange={(e) => setAdditionalWorkData({ ...additionalWorkData, description: e.target.value })}
-              placeholder="Додаткові деталі про роботи..."
-              className="mt-2 h-12 sm:h-14 text-base sm:text-lg"
+              placeholder="Додаткові деталі..."
+              className="mt-1.5 h-11 sm:h-12 text-sm sm:text-base"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <div>
-              <Label htmlFor="aw-unit" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Одиниця</Label>
+              <Label htmlFor="aw-unit" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">Од.</Label>
               <Input
                 id="aw-unit"
                 value={additionalWorkData.unit}
                 onChange={(e) => setAdditionalWorkData({ ...additionalWorkData, unit: e.target.value })}
-                placeholder="шт, м², кг..."
+                placeholder="шт, м²..."
                 required
-                className="mt-2 h-12 sm:h-14 text-base sm:text-lg"
+                className="mt-1.5 h-11 sm:h-12 text-sm sm:text-base"
               />
             </div>
 
             <div>
-              <Label htmlFor="aw-volume" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Кількість</Label>
+              <Label htmlFor="aw-volume" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">Кільк.</Label>
               <Input
                 id="aw-volume"
                 type="number"
@@ -384,13 +389,13 @@ export default function LogProcessModal({ open, onClose }: LogProcessModalProps)
                 onChange={(e) => setAdditionalWorkData({ ...additionalWorkData, volume: e.target.value })}
                 placeholder="10"
                 required
-                className="mt-2 h-12 sm:h-14 text-base sm:text-lg"
+                className="mt-1.5 h-11 sm:h-12 text-sm sm:text-base"
               />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="aw-rate" className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200">Ставка за Одиницю (₴)</Label>
+            <Label htmlFor="aw-rate" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">Ставка (₴)</Label>
             <Input
               id="aw-rate"
               type="number"
@@ -399,25 +404,25 @@ export default function LogProcessModal({ open, onClose }: LogProcessModalProps)
               onChange={(e) => setAdditionalWorkData({ ...additionalWorkData, rate: e.target.value })}
               placeholder="100"
               required
-              className="mt-2 h-12 sm:h-14 text-base sm:text-lg"
+              className="mt-1.5 h-11 sm:h-12 text-sm sm:text-base"
             />
           </div>
 
           {additionalWorkData.volume && additionalWorkData.rate && (
-            <div className="p-4 sm:p-5 bg-blue-50 dark:bg-blue-950/20 rounded-xl border-2 border-blue-200 dark:border-blue-800">
-              <p className="text-base sm:text-lg font-bold text-blue-800 dark:text-blue-200">
-                ⭐ Сума для затвердження: ₴{(parseFloat(additionalWorkData.volume) * parseFloat(additionalWorkData.rate)).toFixed(2)}
+            <div className="p-3 sm:p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border-2 border-blue-200 dark:border-blue-800">
+              <p className="text-sm sm:text-base font-bold text-blue-800 dark:text-blue-200">
+                ⭐ Сума: ₴{(parseFloat(additionalWorkData.volume) * parseFloat(additionalWorkData.rate)).toFixed(2)}
               </p>
             </div>
           )}
 
-          <div className="flex gap-3 pt-3">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1 h-12 sm:h-14 text-base sm:text-lg font-semibold">
+          <div className="flex gap-2 sm:gap-3 pt-2">
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold">
               Скасувати
             </Button>
             <Button
               type="submit"
-              className="flex-1 h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-amber-600 to-orange-500 hover:from-amber-700 hover:to-orange-600 shadow-lg active:scale-95 transition-transform"
+              className="flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold bg-gradient-to-r from-amber-600 to-orange-500 hover:from-amber-700 hover:to-orange-600 shadow-lg active:scale-95 transition-transform"
               disabled={!additionalWorkData.object || !additionalWorkData.workName || !additionalWorkData.unit || !additionalWorkData.volume || !additionalWorkData.rate}
             >
               ✓ Надіслати
