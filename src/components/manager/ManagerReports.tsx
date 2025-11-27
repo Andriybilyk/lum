@@ -4,9 +4,11 @@ import { useData } from '@/contexts/DataContext';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Clock, DollarSign, Eye } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Clock, DollarSign, Eye, Users, Building2 } from 'lucide-react';
 import { FeatureErrorBoundary } from '@/components/providers/FeatureErrorBoundary';
 import EmployeeReportDetailsModal from './EmployeeReportDetailsModal';
+import ObjectReports from './ObjectReports';
 import ExportMenu from '@/components/export/ExportMenu';
 
 export default function ManagerReports() {
@@ -51,9 +53,23 @@ export default function ManagerReports() {
         {/* Заголовок по центру */}
         <div className="pt-3 sm:pt-4 pb-2 text-center">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800 dark:text-white">
-            📊 Звіти Команди
+            📊 Звіти
           </h2>
         </div>
+
+        <Tabs defaultValue="team" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="team" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Команда
+            </TabsTrigger>
+            <TabsTrigger value="objects" className="flex items-center gap-2">
+              <Building2 className="w-4 h-4" />
+              Об'єкти
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="team"  className="mt-0">
 
       <Card className="p-3 sm:p-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
@@ -168,15 +184,21 @@ export default function ManagerReports() {
         />
       </div>
 
-      {selectedEmployee && (
-        <EmployeeReportDetailsModal
-          open={!!selectedEmployee}
-          onClose={() => setSelectedEmployee(null)}
-          employeeId={selectedEmployee.id}
-          employeeName={selectedEmployee.name}
-          month={selectedMonth}
-        />
-      )}
+          {selectedEmployee && (
+            <EmployeeReportDetailsModal
+              open={!!selectedEmployee}
+              onClose={() => setSelectedEmployee(null)}
+              employeeId={selectedEmployee.id}
+              employeeName={selectedEmployee.name}
+              month={selectedMonth}
+            />
+          )}
+          </TabsContent>
+
+          <TabsContent value="objects" className="mt-0">
+            <ObjectReports />
+          </TabsContent>
+        </Tabs>
       </div>
     </FeatureErrorBoundary>
   );

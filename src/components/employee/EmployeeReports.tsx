@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
-import { Clock, Briefcase, DollarSign } from 'lucide-react';
+import { Clock, Briefcase, DollarSign, Package } from 'lucide-react';
 import { useData } from '@/contexts/DataContext';
 import { useUser } from '@/contexts/UserContext';
 import ExportMenu from '@/components/export/ExportMenu';
@@ -13,7 +13,7 @@ export default function EmployeeReports() {
   const [selectedMonth, setSelectedMonth] = useState('2024-01');
 
   const report = useMemo(() => {
-    return user ? getEmployeeReport(user.id, selectedMonth) : { hours: [], processes: [], totalHours: 0, totalEarnings: 0 };
+    return user ? getEmployeeReport(user.id, selectedMonth) : { hours: [], processes: [], materials: [], totalHours: 0, totalEarnings: 0 };
   }, [user, selectedMonth, getEmployeeReport]);
 
   const hourEarnings = report.hours.reduce((sum, h) => sum + h.earnings, 0);
@@ -37,6 +37,15 @@ export default function EmployeeReports() {
         Одиниця: p.unit,
         Ставка: p.rate,
         Заробіток: p.earnings,
+      })),
+      ...report.materials.map(m => ({
+        Дата: m.date,
+        Об_єкт: m.object,
+        Тип: 'Матеріали',
+        Назва: m.materialName,
+        Кількість: m.quantity,
+        Одиниця: m.unit,
+        Примітки: m.notes || '',
       })),
     ];
   }, [report]);
@@ -62,7 +71,7 @@ export default function EmployeeReports() {
           />
         </div>
 
-        <div className="grid grid-cols-3 gap-3 mb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
           <Card className="p-3 bg-gradient-to-br from-blue-500 to-cyan-400 text-white">
             <Clock className="w-4 h-4 mb-1 opacity-80" />
             <p className="text-2xl font-bold">{report.totalHours.toFixed(1)}</p>
@@ -73,6 +82,11 @@ export default function EmployeeReports() {
             <p className="text-2xl font-bold">{report.processes.length}</p>
             <p className="text-xs opacity-80">Процесів</p>
           </Card>
+          <Card className="p-3 bg-gradient-to-br from-amber-600 to-orange-500 text-white">
+            <Package className="w-4 h-4 mb-1 opacity-80" />
+            <p className="text-2xl font-bold">{report.materials.length}</p>
+            <p className="text-xs opacity-80">Матеріалів</p>
+          </Card>
           <Card className="p-3 bg-gradient-to-br from-green-500 to-emerald-400 text-white">
             <DollarSign className="w-4 h-4 mb-1 opacity-80" />
             <p className="text-2xl font-bold">₴{(report.totalEarnings / 1000).toFixed(1)}k</p>
@@ -81,9 +95,10 @@ export default function EmployeeReports() {
         </div>
 
         <Tabs defaultValue="hours" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="hours">Години</TabsTrigger>
             <TabsTrigger value="processes">Процеси</TabsTrigger>
+            <TabsTrigger value="materials">Матеріали</TabsTrigger>
           </TabsList>
 
           <TabsContent value="hours" className="space-y-2 mt-4">
@@ -155,6 +170,47 @@ export default function EmployeeReports() {
                     <div className="text-right">
                       <p className="text-lg font-bold text-green-600 dark:text-green-400">
                         ₴{entry.earnings}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            )}
+          </TabsContent>
+
+          <TabsContent value="materials" className="space-y-2 mt-4">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Використані Матеріали
+              </h4>
+              <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+                {report.materials.length} записів
+              </p>
+            </div>
+            {report.materials.length === 0 ? (
+              <Card className="p-4 text-center">
+                <p className="text-sm text-slate-500">Немає записів за цей місяць</p>
+              </Card>
+            ) : (
+              report.materials.map((entry) => (
+                <Card key={entry.id} className="p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-800 dark:text-white">
+                        {entry.materialName}
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        {entry.object} • {entry.date}
+                      </p>
+                      {entry.notes && (
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 italic">
+                          {entry.notes}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-amber-600 dark:text-amber-400">
+                        {entry.quantity} {entry.unit}
                       </p>
                     </div>
                   </div>

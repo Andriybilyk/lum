@@ -138,6 +138,15 @@ export interface EmployeeReport {
     rate: number;
     earnings: number;
   }>;
+  materials: Array<{
+    id: string;
+    date: string;
+    object: string;
+    materialName: string;
+    quantity: number;
+    unit: string;
+    notes?: string;
+  }>;
   totalHours: number;
   totalEarnings: number;
 }

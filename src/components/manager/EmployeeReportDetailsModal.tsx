@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { DollarSign, Clock, TrendingUp, Calendar, Briefcase, Edit2, Trash2, Check, X, Download } from 'lucide-react';
+import { DollarSign, Clock, TrendingUp, Calendar, Briefcase, Edit2, Trash2, Check, X, Download, Package } from 'lucide-react';
 import { useData } from '@/contexts/DataContext';
 import { useToast } from '@/components/ui/use-toast';
 import { exportEmployeeReport } from '@/services/reportExport';
@@ -235,7 +235,7 @@ export default function EmployeeReportDetailsModal({
           </Card>
 
           {/* Розбивка по типах */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <Card className="p-4 bg-gradient-to-br from-blue-500 to-cyan-400 text-white">
               <Clock className="w-4 h-4 mb-1 opacity-80" />
               <p className="text-xs opacity-80">Годин</p>
@@ -250,6 +250,11 @@ export default function EmployeeReportDetailsModal({
               <Briefcase className="w-4 h-4 mb-1 opacity-80" />
               <p className="text-xs opacity-80">За Процеси</p>
               <p className="text-xl font-bold">₴{processEarnings.toLocaleString()}</p>
+            </Card>
+            <Card className="p-4 bg-gradient-to-br from-amber-600 to-orange-500 text-white">
+              <Package className="w-4 h-4 mb-1 opacity-80" />
+              <p className="text-xs opacity-80">Матеріали</p>
+              <p className="text-2xl font-bold">{report.materials.length}</p>
             </Card>
           </div>
 
@@ -464,8 +469,50 @@ export default function EmployeeReportDetailsModal({
             </div>
           )}
 
+          {/* Деталі по матеріалах */}
+          {report.materials.length > 0 && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                <Package className="w-4 h-4" />
+                Використані Матеріали ({report.materials.length})
+              </h3>
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                {report.materials.map((item) => (
+                  <Card key={item.id} className="p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-slate-800 dark:text-white">
+                          {item.materialName}
+                        </p>
+                        <div className="flex items-center gap-3 mt-1">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(item.date).toLocaleDateString('uk-UA')}
+                          </p>
+                          <p className="text-xs text-slate-600 dark:text-slate-400">
+                            {item.object}
+                          </p>
+                        </div>
+                        {item.notes && (
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 italic">
+                            {item.notes}
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+                          {item.quantity} {item.unit}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Якщо немає даних */}
-          {report.hours.length === 0 && report.processes.length === 0 && (
+          {report.hours.length === 0 && report.processes.length === 0 && report.materials.length === 0 && (
             <Card className="p-6">
               <p className="text-center text-slate-500">
                 Немає даних за обраний місяць
@@ -476,7 +523,7 @@ export default function EmployeeReportDetailsModal({
           <div className="flex gap-2">
             <Button
               onClick={handleExportReport}
-              disabled={isExporting || (report.hours.length === 0 && report.processes.length === 0)}
+              disabled={isExporting || (report.hours.length === 0 && report.processes.length === 0 && report.materials.length === 0)}
               className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-500"
             >
               <Download className="w-4 h-4 mr-2" />

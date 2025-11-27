@@ -1023,7 +1023,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const empProcesses = processes.filter(p =>
       p.userId === userId && p.date && p.date.startsWith(month)
     );
-    
+
+    // Фільтруємо матеріали за місяцем
+    const empMaterials = materials.filter(m =>
+      m.userId === userId && m.date && m.date.startsWith(month)
+    );
+
     // Форматуємо години
     const formattedHours = empHours.map(h => ({
       id: h.id,
@@ -1033,7 +1038,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       businessTrip: h.isBusinessTrip,
       earnings: h.salary,
     }));
-    
+
     // Форматуємо процеси
     const formattedProcesses = empProcesses.map(p => ({
       id: p.id,
@@ -1045,18 +1050,30 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       rate: p.rate,
       earnings: p.salary,
     }));
-    
+
+    // Форматуємо матеріали
+    const formattedMaterials = empMaterials.map(m => ({
+      id: m.id,
+      date: m.date,
+      object: m.object,
+      materialName: m.materialName,
+      quantity: m.quantity,
+      unit: m.unit,
+      notes: m.notes,
+    }));
+
     // Рахуємо загальні години
     const totalHours = empHours.reduce((sum, h) => sum + h.hours, 0);
-    
+
     // Рахуємо загальний заробіток
     const hoursEarnings = empHours.reduce((sum, h) => sum + h.salary, 0);
     const processEarnings = empProcesses.reduce((sum, p) => sum + p.salary, 0);
     const totalEarnings = hoursEarnings + processEarnings;
-    
+
     return {
       hours: formattedHours,
       processes: formattedProcesses,
+      materials: formattedMaterials,
       totalHours,
       totalEarnings,
     };
