@@ -15,7 +15,8 @@ import type {
   ObjectType,
   ProcessType,
   AdditionalWork,
-  Assignment
+  Assignment,
+  Material
 } from '../types';
 
 /**
@@ -36,7 +37,8 @@ export async function loadAllDataParallel() {
     objectsResult,
     processTypesResult,
     assignmentsResult,
-    additionalWorksResult
+    additionalWorksResult,
+    materialsResult
   ] = await Promise.allSettled([
     readSheet(CONFIG.GOOGLE_SHEETS.RANGES.USERS),
     readSheet(CONFIG.GOOGLE_SHEETS.RANGES.HOURS),
@@ -46,6 +48,7 @@ export async function loadAllDataParallel() {
     readSheet(CONFIG.GOOGLE_SHEETS.RANGES.PROCESS_TYPES),
     readSheet(CONFIG.GOOGLE_SHEETS.RANGES.ASSIGNMENTS),
     readSheet(CONFIG.GOOGLE_SHEETS.RANGES.ADDITIONAL_WORKS),
+    readSheet(CONFIG.GOOGLE_SHEETS.RANGES.MATERIALS),
   ]);
 
   const endTime = Date.now();
@@ -61,6 +64,7 @@ export async function loadAllDataParallel() {
     processTypes: processProcessTypes(processTypesResult),
     assignments: processAssignments(assignmentsResult),
     additionalWorks: processAdditionalWorks(additionalWorksResult),
+    materials: processMaterials(materialsResult),
   };
 }
 
@@ -275,4 +279,32 @@ function processAdditionalWorks(result: PromiseSettledResult<any[]>): Additional
 
   if (isDevelopment()) logger.debug(`✅ Loaded ${works.length} additional works`, 'DataLoader');
   return works;
+}
+
+function processMaterials(result: PromiseSettledResult<any[]>): Material[] {
+  if (result.status === 'rejected') {
+    if (isDevelopment()) logger.warn('Could not load materials:', result.reason, 'DataLoader');
+    return [];
+  }
+
+  const data = result.value;
+  if (!data || data.length <= 1) {
+    return [];
+  }
+
+  const materials = data.slice(1).map((row: string[]) => ({
+    id: cleanId(row[0]),
+    userId: cleanId(row[1]),
+    date: row[2],
+    object: row[3],
+    materialName: row[4],
+    quantity: parseFloatSafe(row[5]),
+    unit: row[6],
+    notes: row[7] || '',
+    createdAt: row[8] || new Date().toISOString(),
+    updatedAt: row[8] || new Date().toISOString(),
+  }));
+
+  if (isDevelopment()) logger.debug(`✅ Loaded ${materials.length} materials`, 'DataLoader');
+  return materials;
 }

@@ -106,6 +106,19 @@ export interface AdditionalWork {
   updatedAt: string;
 }
 
+export interface Material {
+  id: string;
+  userId: string;
+  date: string;
+  object: string;
+  materialName: string;
+  quantity: number;
+  unit: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface EmployeeReport {
   hours: Array<{
     id: string;

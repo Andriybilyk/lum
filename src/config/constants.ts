@@ -22,6 +22,7 @@ export const CONFIG = {
       PROCESS_TYPES: 'ProcessTypes!A:F',
       ASSIGNMENTS: 'Assignments!A:G',
       ADDITIONAL_WORKS: 'AdditionalWorks!A:M',
+      MATERIALS: 'Materials!A:I',
     },
 
     // Sheet row indexes (0-based)
@@ -34,6 +35,7 @@ export const CONFIG = {
       PROCESS_TYPES: { ID: 0, NAME: 1, OBJECT: 2, RATE: 3, UNIT: 4, PLANNED_VOLUME: 5 },
       ASSIGNMENTS: { ID: 0, EMPLOYEE_ID: 1, MANAGER_ID: 2, DATE: 3, DESCRIPTION: 4, NOTES: 5, STATUS: 6 },
       ADDITIONAL_WORKS: { ID: 0, USER_ID: 1, MANAGER_ID: 2, OBJECT_NAME: 3, DATE: 4, WORK_NAME: 5, DESCRIPTION: 6, UNIT: 7, VOLUME: 8, RATE: 9, SALARY: 10, STATUS: 11, CREATED_AT: 12 },
+      MATERIALS: { ID: 0, USER_ID: 1, DATE: 2, OBJECT: 3, MATERIAL_NAME: 4, QUANTITY: 5, UNIT: 6, NOTES: 7, CREATED_AT: 8 },
     },
   },
 

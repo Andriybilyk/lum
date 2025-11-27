@@ -19,6 +19,7 @@ import type {
   ObjectType,
   ProcessType,
   AdditionalWork,
+  Material,
   TeamReport,
   EmployeeReport
 } from '../types';
@@ -33,6 +34,7 @@ interface DataContextType {
   objects: ObjectType[];
   processTypes: ProcessType[];
   additionalWorks: AdditionalWork[];
+  materials: Material[];
   
   // Actions
   addUser: (user: Omit<User, 'id'> | User) => Promise<void>;
@@ -57,6 +59,8 @@ interface DataContextType {
   updateUser: (userId: string, updates: Partial<Omit<User, 'id'>>) => Promise<void>;
   addAdditionalWork: (work: Omit<AdditionalWork, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateAdditionalWork: (id: string, updates: Partial<Omit<AdditionalWork, 'id' | 'userId' | 'managerId' | 'createdAt' | 'updatedAt'>>) => Promise<void>;
+  addMaterial: (material: Omit<Material, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  deleteMaterial: (id: string) => Promise<void>;
 
   // Reports
   getTeamReport: (month: string) => TeamReport[];
@@ -87,6 +91,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [objects, setObjects] = useState<ObjectType[]>([]);
   const [processTypes, setProcessTypes] = useState<ProcessType[]>([]);
   const [additionalWorks, setAdditionalWorks] = useState<AdditionalWork[]>([]);
+  const [materials, setMaterials] = useState<Material[]>([]);
 
   // LocalStorage helpers для швидкого кешування
   const CACHE_KEY = 'timetracker_data_cache';
@@ -238,6 +243,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setProcessTypes(data.processTypes);
       setAssignments(data.assignments);
       setAdditionalWorks(data.additionalWorks);
+      setMaterials(data.materials || []);
 
       // Зберігаємо в localStorage для наступного разу
       saveToLocalStorage(data);
@@ -1227,6 +1233,66 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Materials functions
+  const addMaterial = async (materialData: Omit<Material, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const id = Date.now().toString();
+    const now = new Date().toISOString();
+    const newMaterial: Material = {
+      ...materialData,
+      id,
+      createdAt: now,
+      updatedAt: now
+    };
+
+    setMaterials(prev => [...prev, newMaterial]);
+
+    if (isConfigured) {
+      try {
+        await appendSheet(CONFIG.GOOGLE_SHEETS.RANGES.MATERIALS, [[
+          parseInt(id),
+          parseInt(materialData.userId),
+          materialData.date,
+          materialData.object,
+          materialData.materialName,
+          materialData.quantity,
+          materialData.unit,
+          materialData.notes || '',
+          now
+        ]]);
+        logger.debug('✅ Material added:', newMaterial, 'DataContext');
+      } catch (error) {
+        logger.error('Failed to save material to sheets:', error, 'DataContext');
+        // Rollback on error
+        setMaterials(prev => prev.filter(m => m.id !== id));
+        throw error;
+      }
+    }
+  };
+
+  const deleteMaterial = async (id: string) => {
+    const materialToDelete = materials.find(m => m.id === id);
+    if (!materialToDelete) {
+      logger.error('Material not found:', id, 'DataContext');
+      return;
+    }
+
+    // Optimistic update
+    setMaterials(prev => prev.filter(m => m.id !== id));
+
+    if (isConfigured) {
+      try {
+        const rowIndex = materials.findIndex(m => m.id === id) + 2; // +2 for header row and 1-based indexing
+        await writeSheet(`Materials!A${rowIndex}:I${rowIndex}`, [['', '', '', '', '', '', '', '', '']]);
+        logger.debug('✅ Material deleted:', id, 'DataContext');
+      } catch (error) {
+        logger.error('Failed to delete material from sheets:', error, 'DataContext');
+        // Rollback on error
+        setMaterials(prev => [...prev, materialToDelete]);
+        throw error;
+      }
+    }
+  };
+
   const value: DataContextType = {
     syncWithGoogleSheets,
     loadFromGoogleSheets: loadDataFromSheets,
@@ -1241,6 +1307,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     objects,
     processTypes,
     additionalWorks,
+    materials,
     addUser,
     addHours,
     updateHours,
@@ -1263,6 +1330,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updateUser,
     addAdditionalWork,
     updateAdditionalWork,
+    addMaterial,
+    deleteMaterial,
     getTeamReport,
     getEmployeeReport,
   };
