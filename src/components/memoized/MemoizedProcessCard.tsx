@@ -27,39 +27,48 @@ const MemoizedProcessCardComponent = memo(
     }, [process.id, onDelete]);
 
     return (
-      <Card className="p-3">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <p className="text-sm font-medium text-slate-800 dark:text-white">
+      <Card className="p-3 sm:p-4 hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm sm:text-base font-semibold text-slate-800 dark:text-white mb-1.5">
               {process.processName}
             </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              {process.date} • {process.volume} {process.unit} × ₴{process.rate?.toFixed(0) || (process.volume ? (process.salary / process.volume).toFixed(0) : '0')}
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mb-2">
+              📅 {process.date}
             </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-semibold text-green-600 dark:text-green-400">
-              ₴{process.salary.toFixed(0)}
-            </p>
-            <div className="flex gap-1">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleEdit}
-                disabled={isLoading}
-              >
-                <Edit2 className="w-3 h-3" />
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-red-600"
-                onClick={handleDelete}
-                disabled={isLoading}
-              >
-                <Trash2 className="w-3 h-3" />
-              </Button>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <p className="text-sm sm:text-base font-bold text-purple-600 dark:text-purple-400">
+                {process.volume} {process.unit}
+              </p>
+              <span className="text-xs sm:text-sm text-slate-400">×</span>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                ₴{process.rate?.toFixed(0) || (process.volume ? (process.salary / process.volume).toFixed(0) : '0')}
+              </p>
+              <span className="text-xs sm:text-sm text-slate-400">=</span>
+              <p className="text-base sm:text-lg font-bold text-green-600 dark:text-green-400">
+                ₴{process.salary.toFixed(0)}
+              </p>
             </div>
+          </div>
+          <div className="flex gap-2 sm:flex-col sm:gap-2 justify-end sm:justify-start">
+            <Button
+              variant="outline"
+              onClick={handleEdit}
+              disabled={isLoading}
+              className="flex-1 sm:flex-none h-9 sm:h-10 px-3 sm:px-4 text-sm hover:bg-purple-50 hover:text-purple-600 hover:border-purple-300 dark:hover:bg-purple-950/20"
+            >
+              <Edit2 className="w-4 h-4 sm:mr-1.5" />
+              <span className="hidden sm:inline">Редагувати</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1 sm:flex-none h-9 sm:h-10 px-3 sm:px-4 text-sm text-red-600 hover:bg-red-50 hover:border-red-300 dark:hover:bg-red-950/20"
+              onClick={handleDelete}
+              disabled={isLoading}
+            >
+              <Trash2 className="w-4 h-4 sm:mr-1.5" />
+              <span className="hidden sm:inline">Видалити</span>
+            </Button>
           </div>
         </div>
       </Card>

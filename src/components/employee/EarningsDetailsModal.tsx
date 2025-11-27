@@ -34,64 +34,66 @@ export default function EarningsDetailsModal({ open, onClose, month, year }: Ear
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <DollarSign className="w-5 h-5 text-green-600" />
-            Заробіток - {months[parseInt(month) - 1]} {year.padStart(4, '0')}
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg font-bold">
+            <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0" />
+            <span className="truncate">💰 Заробіток - {months[parseInt(month) - 1]} {year.padStart(4, '0')}</span>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {/* Загальний заробіток */}
-          <Card className="p-4 bg-gradient-to-br from-green-500 to-emerald-400 text-white">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-white/20 rounded-xl">
-                <TrendingUp className="w-6 h-6" />
+          <Card className="p-4 sm:p-5 bg-gradient-to-br from-green-500 to-emerald-400 text-white">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2.5 sm:p-3 bg-white/20 rounded-xl flex-shrink-0">
+                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div>
-                <p className="text-sm opacity-80">Загальний Заробіток</p>
-                <p className="text-3xl font-bold">₴{totalEarnings.toLocaleString()}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm opacity-80">Загальний Заробіток</p>
+                <p className="text-2xl sm:text-3xl font-bold truncate">₴{totalEarnings.toLocaleString()}</p>
               </div>
             </div>
           </Card>
 
           {/* Розбивка */}
-          <div className="grid grid-cols-2 gap-3">
-            <Card className="p-4 bg-gradient-to-br from-blue-500 to-cyan-400 text-white">
-              <p className="text-xs opacity-80">За Години</p>
-              <p className="text-2xl font-bold">₴{hourlyTotal.toLocaleString()}</p>
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <Card className="p-3 sm:p-4 bg-gradient-to-br from-blue-500 to-cyan-400 text-white">
+              <p className="text-[10px] sm:text-xs opacity-80">За Години</p>
+              <p className="text-xl sm:text-2xl font-bold">₴{hourlyTotal.toLocaleString()}</p>
             </Card>
-            <Card className="p-4 bg-gradient-to-br from-purple-500 to-pink-400 text-white">
-              <p className="text-xs opacity-80">За Процеси</p>
-              <p className="text-2xl font-bold">₴{processesTotal.toLocaleString()}</p>
+            <Card className="p-3 sm:p-4 bg-gradient-to-br from-purple-500 to-pink-400 text-white">
+              <p className="text-[10px] sm:text-xs opacity-80">За Процеси</p>
+              <p className="text-xl sm:text-2xl font-bold">₴{processesTotal.toLocaleString()}</p>
             </Card>
           </div>
 
           {/* Деталі по годинах */}
           <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Заробіток за Години
+            <h3 className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-300">
+              ⏰ Заробіток за Години
             </h3>
             {userHours.length === 0 ? (
-              <p className="text-center text-slate-500 py-4">Немає записів годин</p>
+              <p className="text-center text-slate-500 text-sm sm:text-base py-6 sm:py-8">Немає записів годин</p>
             ) : (
               userHours.map((item) => (
-                <Card key={item.id} className="p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-slate-800 dark:text-white">
-                        {item.hours} год • {item.object}
+                <Card key={item.id} className="p-3 sm:p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start gap-2 mb-1">
+                        <p className="text-sm sm:text-base font-semibold text-slate-800 dark:text-white flex-1 min-w-0">
+                          {item.hours} год • {item.object}
+                        </p>
                         {item.isBusinessTrip && (
-                          <span className="ml-2 text-xs bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded">
-                            Відрядження 1.2x
+                          <span className="flex-shrink-0 text-xs sm:text-sm bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-2 py-1 rounded-lg font-medium">
+                            🛫 1.2x
                           </span>
                         )}
-                      </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{item.date}</p>
+                      </div>
+                      <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">📅 {item.date}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-green-600 dark:text-green-400">
+                    <div className="text-left sm:text-right">
+                      <p className="text-base sm:text-lg font-bold text-green-600 dark:text-green-400">
                         ₴{item.salary.toFixed(2)}
                       </p>
                     </div>
@@ -103,25 +105,25 @@ export default function EarningsDetailsModal({ open, onClose, month, year }: Ear
 
           {/* Деталі по процесах */}
           <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Заробіток за Процеси
+            <h3 className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-300">
+              📋 Заробіток за Процеси
             </h3>
             {userProcesses.length === 0 ? (
-              <p className="text-center text-slate-500 py-4">Немає записів процесів</p>
+              <p className="text-center text-slate-500 text-sm sm:text-base py-6 sm:py-8">Немає записів процесів</p>
             ) : (
               userProcesses.map((item) => (
-                <Card key={item.id} className="p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-slate-800 dark:text-white">
+                <Card key={item.id} className="p-3 sm:p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm sm:text-base font-semibold text-slate-800 dark:text-white mb-1">
                         {item.processName}
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
-                        {item.date} • {item.volume} {item.unit} × ₴{item.rate?.toFixed(2) || 0}
+                      <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                        📅 {item.date} • {item.volume} {item.unit} × ₴{item.rate?.toFixed(2) || 0}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-green-600 dark:text-green-400">
+                    <div className="text-left sm:text-right">
+                      <p className="text-base sm:text-lg font-bold text-green-600 dark:text-green-400">
                         ₴{item.salary.toFixed(2)}
                       </p>
                     </div>

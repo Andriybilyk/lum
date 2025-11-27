@@ -27,39 +27,52 @@ const MemoizedHoursCardComponent = memo(
     }, [hours.id, onDelete]);
 
     return (
-      <Card className="p-3">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <p className="text-sm font-medium text-slate-800 dark:text-white">
-              {hours.object}
+      <Card className="p-3 sm:p-4 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start gap-2 mb-1.5">
+              <p className="text-sm sm:text-base font-semibold text-slate-800 dark:text-white flex-1 min-w-0">
+                {hours.object}
+              </p>
               {hours.isBusinessTrip && (
-                <span className="ml-2 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded">
-                  Відрядження 1.2x
+                <span className="flex-shrink-0 text-xs sm:text-sm bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-2 py-1 rounded-lg font-medium">
+                  🛫 1.2x
                 </span>
               )}
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">{hours.date}</p>
-            <p className="text-sm font-semibold text-slate-800 dark:text-white mt-1">
-              {hours.hours} год × ₴{(hours.salary / hours.hours).toFixed(2)}/год = ₴{hours.salary.toFixed(2)}
-            </p>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mb-2">📅 {hours.date}</p>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <p className="text-sm sm:text-base font-bold text-blue-600 dark:text-blue-400">
+                {hours.hours} год
+              </p>
+              <span className="text-xs sm:text-sm text-slate-400">×</span>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                ₴{(hours.salary / hours.hours).toFixed(2)}/год
+              </p>
+              <span className="text-xs sm:text-sm text-slate-400">=</span>
+              <p className="text-base sm:text-lg font-bold text-green-600 dark:text-green-400">
+                ₴{hours.salary.toFixed(2)}
+              </p>
+            </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 sm:flex-col sm:gap-2 justify-end sm:justify-start">
             <Button
-              size="sm"
               variant="outline"
               onClick={handleEdit}
               disabled={isLoading}
+              className="flex-1 sm:flex-none h-9 sm:h-10 px-3 sm:px-4 text-sm hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 dark:hover:bg-blue-950/20"
             >
-              <Edit2 className="w-3 h-3" />
+              <Edit2 className="w-4 h-4 sm:mr-1.5" />
+              <span className="hidden sm:inline">Редагувати</span>
             </Button>
             <Button
-              size="sm"
               variant="outline"
-              className="text-red-600"
+              className="flex-1 sm:flex-none h-9 sm:h-10 px-3 sm:px-4 text-sm text-red-600 hover:bg-red-50 hover:border-red-300 dark:hover:bg-red-950/20"
               onClick={handleDelete}
               disabled={isLoading}
             >
-              <Trash2 className="w-3 h-3" />
+              <Trash2 className="w-4 h-4 sm:mr-1.5" />
+              <span className="hidden sm:inline">Видалити</span>
             </Button>
           </div>
         </div>
