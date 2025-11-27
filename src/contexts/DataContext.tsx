@@ -1,15 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { logger } from '@/utils/logger';
 import { CONFIG } from '@/config/constants';
-import { loadAllDataParallel } from '@/utils/dataLoader';
-import {
-  appendSheet,
-  writeSheet,
-  updateHourEntry,
-  deleteHourEntry,
-  updateProcessEntry,
-  deleteProcessEntry
-} from '../services/googleSheets';
+import { appendSheet } from '../services/googleSheets';
+import * as dataAdapter from '../services/dataAdapter';
 import type {
   User,
   Hours,
@@ -227,12 +220,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    logger.info('Loading fresh data from Google Sheets', 'DataContext');
+    const dataSource = dataAdapter.getActiveDataSource();
+    logger.info(`Loading fresh data from ${dataSource}`, 'DataContext');
     setIsSyncing(true);
     setIsLoadingInProgress(true);
     try {
-      // Use parallel loading for much faster performance
-      const data = await loadAllDataParallel();
+      // Use data adapter for automatic Supabase/Google Sheets selection
+      const data = await dataAdapter.loadAllData();
 
       // Set all data at once
       setUsers(data.users);
@@ -248,7 +242,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Зберігаємо в localStorage для наступного разу
       saveToLocalStorage(data);
 
-      logger.info('✅ All data loaded successfully', 'DataContext');
+      logger.info(`✅ All data loaded successfully from ${dataSource}`, 'DataContext');
 
       // OLD SEQUENTIAL LOADING CODE - Kept for reference, can be removed
       // This was taking 14+ seconds with delays, now takes 2-3 seconds with parallel loading
@@ -638,55 +632,42 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addUser = async (user: Omit<User, 'id'> | User) => {
     // Якщо ID вже є, використовуємо його, інакше генеруємо новий
     const newUser = 'id' in user ? user : { ...user, id: Date.now().toString() };
-    
+
     logger.info('👤 Adding user:', newUser, 'DataContext');
-    logger.debug('📊 Is configured:', isConfigured, 'DataContext');
-    
+
+    // Optimistic update
     setUsers([...users, newUser]);
-    
+
     if (isConfigured) {
-      // ��икористовуємо setTimeout щоб не блокув��ти UI
       try {
-        logger.info('💾 Saving user to Google Sheets...', 'DataContext');
-        logger.info('User ID to save: ' + newUser.id + ' (Type: ' + typeof newUser.id + ')', 'DataContext');
-        const rowData = [
-          newUser.id,
-          newUser.name,
-          newUser.role,
-          newUser.level,
-          newUser.hourlyRate,
-          newUser.managerId ? parseInt(newUser.managerId) : '',
-          newUser.telegramId || ''
-        ];
-        logger.info('Row data to append:', rowData, 'DataContext');
-        const result = await appendSheet(CONFIG.GOOGLE_SHEETS.RANGES.USERS, [rowData]);
-        logger.info('Append result:', result, 'DataContext');
-        if (!result.success) {
-          logger.error('❌ Failed to append user: ' + result.reason, 'DataContext');
-          throw new Error('Failed to save: ' + result.reason);
-        }
-        logger.debug('✅ User saved to Google Sheets', 'DataContext');
+        await dataAdapter.createUser(newUser);
+        logger.debug('✅ User saved successfully', 'DataContext');
       } catch (error) {
-        logger.error('❌ Failed to save user to Google Sheets:', error, 'DataContext');
+        // Rollback on error
+        setUsers(users);
+        logger.error('❌ Failed to save user:', error, 'DataContext');
         throw error;
       }
     } else {
-      logger.warn('Google Sheets not configured, user saved locally only');
+      logger.warn('Data source not configured, user saved locally only');
     }
   };
 
   const addHours = async (hoursData: Omit<Hours, 'id'>) => {
     const newHours = { ...hoursData, id: Date.now().toString() };
+
+    // Optimistic update
     setHours([...hours, newHours]);
-    
+
     if (isConfigured) {
       try {
-        await appendSheet(CONFIG.GOOGLE_SHEETS.RANGES.HOURS, [[
-          parseInt(newHours.id), parseInt(newHours.userId), newHours.date, newHours.hours,
-          newHours.object, newHours.isBusinessTrip.toString(), newHours.salary
-        ]]);
+        await dataAdapter.createHours(hoursData);
+        logger.debug('✅ Hours saved successfully', 'DataContext');
       } catch (error) {
-        logger.error('Failed to save hours to sheets:', error, 'DataContext');
+        // Rollback
+        setHours(hours);
+        logger.error('Failed to save hours:', error, 'DataContext');
+        throw error;
       }
     }
   };
@@ -699,33 +680,38 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const updatedEntry = { ...hourEntry, ...updates };
+
+    // Optimistic update
     setHours(hours.map(h => h.id === id ? updatedEntry : h));
-    
+
     if (isConfigured) {
       try {
-        await updateHourEntry(id, {
-          date: updatedEntry.date,
-          hours: updatedEntry.hours,
-          object: updatedEntry.object,
-          isBusinessTrip: updatedEntry.isBusinessTrip,
-          salary: updatedEntry.salary
-        });
+        await dataAdapter.updateHours(id, updates);
         logger.debug('✅ Hour entry updated successfully', 'DataContext');
       } catch (error) {
-        logger.error('Failed to update hours in sheets:', error, 'DataContext');
+        // Rollback
+        setHours(hours);
+        logger.error('Failed to update hours:', error, 'DataContext');
+        throw error;
       }
     }
   };
 
   const deleteHours = async (id: string) => {
+    const previousHours = hours;
+
+    // Optimistic update
     setHours(hours.filter(h => h.id !== id));
-    
+
     if (isConfigured) {
       try {
-        await deleteHourEntry(id);
+        await dataAdapter.deleteHours(id);
         logger.debug('✅ Hour entry deleted successfully', 'DataContext');
       } catch (error) {
-        logger.error('Failed to delete hours from sheets:', error, 'DataContext');
+        // Rollback
+        setHours(previousHours);
+        logger.error('Failed to delete hours:', error, 'DataContext');
+        throw error;
       }
     }
   };
@@ -733,36 +719,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addProcess = async (process: Omit<Process, 'id'>) => {
     const newProcess = { ...process, id: Date.now().toString() };
 
-    logger.info('Adding process to memory and Google Sheets:', {
-      id: newProcess.id,
-      userId: newProcess.userId,
-      date: newProcess.date,
-      processName: newProcess.processName,
-      object: newProcess.object,
-      volume: newProcess.volume,
-      unit: newProcess.unit,
-      rate: newProcess.rate,
-      salary: newProcess.salary
-    });
+    logger.info('Adding process:', newProcess.processName, 'DataContext');
 
-    // Одразу додаємо в пам'ять, щоб UI оновився
+    // Optimistic update
     setProcesses(prev => [...prev, newProcess]);
 
     if (isConfigured) {
       try {
-        await appendSheet(CONFIG.GOOGLE_SHEETS.RANGES.PROCESSES, [[
-          parseInt(newProcess.id), parseInt(newProcess.userId), newProcess.date, newProcess.processName,
-          newProcess.object || '', newProcess.volume, newProcess.unit, newProcess.rate, newProcess.salary
-        ]]);
-        logger.debug('✅ Process saved to Google Sheets:', newProcess.processName, 'DataContext');
+        await dataAdapter.createProcess(process);
+        logger.debug('✅ Process saved successfully', 'DataContext');
       } catch (error) {
-        logger.error('❌ Failed to save process to sheets:', error, 'DataContext');
-        // Видаляємо з пам'яті, якщо не вдалося зберегти
+        // Rollback
         setProcesses(prev => prev.filter(p => p.id !== newProcess.id));
+        logger.error('❌ Failed to save process:', error, 'DataContext');
         throw error;
       }
-    } else {
-      logger.warn('Google Sheets not configured, process saved only in memory');
     }
   };
 
@@ -774,35 +745,38 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const updatedEntry = { ...processEntry, ...updates };
+
+    // Optimistic update
     setProcesses(processes.map(p => p.id === id ? updatedEntry : p));
-    
+
     if (isConfigured) {
       try {
-        await updateProcessEntry(id, {
-          date: updatedEntry.date,
-          processName: updatedEntry.processName,
-          object: updatedEntry.object,
-          volume: updatedEntry.volume,
-          unit: updatedEntry.unit,
-          rate: updatedEntry.rate,
-          salary: updatedEntry.salary
-        });
+        await dataAdapter.updateProcess(id, updates);
         logger.debug('✅ Process entry updated successfully', 'DataContext');
       } catch (error) {
-        logger.error('Failed to update process in sheets:', error, 'DataContext');
+        // Rollback
+        setProcesses(processes);
+        logger.error('Failed to update process:', error, 'DataContext');
+        throw error;
       }
     }
   };
 
   const deleteProcess = async (id: string) => {
+    const previousProcesses = processes;
+
+    // Optimistic update
     setProcesses(processes.filter(p => p.id !== id));
-    
+
     if (isConfigured) {
       try {
-        await deleteProcessEntry(id);
+        await dataAdapter.deleteProcess(id);
         logger.debug('✅ Process entry deleted successfully', 'DataContext');
       } catch (error) {
-        logger.error('Failed to delete process from sheets:', error, 'DataContext');
+        // Rollback
+        setProcesses(previousProcesses);
+        logger.error('Failed to delete process:', error, 'DataContext');
+        throw error;
       }
     }
   };
@@ -837,18 +811,27 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addLevel = async (level: Omit<Level, 'id'>) => {
     const newLevel = { ...level, id: Date.now().toString() };
+
+    // Optimistic update
     setLevels([...levels, newLevel]);
-    
+
     if (isConfigured) {
       try {
-        await appendSheet(CONFIG.GOOGLE_SHEETS.RANGES.LEVELS, [[parseInt(newLevel.id), newLevel.name, newLevel.hourlyRate]]);
+        await dataAdapter.createLevel(level);
+        logger.debug('✅ Level saved successfully', 'DataContext');
       } catch (error) {
-        logger.error('Failed to save level to sheets:', error, 'DataContext');
+        // Rollback
+        setLevels(levels);
+        logger.error('Failed to save level:', error, 'DataContext');
+        throw error;
       }
     }
   };
 
   const updateLevel = async (id: string, updates: { name?: string; rate?: number }) => {
+    const previousLevels = levels;
+
+    // Optimistic update
     setLevels(levels.map(l => {
       if (l.id === id) {
         return {
@@ -859,100 +842,149 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       return l;
     }));
-    
+
     if (isConfigured) {
       try {
-        await syncWithGoogleSheets();
+        await dataAdapter.updateLevel(id, updates);
+        logger.debug('✅ Level updated successfully', 'DataContext');
       } catch (error) {
-        logger.error('Failed to update level in sheets:', error, 'DataContext');
+        // Rollback
+        setLevels(previousLevels);
+        logger.error('Failed to update level:', error, 'DataContext');
+        throw error;
       }
     }
   };
 
   const deleteLevel = async (id: string) => {
+    const previousLevels = levels;
+
+    // Optimistic update
     setLevels(levels.filter(l => l.id !== id));
-    
+
     if (isConfigured) {
       try {
-        await syncWithGoogleSheets();
+        await dataAdapter.deleteLevel(id);
+        logger.debug('✅ Level deleted successfully', 'DataContext');
       } catch (error) {
-        logger.error('Failed to delete level from sheets:', error, 'DataContext');
+        // Rollback
+        setLevels(previousLevels);
+        logger.error('Failed to delete level:', error, 'DataContext');
+        throw error;
       }
     }
   };
 
   const addObject = async (object: Omit<ObjectType, 'id'>) => {
     const newObject = { ...object, id: Date.now().toString() };
+
+    // Optimistic update
     setObjects([...objects, newObject]);
-    
+
     if (isConfigured) {
       try {
-        await appendSheet('Objects!A:C', [[parseInt(newObject.id), newObject.name, newObject.isBusinessTrip ? 'true' : 'false']]);
+        await dataAdapter.createObject(object);
+        logger.debug('✅ Object saved successfully', 'DataContext');
       } catch (error) {
-        logger.error('Failed to save object to sheets:', error, 'DataContext');
+        // Rollback
+        setObjects(objects);
+        logger.error('Failed to save object:', error, 'DataContext');
+        throw error;
       }
     }
   };
 
   const updateObject = async (id: string, updates: Partial<Omit<ObjectType, 'id'>>) => {
+    const previousObjects = objects;
+
+    // Optimistic update
     setObjects(objects.map(o => o.id === id ? { ...o, ...updates } : o));
-    
+
     if (isConfigured) {
       try {
-        await syncWithGoogleSheets();
+        await dataAdapter.updateObject(id, updates);
+        logger.debug('✅ Object updated successfully', 'DataContext');
       } catch (error) {
-        logger.error('Failed to update object in sheets:', error, 'DataContext');
+        // Rollback
+        setObjects(previousObjects);
+        logger.error('Failed to update object:', error, 'DataContext');
+        throw error;
       }
     }
   };
 
   const deleteObject = async (id: string) => {
+    const previousObjects = objects;
+
+    // Optimistic update
     setObjects(objects.filter(o => o.id !== id));
-    
+
     if (isConfigured) {
       try {
-        await syncWithGoogleSheets();
+        await dataAdapter.deleteObject(id);
+        logger.debug('✅ Object deleted successfully', 'DataContext');
       } catch (error) {
-        logger.error('Failed to delete object from sheets:', error, 'DataContext');
+        // Rollback
+        setObjects(previousObjects);
+        logger.error('Failed to delete object:', error, 'DataContext');
+        throw error;
       }
     }
   };
 
   const addProcessType = async (processType: Omit<ProcessType, 'id'>) => {
     const newProcessType = { ...processType, id: Date.now().toString() };
+
+    // Optimistic update
     setProcessTypes([...processTypes, newProcessType]);
 
     if (isConfigured) {
       try {
-        await appendSheet('ProcessTypes!A:F', [[
-          parseInt(newProcessType.id), newProcessType.name, newProcessType.object || '', newProcessType.rate, newProcessType.unit, newProcessType.plannedVolume || ''
-        ]]);
+        await dataAdapter.createProcessType(processType);
+        logger.debug('✅ Process type saved successfully', 'DataContext');
       } catch (error) {
-        logger.error('Failed to save process type to sheets:', error, 'DataContext');
+        // Rollback
+        setProcessTypes(processTypes);
+        logger.error('Failed to save process type:', error, 'DataContext');
+        throw error;
       }
     }
   };
 
   const updateProcessType = async (id: string, updates: Partial<Omit<ProcessType, 'id'>>) => {
+    const previousProcessTypes = processTypes;
+
+    // Optimistic update
     setProcessTypes(processTypes.map(pt => pt.id === id ? { ...pt, ...updates } : pt));
-    
+
     if (isConfigured) {
       try {
-        await syncWithGoogleSheets();
+        await dataAdapter.updateProcessType(id, updates);
+        logger.debug('✅ Process type updated successfully', 'DataContext');
       } catch (error) {
-        logger.error('Failed to update process type in sheets:', error, 'DataContext');
+        // Rollback
+        setProcessTypes(previousProcessTypes);
+        logger.error('Failed to update process type:', error, 'DataContext');
+        throw error;
       }
     }
   };
 
   const deleteProcessType = async (id: string) => {
+    const previousProcessTypes = processTypes;
+
+    // Optimistic update
     setProcessTypes(processTypes.filter(pt => pt.id !== id));
-    
+
     if (isConfigured) {
       try {
-        await syncWithGoogleSheets();
+        await dataAdapter.deleteProcessType(id);
+        logger.debug('✅ Process type deleted successfully', 'DataContext');
       } catch (error) {
-        logger.error('Failed to delete process type from sheets:', error, 'DataContext');
+        // Rollback
+        setProcessTypes(previousProcessTypes);
+        logger.error('Failed to delete process type:', error, 'DataContext');
+        throw error;
       }
     }
   };
@@ -1261,24 +1293,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updatedAt: now
     };
 
+    // Optimistic update
     setMaterials(prev => [...prev, newMaterial]);
 
     if (isConfigured) {
       try {
-        await appendSheet(CONFIG.GOOGLE_SHEETS.RANGES.MATERIALS, [[
-          parseInt(id),
-          parseInt(materialData.userId),
-          materialData.date,
-          materialData.object,
-          materialData.materialName,
-          materialData.quantity,
-          materialData.unit,
-          materialData.notes || '',
-          now
-        ]]);
-        logger.debug('✅ Material added:', newMaterial, 'DataContext');
+        await dataAdapter.createMaterial(materialData);
+        logger.debug('✅ Material added successfully', 'DataContext');
       } catch (error) {
-        logger.error('Failed to save material to sheets:', error, 'DataContext');
+        logger.error('Failed to save material:', error, 'DataContext');
         // Rollback on error
         setMaterials(prev => prev.filter(m => m.id !== id));
         throw error;
@@ -1298,9 +1321,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (isConfigured) {
       try {
-        const rowIndex = materials.findIndex(m => m.id === id) + 2; // +2 for header row and 1-based indexing
-        await writeSheet(`Materials!A${rowIndex}:I${rowIndex}`, [['', '', '', '', '', '', '', '', '']]);
-        logger.debug('✅ Material deleted:', id, 'DataContext');
+        await dataAdapter.deleteMaterial(id);
+        logger.debug('✅ Material deleted successfully', 'DataContext');
       } catch (error) {
         logger.error('Failed to delete material from sheets:', error, 'DataContext');
         // Rollback on error

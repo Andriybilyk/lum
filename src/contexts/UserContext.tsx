@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { setCurrentUserContext } from '@/lib/supabase';
+import { logger } from '@/utils/logger';
 import type { User } from '../types';
 
 interface UserContextType {
@@ -24,6 +26,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (user) {
       localStorage.setItem('user', JSON.stringify(user));
+
+      // Set Supabase RLS context for the current user
+      setCurrentUserContext(user.id).catch((error) => {
+        logger.warn('Failed to set Supabase user context:', error, 'UserContext');
+      });
     } else {
       localStorage.removeItem('user');
     }
