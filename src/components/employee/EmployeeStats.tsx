@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Plus, Clock, DollarSign, Briefcase, LogOut } from 'lucide-react';
 import LogHoursModal from './LogHoursModal';
 import LogProcessModal from './LogProcessModal';
-import LogMaterialsModal from './LogMaterialsModal';
 import WorkReminders from './WorkReminders';
 import HoursDetailsModal from './HoursDetailsModal';
 import ProcessDetailsModal from './ProcessDetailsModal';
@@ -18,7 +17,6 @@ export default function EmployeeStats() {
   const navigate = useNavigate();
   const [showLogHours, setShowLogHours] = useState(false);
   const [showLogProcess, setShowLogProcess] = useState(false);
-  const [showLogMaterials, setShowLogMaterials] = useState(false);
   const [showHoursDetails, setShowHoursDetails] = useState(false);
   const [showProcessDetails, setShowProcessDetails] = useState(false);
   const [showEarningsDetails, setShowEarningsDetails] = useState(false);
@@ -110,19 +108,10 @@ export default function EmployeeStats() {
           <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
           Записати Процес
         </Button>
-
-        <Button
-          onClick={() => setShowLogMaterials(true)}
-          className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-amber-600 to-orange-500 hover:from-amber-700 hover:to-orange-600 rounded-xl sm:rounded-2xl shadow-lg active:scale-95 transition-transform"
-        >
-          <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
-          📦 Записати Матеріали
-        </Button>
       </div>
 
       <LogHoursModal open={showLogHours} onClose={() => setShowLogHours(false)} />
       <LogProcessModal open={showLogProcess} onClose={() => setShowLogProcess(false)} />
-      <LogMaterialsModal open={showLogMaterials} onClose={() => setShowLogMaterials(false)} />
       <HoursDetailsModal 
         open={showHoursDetails} 
         onClose={() => setShowHoursDetails(false)}
