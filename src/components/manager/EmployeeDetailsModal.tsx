@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Clock, Briefcase, DollarSign, Edit2, Save, X, Trash2, RefreshCw } from 'lucide-react';
+import { Clock, Briefcase, DollarSign, Edit2, Save, X, Trash2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useData } from '@/contexts/DataContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -20,7 +20,7 @@ interface EmployeeDetailsModalProps {
 
 export default function EmployeeDetailsModal({ open, onClose, employee }: EmployeeDetailsModalProps) {
   const { toast } = useToast();
-  const { hours, processes, objects, processTypes, updateHours, deleteHours, updateProcess, deleteProcess, loadFromGoogleSheets } = useData();
+  const { hours, processes, objects, processTypes, updateHours, deleteHours, updateProcess, deleteProcess } = useData();
   
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'hour' | 'process', id: string } | null>(null);
   const [editingHour, setEditingHour] = useState<string | null>(null);
@@ -28,7 +28,6 @@ export default function EmployeeDetailsModal({ open, onClose, employee }: Employ
   const [editHourData, setEditHourData] = useState<EditHourData>({ date: '', hours: 0, object: '', isBusinessTrip: false });
   const [editProcessData, setEditProcessData] = useState<EditProcessData>({ date: '', processName: '', object: '', volume: 0, unit: '', rate: 0 });
   const [isLoading, setIsLoading] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
 
   const empHours = hours.filter(h => h.userId === employee.id);
   const empProcesses = processes.filter(p => p.userId === employee.id);
@@ -165,55 +164,15 @@ export default function EmployeeDetailsModal({ open, onClose, employee }: Employ
     }
   };
 
-  const handleManualSync = async () => {
-    if (editingHour || editingProcess) {
-      toast({
-        title: 'Увага',
-        description: 'Завершіть редагування перед синхронізацією',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    setIsSyncing(true);
-    try {
-      await loadFromGoogleSheets();
-      toast({
-        title: 'Синхронізовано',
-        description: 'Дані успішно оновлено з Google Sheets'
-      });
-    } catch (error) {
-      toast({
-        title: 'Помилка',
-        description: 'Не вдалося синхронізувати дані',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsSyncing(false);
-    }
-  };
 
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-xl">
-                Детальна Інформація - {employee.name}
-              </DialogTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleManualSync}
-                disabled={isSyncing || !!editingHour || !!editingProcess}
-                className="gap-2"
-                title={editingHour || editingProcess ? 'Завершіть редагування перед синхронізацією' : 'Оновити дані з Google Sheets'}
-              >
-                <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                {isSyncing ? 'Синхронізація...' : 'Оновити'}
-              </Button>
-            </div>
+            <DialogTitle className="text-xl">
+              Детальна Інформація - {employee.name}
+            </DialogTitle>
           </DialogHeader>
 
           {/* Загальна статистика */}

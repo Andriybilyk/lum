@@ -20,7 +20,7 @@ interface HoursDetailsModalProps {
 
 export default function HoursDetailsModal({ open, onClose, month, year }: HoursDetailsModalProps) {
   const { toast } = useToast();
-  const { hours, updateHours, deleteHours, loadFromGoogleSheets } = useData();
+  const { hours, updateHours, deleteHours } = useData();
   const { user } = useUser();
   
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -96,9 +96,6 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
         salary
       });
 
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      await loadFromGoogleSheets();
-
       toast({
         title: 'Успішно',
         description: 'Запис годин оновлено'
@@ -122,12 +119,9 @@ export default function HoursDetailsModal({ open, onClose, month, year }: HoursD
     setIsLoading(true);
     try {
       await deleteHours(deleteConfirm);
-      
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      await loadFromGoogleSheets();
-      
-      toast({ 
-        title: 'Успішно', 
+
+      toast({
+        title: 'Успішно',
         description: 'Запис годин видалено'
       });
       

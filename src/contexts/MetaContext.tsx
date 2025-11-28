@@ -1,6 +1,16 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { logger } from '@/utils/logger';
-import { CONFIG } from '@/config/constants';
+import {
+  getAllLevels,
+  getAllObjects,
+  getAllProcessTypes,
+  createLevel,
+  updateLevel as updateLevelService,
+  deleteLevel as deleteLevelService,
+  createObject,
+  updateObject as updateObjectService,
+  deleteObject as deleteObjectService
+} from '@/services/supabaseService';
 import type { Level, ObjectType, ProcessType } from '@/types';
 
 interface MetaContextType {
@@ -30,52 +40,21 @@ export function MetaProvider({ children }: { children: React.ReactNode }) {
   const loadMetadata = async () => {
     try {
       setIsLoading(true);
-      const { readSheet } = await import('@/services/googleSheets');
 
-      const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+      const [loadedLevels, loadedObjects, loadedProcessTypes] = await Promise.all([
+        getAllLevels(),
+        getAllObjects(),
+        getAllProcessTypes(),
+      ]);
 
-      const levelsData = await readSheet(CONFIG.GOOGLE_SHEETS.RANGES.LEVELS);
-      await delay(CONFIG.GOOGLE_SHEETS.DELAY_BETWEEN_REQUESTS);
-
-      const objectsData = await readSheet(CONFIG.GOOGLE_SHEETS.RANGES.OBJECTS);
-      await delay(CONFIG.GOOGLE_SHEETS.DELAY_BETWEEN_REQUESTS);
-
-      const processTypesData = await readSheet(CONFIG.GOOGLE_SHEETS.RANGES.PROCESS_TYPES);
-
-      if (levelsData && levelsData.length > 1) {
-        const loadedLevels = levelsData.slice(1).map((row: any) => ({
-          id: String(row[0]),
-          name: String(row[1]),
-          hourlyRate: parseFloat(row[2]) || 0,
-        }));
-        setLevels(loadedLevels);
-      }
-
-      if (objectsData && objectsData.length > 1) {
-        const loadedObjects = objectsData.slice(1).map((row: any) => ({
-          id: String(row[0]),
-          name: String(row[1]),
-          isBusinessTrip: row[2] === 1 || row[2] === true,
-        }));
-        setObjects(loadedObjects);
-      }
-
-      if (processTypesData && processTypesData.length > 1) {
-        const loadedProcessTypes = processTypesData.slice(1).map((row: any) => ({
-          id: String(row[0]),
-          name: String(row[1]),
-          object: String(row[2] || ''),
-          rate: parseFloat(row[3]) || 0,
-          unit: String(row[4] || ''),
-          plannedVolume: parseFloat(row[5]) || 0,
-        }));
-        setProcessTypes(loadedProcessTypes);
-      }
+      setLevels(loadedLevels);
+      setObjects(loadedObjects);
+      setProcessTypes(loadedProcessTypes);
 
       logger.info('Metadata loaded', {
-        levels: levels.length,
-        objects: objects.length,
-        processTypes: processTypes.length,
+        levels: loadedLevels.length,
+        objects: loadedObjects.length,
+        processTypes: loadedProcessTypes.length,
       }, 'MetaContext');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load metadata';
@@ -92,19 +71,13 @@ export function MetaProvider({ children }: { children: React.ReactNode }) {
 
   const addLevel = async (level: Omit<Level, 'id'>) => {
     try {
-      const { appendSheet } = await import('@/services/googleSheets');
-
       const levelId = Date.now().toString();
       const newLevel: Level = {
         id: levelId,
         ...level,
       };
 
-      await appendSheet(CONFIG.GOOGLE_SHEETS.RANGES.LEVELS, [[
-        levelId,
-        level.name,
-        level.hourlyRate,
-      ]]);
+      await createLevel(newLevel);
 
       setLevels(prev => [...prev, newLevel]);
       logger.info('Level added', { levelId }, 'MetaContext');
@@ -118,6 +91,8 @@ export function MetaProvider({ children }: { children: React.ReactNode }) {
 
   const updateLevel = async (id: string, updates: { name?: string; rate?: number }) => {
     try {
+      await updateLevelService(id, updates);
+
       setLevels(prev => prev.map(l =>
         l.id === id
           ? {
@@ -138,6 +113,8 @@ export function MetaProvider({ children }: { children: React.ReactNode }) {
 
   const deleteLevel = async (id: string) => {
     try {
+      await deleteLevelService(id);
+
       setLevels(prev => prev.filter(l => l.id !== id));
       logger.info('Level deleted', { levelId: id }, 'MetaContext');
     } catch (err) {
@@ -150,19 +127,13 @@ export function MetaProvider({ children }: { children: React.ReactNode }) {
 
   const addObject = async (object: Omit<ObjectType, 'id'>) => {
     try {
-      const { appendSheet } = await import('@/services/googleSheets');
-
       const objectId = Date.now().toString();
       const newObject: ObjectType = {
         id: objectId,
         ...object,
       };
 
-      await appendSheet(CONFIG.GOOGLE_SHEETS.RANGES.OBJECTS, [[
-        objectId,
-        object.name,
-        object.isBusinessTrip ? 1 : 0,
-      ]]);
+      await createObject(newObject);
 
       setObjects(prev => [...prev, newObject]);
       logger.info('Object added', { objectId }, 'MetaContext');
@@ -176,6 +147,8 @@ export function MetaProvider({ children }: { children: React.ReactNode }) {
 
   const updateObject = async (id: string, updates: Partial<Omit<ObjectType, 'id'>>) => {
     try {
+      await updateObjectService(id, updates);
+
       setObjects(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
       logger.info('Object updated', { objectId: id }, 'MetaContext');
     } catch (err) {
@@ -188,6 +161,8 @@ export function MetaProvider({ children }: { children: React.ReactNode }) {
 
   const deleteObject = async (id: string) => {
     try {
+      await deleteObjectService(id);
+
       setObjects(prev => prev.filter(o => o.id !== id));
       logger.info('Object deleted', { objectId: id }, 'MetaContext');
     } catch (err) {

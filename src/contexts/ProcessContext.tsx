@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { logger } from '@/utils/logger';
+import { createProcess as createProcessService, updateProcess as updateProcessService, deleteProcess as deleteProcessService } from '@/services/supabaseService';
 import type { Process } from '@/types';
 
 interface ProcessContextType {
@@ -23,7 +24,6 @@ export function ProcessProvider({ children }: { children: React.ReactNode }) {
   const addProcess = useCallback(async (processData: Omit<Process, 'id'>) => {
     try {
       setIsLoading(true);
-      const { appendSheet } = await import('@/services/googleSheets');
 
       const processId = Date.now().toString();
       const newProcess: Process = {
@@ -31,17 +31,7 @@ export function ProcessProvider({ children }: { children: React.ReactNode }) {
         ...processData,
       };
 
-      await appendSheet('Processes!A:I', [[
-        processId,
-        processData.userId,
-        processData.date,
-        processData.processName,
-        processData.object || '',
-        processData.volume,
-        processData.unit,
-        processData.rate,
-        processData.salary,
-      ]]);
+      await createProcessService(processData);
 
       setProcesses(prev => [...prev, newProcess]);
       logger.info('Process added', { processId }, 'ProcessContext');
@@ -58,9 +48,8 @@ export function ProcessProvider({ children }: { children: React.ReactNode }) {
   const updateProcess = useCallback(async (id: string, updates: Partial<Omit<Process, 'id' | 'userId'>>) => {
     try {
       setIsLoading(true);
-      const { updateProcessEntry } = await import('@/services/googleSheets');
 
-      await updateProcessEntry(id, updates);
+      await updateProcessService(id, updates);
 
       setProcesses(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
       logger.info('Process updated', { processId: id }, 'ProcessContext');
@@ -77,9 +66,8 @@ export function ProcessProvider({ children }: { children: React.ReactNode }) {
   const deleteProcess = useCallback(async (id: string) => {
     try {
       setIsLoading(true);
-      const { deleteProcessEntry } = await import('@/services/googleSheets');
 
-      await deleteProcessEntry(id);
+      await deleteProcessService(id);
 
       setProcesses(prev => prev.filter(p => p.id !== id));
       logger.info('Process deleted', { processId: id }, 'ProcessContext');

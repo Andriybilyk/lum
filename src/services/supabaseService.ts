@@ -342,6 +342,53 @@ export async function getAllLevels(): Promise<Level[]> {
   }
 }
 
+export async function createLevel(level: Level): Promise<void> {
+  try {
+    const { error } = await supabase.from('levels').insert({
+      id: level.id,
+      name: level.name,
+      hourly_rate: level.hourlyRate,
+    });
+
+    if (error) throw error;
+    logger.debug('Level created:', level.id, 'Supabase');
+  } catch (error) {
+    handleSupabaseError(error, 'createLevel');
+  }
+}
+
+export async function updateLevel(id: string, updates: { name?: string; rate?: number }): Promise<void> {
+  try {
+    const updateData: any = {};
+    if (updates.name !== undefined) updateData.name = updates.name;
+    if (updates.rate !== undefined) updateData.hourly_rate = updates.rate;
+
+    const { error } = await supabase
+      .from('levels')
+      .update(updateData)
+      .eq('id', id);
+
+    if (error) throw error;
+    logger.debug('Level updated:', id, 'Supabase');
+  } catch (error) {
+    handleSupabaseError(error, 'updateLevel');
+  }
+}
+
+export async function deleteLevel(id: string): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('levels')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    logger.debug('Level deleted:', id, 'Supabase');
+  } catch (error) {
+    handleSupabaseError(error, 'deleteLevel');
+  }
+}
+
 export async function getAllObjects(): Promise<ObjectType[]> {
   try {
     const { data, error } = await supabase
@@ -359,6 +406,53 @@ export async function getAllObjects(): Promise<ObjectType[]> {
   } catch (error) {
     handleSupabaseError(error, 'getAllObjects');
     return [];
+  }
+}
+
+export async function createObject(object: ObjectType): Promise<void> {
+  try {
+    const { error } = await supabase.from('objects').insert({
+      id: object.id,
+      name: object.name,
+      is_business_trip: object.isBusinessTrip,
+    });
+
+    if (error) throw error;
+    logger.debug('Object created:', object.id, 'Supabase');
+  } catch (error) {
+    handleSupabaseError(error, 'createObject');
+  }
+}
+
+export async function updateObject(id: string, updates: Partial<Omit<ObjectType, 'id'>>): Promise<void> {
+  try {
+    const updateData: any = {};
+    if (updates.name !== undefined) updateData.name = updates.name;
+    if (updates.isBusinessTrip !== undefined) updateData.is_business_trip = updates.isBusinessTrip;
+
+    const { error } = await supabase
+      .from('objects')
+      .update(updateData)
+      .eq('id', id);
+
+    if (error) throw error;
+    logger.debug('Object updated:', id, 'Supabase');
+  } catch (error) {
+    handleSupabaseError(error, 'updateObject');
+  }
+}
+
+export async function deleteObject(id: string): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('objects')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    logger.debug('Object deleted:', id, 'Supabase');
+  } catch (error) {
+    handleSupabaseError(error, 'deleteObject');
   }
 }
 
@@ -385,6 +479,59 @@ export async function getAllProcessTypes(): Promise<ProcessType[]> {
   }
 }
 
+export async function createProcessType(processType: ProcessType): Promise<void> {
+  try {
+    const { error } = await supabase.from('process_types').insert({
+      id: processType.id,
+      name: processType.name,
+      object: processType.object || null,
+      rate: processType.rate,
+      unit: processType.unit,
+      planned_volume: processType.plannedVolume || null,
+    });
+
+    if (error) throw error;
+    logger.debug('ProcessType created:', processType.id, 'Supabase');
+  } catch (error) {
+    handleSupabaseError(error, 'createProcessType');
+  }
+}
+
+export async function updateProcessType(id: string, updates: Partial<Omit<ProcessType, 'id'>>): Promise<void> {
+  try {
+    const updateData: any = {};
+    if (updates.name !== undefined) updateData.name = updates.name;
+    if (updates.object !== undefined) updateData.object = updates.object || null;
+    if (updates.rate !== undefined) updateData.rate = updates.rate;
+    if (updates.unit !== undefined) updateData.unit = updates.unit;
+    if (updates.plannedVolume !== undefined) updateData.planned_volume = updates.plannedVolume || null;
+
+    const { error } = await supabase
+      .from('process_types')
+      .update(updateData)
+      .eq('id', id);
+
+    if (error) throw error;
+    logger.debug('ProcessType updated:', id, 'Supabase');
+  } catch (error) {
+    handleSupabaseError(error, 'updateProcessType');
+  }
+}
+
+export async function deleteProcessType(id: string): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('process_types')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    logger.debug('ProcessType deleted:', id, 'Supabase');
+  } catch (error) {
+    handleSupabaseError(error, 'deleteProcessType');
+  }
+}
+
 export async function getAllAssignments(): Promise<Assignment[]> {
   try {
     const { data, error } = await supabase
@@ -406,6 +553,46 @@ export async function getAllAssignments(): Promise<Assignment[]> {
   } catch (error) {
     handleSupabaseError(error, 'getAllAssignments');
     return [];
+  }
+}
+
+export async function createAssignment(assignment: Assignment & { createdAt: string; updatedAt: string }): Promise<void> {
+  try {
+    const { error } = await supabase.from('assignments').insert({
+      id: assignment.id,
+      employee_id: assignment.employeeId,
+      manager_id: assignment.managerId,
+      date: assignment.date,
+      description: assignment.description,
+      notes: assignment.notes || null,
+      status: assignment.status,
+      created_at: assignment.createdAt,
+      updated_at: assignment.updatedAt,
+    });
+
+    if (error) throw error;
+    logger.debug('Assignment created:', assignment.id, 'Supabase');
+  } catch (error) {
+    handleSupabaseError(error, 'createAssignment');
+  }
+}
+
+export async function updateAssignment(id: string, updates: { status?: string }): Promise<void> {
+  try {
+    const updateData: any = {
+      updated_at: new Date().toISOString(),
+    };
+    if (updates.status !== undefined) updateData.status = updates.status;
+
+    const { error } = await supabase
+      .from('assignments')
+      .update(updateData)
+      .eq('id', id);
+
+    if (error) throw error;
+    logger.debug('Assignment updated:', id, 'Supabase');
+  } catch (error) {
+    handleSupabaseError(error, 'updateAssignment');
   }
 }
 
@@ -437,5 +624,61 @@ export async function getAllAdditionalWorks(): Promise<AdditionalWork[]> {
   } catch (error) {
     handleSupabaseError(error, 'getAllAdditionalWorks');
     return [];
+  }
+}
+
+export async function createAdditionalWork(work: AdditionalWork): Promise<void> {
+  try {
+    const { error } = await supabase.from('additional_works').insert({
+      id: work.id,
+      user_id: work.userId,
+      manager_id: work.managerId,
+      object_name: work.objectName,
+      date: work.date,
+      work_name: work.workName,
+      description: work.description || null,
+      unit: work.unit,
+      volume: work.volume,
+      rate: work.rate,
+      salary: work.salary,
+      status: work.status,
+      created_at: work.createdAt,
+      updated_at: work.updatedAt,
+    });
+
+    if (error) throw error;
+    logger.debug('AdditionalWork created:', work.id, 'Supabase');
+  } catch (error) {
+    handleSupabaseError(error, 'createAdditionalWork');
+  }
+}
+
+export async function updateAdditionalWork(
+  id: string,
+  updates: Partial<Omit<AdditionalWork, 'id' | 'userId' | 'managerId' | 'createdAt' | 'updatedAt'>>
+): Promise<void> {
+  try {
+    const updateData: any = {
+      updated_at: new Date().toISOString(),
+    };
+    if (updates.objectName !== undefined) updateData.object_name = updates.objectName;
+    if (updates.date !== undefined) updateData.date = updates.date;
+    if (updates.workName !== undefined) updateData.work_name = updates.workName;
+    if (updates.description !== undefined) updateData.description = updates.description || null;
+    if (updates.unit !== undefined) updateData.unit = updates.unit;
+    if (updates.volume !== undefined) updateData.volume = updates.volume;
+    if (updates.rate !== undefined) updateData.rate = updates.rate;
+    if (updates.salary !== undefined) updateData.salary = updates.salary;
+    if (updates.status !== undefined) updateData.status = updates.status;
+
+    const { error } = await supabase
+      .from('additional_works')
+      .update(updateData)
+      .eq('id', id);
+
+    if (error) throw error;
+    logger.debug('AdditionalWork updated:', id, 'Supabase');
+  } catch (error) {
+    handleSupabaseError(error, 'updateAdditionalWork');
   }
 }

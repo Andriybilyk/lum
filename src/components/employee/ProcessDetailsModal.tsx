@@ -20,7 +20,7 @@ interface ProcessDetailsModalProps {
 
 export default function ProcessDetailsModal({ open, onClose, month, year }: ProcessDetailsModalProps) {
   const { toast } = useToast();
-  const { processes, updateProcess, deleteProcess, loadFromGoogleSheets } = useData();
+  const { processes, updateProcess, deleteProcess } = useData();
   const { user } = useUser();
   
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -80,9 +80,6 @@ export default function ProcessDetailsModal({ open, onClose, month, year }: Proc
         salary
       });
 
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      await loadFromGoogleSheets();
-      
       toast({
         title: 'Успішно',
         description: 'Запис процесу оновлено'
@@ -106,12 +103,9 @@ export default function ProcessDetailsModal({ open, onClose, month, year }: Proc
     setIsLoading(true);
     try {
       await deleteProcess(deleteConfirm);
-      
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      await loadFromGoogleSheets();
-      
-      toast({ 
-        title: 'Успішно', 
+
+      toast({
+        title: 'Успішно',
         description: 'Запис процесу видалено'
       });
       

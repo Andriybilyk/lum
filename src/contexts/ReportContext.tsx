@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { logger } from '@/utils/logger';
+import {
+  createAdditionalWork as createAdditionalWorkService,
+  updateAdditionalWork as updateAdditionalWorkService,
+  createAssignment as createAssignmentService,
+  updateAssignment as updateAssignmentService
+} from '@/services/supabaseService';
 import type { AdditionalWork, Assignment } from '@/types';
 
 interface ReportContextType {
@@ -26,7 +32,6 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
   const addAdditionalWork = useCallback(async (work: Omit<AdditionalWork, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
       setIsLoading(true);
-      const { appendSheet } = await import('@/services/googleSheets');
 
       const workId = Date.now().toString();
       const now = new Date().toISOString();
@@ -37,21 +42,7 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
         updatedAt: now,
       };
 
-      await appendSheet('AdditionalWorks!A:M', [[
-        workId,
-        work.userId,
-        work.managerId,
-        work.objectName,
-        work.date,
-        work.workName,
-        work.description || '',
-        work.unit,
-        work.volume,
-        work.rate,
-        work.salary,
-        work.status || 'pending',
-        now,
-      ]]);
+      await createAdditionalWorkService(newWork);
 
       setAdditionalWorks(prev => [...prev, newWork]);
       logger.info('Additional work added', { workId }, 'ReportContext');
@@ -68,16 +59,13 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
   const updateAdditionalWork = useCallback(async (id: string, updates: Partial<Omit<AdditionalWork, 'id' | 'createdAt'>>) => {
     try {
       setIsLoading(true);
-      const { writeSheet } = await import('@/services/googleSheets');
 
       const updatedWork = {
         ...updates,
         updatedAt: new Date().toISOString(),
       };
 
-      await writeSheet('AdditionalWorks!A:M', [
-        Object.values(updatedWork).map(v => v || ''),
-      ]);
+      await updateAdditionalWorkService(id, updates);
 
       setAdditionalWorks(prev => prev.map(w => w.id === id ? { ...w, ...updatedWork } : w));
       logger.info('Additional work updated', { workId: id }, 'ReportContext');
@@ -94,23 +82,15 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
   const addAssignment = useCallback(async (assignment: Omit<Assignment, 'id'>) => {
     try {
       setIsLoading(true);
-      const { appendSheet } = await import('@/services/googleSheets');
 
       const assignmentId = Date.now().toString();
+      const now = new Date().toISOString();
       const newAssignment: Assignment = {
         id: assignmentId,
         ...assignment,
       };
 
-      await appendSheet('Assignments!A:G', [[
-        assignmentId,
-        assignment.employeeId,
-        assignment.managerId,
-        assignment.date,
-        assignment.description,
-        assignment.notes || '',
-        assignment.status,
-      ]]);
+      await createAssignmentService({ ...newAssignment, createdAt: now, updatedAt: now });
 
       setAssignments(prev => [...prev, newAssignment]);
       logger.info('Assignment added', { assignmentId }, 'ReportContext');
@@ -127,9 +107,8 @@ export function ReportProvider({ children }: { children: React.ReactNode }) {
   const updateAssignment = useCallback(async (id: string, status: 'confirmed' | 'declined' | 'employee_confirmed' | 'manager_confirmed') => {
     try {
       setIsLoading(true);
-      const { writeSheet } = await import('@/services/googleSheets');
 
-      await writeSheet('Assignments!A:G', [[status]]);
+      await updateAssignmentService(id, { status });
 
       setAssignments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
       logger.info('Assignment updated', { assignmentId: id, status }, 'ReportContext');

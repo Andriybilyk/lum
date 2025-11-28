@@ -1,11 +1,10 @@
-import { logger } from '@/utils/logger';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import { useData } from '@/contexts/DataContext';
-import { Moon, Sun, User, LogOut, RefreshCw, AlertCircle } from 'lucide-react';
+import { Moon, Sun, User, LogOut, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -17,7 +16,7 @@ interface SettingsProps {
 export default function Settings({ onLogout }: SettingsProps = {}) {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useUser();
-  const { syncWithGoogleSheets, loadFromGoogleSheets, isSyncing, isConfigured } = useData();
+  const { isConfigured } = useData();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -26,22 +25,6 @@ export default function Settings({ onLogout }: SettingsProps = {}) {
     } else {
       logout();
       navigate('/');
-    }
-  };
-
-  const handleManualSync = async () => {
-    try {
-      await syncWithGoogleSheets();
-    } catch (error) {
-      logger.error('Failed to sync:', error);
-    }
-  };
-
-  const handleLoadData = async () => {
-    try {
-      await loadFromGoogleSheets();
-    } catch (error) {
-      logger.error('Failed to load data:', error);
     }
   };
 
@@ -67,10 +50,10 @@ export default function Settings({ onLogout }: SettingsProps = {}) {
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Google Sheets не налаштовано. Дані зберігаються тільки локально.
+                  Supabase не налаштовано. Дані зберігаються тільки локально.
                   <br />
                   <span className="text-xs mt-2 block">
-                    Додайте VITE_GOOGLE_API_KEY, VITE_SPREADSHEET_ID та VITE_GOOGLE_SCRIPT_URL в налаштуваннях проєкту.
+                    Додайте VITE_SUPABASE_URL та VITE_SUPABASE_ANON_KEY в налаштуваннях проєкту.
                   </span>
                 </AlertDescription>
               </Alert>
@@ -79,36 +62,12 @@ export default function Settings({ onLogout }: SettingsProps = {}) {
                 <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
                   <div className="flex items-center gap-2">
                     <span className="text-green-600 dark:text-green-400">✓</span>
-                    <span className="text-sm font-medium">Налаштовано</span>
+                    <span className="text-sm font-medium">Підключено до Supabase</span>
                   </div>
-                  {isSyncing && (
-                    <RefreshCw className="w-4 h-4 animate-spin text-muted-foreground" />
-                  )}
                 </div>
-                
-                <div className="flex gap-2">
-                  <Button
-                    onClick={handleLoadData}
-                    disabled={isSyncing}
-                    variant="outline"
-                    className="flex-1"
-                  >
-                    <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-                    Завантажити
-                  </Button>
-                  <Button
-                    onClick={handleManualSync}
-                    disabled={isSyncing}
-                    variant="outline"
-                    className="flex-1"
-                  >
-                    <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-                    Зберегти
-                  </Button>
-                </div>
-                
+
                 <p className="text-xs text-muted-foreground">
-                  Дані автоматично зберігаються в Google Таблиці при кожній зміні
+                  Дані автоматично зберігаються в Supabase при кожній зміні
                 </p>
               </div>
             )}

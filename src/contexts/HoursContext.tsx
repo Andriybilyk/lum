@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { logger } from '@/utils/logger';
+import { createHours as createHoursService, updateHours as updateHoursService, deleteHours as deleteHoursService } from '@/services/supabaseService';
 import type { Hours } from '@/types';
 
 interface HoursContextType {
@@ -23,7 +24,6 @@ export function HoursProvider({ children }: { children: React.ReactNode }) {
   const addHours = useCallback(async (hoursData: Omit<Hours, 'id'>) => {
     try {
       setIsLoading(true);
-      const { appendSheet } = await import('@/services/googleSheets');
 
       const hoursId = Date.now().toString();
       const newHours: Hours = {
@@ -31,15 +31,7 @@ export function HoursProvider({ children }: { children: React.ReactNode }) {
         ...hoursData,
       };
 
-      await appendSheet('Hours!A:G', [[
-        hoursId,
-        hoursData.userId,
-        hoursData.date,
-        hoursData.hours,
-        hoursData.object,
-        hoursData.isBusinessTrip ? 1 : 0,
-        hoursData.salary,
-      ]]);
+      await createHoursService(hoursData);
 
       setHours(prev => [...prev, newHours]);
       logger.info('Hours entry added', { hoursId }, 'HoursContext');
@@ -56,9 +48,8 @@ export function HoursProvider({ children }: { children: React.ReactNode }) {
   const updateHours = useCallback(async (id: string, updates: Partial<Omit<Hours, 'id' | 'userId'>>) => {
     try {
       setIsLoading(true);
-      const { updateHourEntry } = await import('@/services/googleSheets');
 
-      await updateHourEntry(id, updates);
+      await updateHoursService(id, updates);
 
       setHours(prev => prev.map(h => h.id === id ? { ...h, ...updates } : h));
       logger.info('Hours entry updated', { hoursId: id }, 'HoursContext');
@@ -75,9 +66,8 @@ export function HoursProvider({ children }: { children: React.ReactNode }) {
   const deleteHours = useCallback(async (id: string) => {
     try {
       setIsLoading(true);
-      const { deleteHourEntry } = await import('@/services/googleSheets');
 
-      await deleteHourEntry(id);
+      await deleteHoursService(id);
 
       setHours(prev => prev.filter(h => h.id !== id));
       logger.info('Hours entry deleted', { hoursId: id }, 'HoursContext');
