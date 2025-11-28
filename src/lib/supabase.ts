@@ -7,14 +7,32 @@ import type { Database } from '@/types/database';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  logger.error('Supabase URL or Anon Key not configured', 'Supabase');
+// Check if Supabase is properly configured (not placeholder values)
+const isValidUrl = (url: string): boolean => {
+  if (!url) return false;
+  if (url === 'your-project-url.supabase.co') return false;
+  if (!url.startsWith('http://') && !url.startsWith('https://')) return false;
+  return true;
+};
+
+const isValidKey = (key: string): boolean => {
+  if (!key) return false;
+  if (key === 'your-anon-key-here') return false;
+  if (key.length < 20) return false;
+  return true;
+};
+
+const isConfigured = isValidUrl(supabaseUrl) && isValidKey(supabaseAnonKey);
+
+if (!isConfigured) {
+  logger.warn('Supabase not configured - using placeholder values. App will fallback to Google Sheets.', 'Supabase');
 }
 
-// Create Supabase client
+// Create Supabase client with fallback to dummy values if not configured
+// This prevents errors during initialization
 export const supabase = createClient<Database>(
-  supabaseUrl || '',
-  supabaseAnonKey || '',
+  isConfigured ? supabaseUrl : 'https://placeholder.supabase.co',
+  isConfigured ? supabaseAnonKey : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDUxOTI4MDAsImV4cCI6MTk2MDc2ODgwMH0.placeholder',
   {
     auth: {
       persistSession: true,
@@ -50,7 +68,7 @@ export async function setCurrentUserContext(userId: string) {
 
 // Helper to check if Supabase is configured
 export function isSupabaseConfigured(): boolean {
-  return Boolean(supabaseUrl && supabaseAnonKey);
+  return isConfigured;
 }
 
 // Helper for error handling
