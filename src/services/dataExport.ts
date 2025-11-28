@@ -102,6 +102,22 @@ export const exportToPDF = (
       return format(new Date(date), 'dd MMMM yyyy', { locale: uk });
     };
 
+    // Підрахунок підсумків
+    const totals: Record<string, number> = {};
+    if (reportData.data.length > 0) {
+      const numericFields = Object.keys(reportData.data[0]).filter(key => {
+        const value = reportData.data[0][key];
+        return typeof value === 'number' || (!isNaN(parseFloat(value)) && key !== 'Дата');
+      });
+
+      numericFields.forEach(field => {
+        totals[field] = reportData.data.reduce((sum, row) => {
+          const value = parseFloat(row[field]);
+          return sum + (isNaN(value) ? 0 : value);
+        }, 0);
+      });
+    }
+
     const documentDefinition: any = {
       content: [
         {
@@ -109,7 +125,7 @@ export const exportToPDF = (
           style: 'header',
         },
         {
-          text: options.subtitle || `Дата експорту: ${formatDate(new Date())}`,
+          text: `Дата експорту: ${formatDate(new Date())}`,
           style: 'subheader',
           margin: [0, 0, 0, 15],
         },
@@ -119,17 +135,29 @@ export const exportToPDF = (
           margin: [0, 0, 0, 20],
         },
         createTable(reportData.data, reportData.columns),
+        // Додаємо підсумки якщо є числові поля
+        Object.keys(totals).length > 0 && {
+          text: 'Підсумки:',
+          style: 'summaryHeader',
+          margin: [0, 20, 0, 10],
+        },
+        Object.keys(totals).length > 0 && {
+          ul: Object.entries(totals).map(([field, value]) =>
+            `${field}: ${value.toLocaleString('uk-UA', { maximumFractionDigits: 2 })}`
+          ),
+          style: 'summaryBody',
+        },
         {
           text: `Експортовано: ${format(new Date(), 'dd.MM.yyyy HH:mm')}`,
           style: 'footer',
           margin: [0, 20, 0, 0],
         },
-      ],
+      ].filter(Boolean),
       styles: {
         header: {
-          fontSize: 18,
+          fontSize: 20,
           bold: true,
-          color: '#1f2937',
+          color: '#1e40af',
           margin: [0, 0, 0, 10],
         },
         subheader: {
@@ -140,6 +168,15 @@ export const exportToPDF = (
           fontSize: 11,
           color: '#6b7280',
         },
+        summaryHeader: {
+          fontSize: 14,
+          bold: true,
+          color: '#1e40af',
+        },
+        summaryBody: {
+          fontSize: 11,
+          color: '#374151',
+        },
         footer: {
           fontSize: 9,
           color: '#9ca3af',
@@ -149,21 +186,30 @@ export const exportToPDF = (
           bold: true,
           fontSize: 11,
           color: '#ffffff',
-          fillColor: '#374151',
+          fillColor: '#1e40af',
           alignment: 'center',
-          margin: [4, 4, 4, 4],
+          margin: [5, 5, 5, 5],
         },
         tableBody: {
           fontSize: 10,
-          margin: [4, 4, 4, 4],
+          margin: [5, 5, 5, 5],
         },
       },
       defaultStyle: {
         font: 'Helvetica',
       },
-      pageMargins: [40, 40, 40, 60],
+      pageMargins: [40, 60, 40, 60],
       pageSize: 'A4',
-      pageOrientation: 'portrait',
+      pageOrientation: 'landscape', // Змінено на альбомну для кращого відображення таблиць
+      footer: function(currentPage: number, pageCount: number) {
+        return {
+          text: `Сторінка ${currentPage} з ${pageCount}`,
+          alignment: 'center',
+          fontSize: 9,
+          color: '#9ca3af',
+          margin: [0, 10, 0, 0],
+        };
+      },
     };
 
     const filename = `${options.filename}_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
@@ -185,8 +231,9 @@ function createTable(data: Array<Record<string, any>>, columns?: string[]): any 
       table: {
         headerRows: 1,
         widths: ['*'],
-        body: [[{ text: 'Немає даних для експорту', style: 'tableBody' }]],
+        body: [[{ text: 'Немає даних для експорту', style: 'tableBody', alignment: 'center' }]],
       },
+      layout: 'lightHorizontalLines',
     };
   }
 
@@ -196,18 +243,47 @@ function createTable(data: Array<Record<string, any>>, columns?: string[]): any 
     style: 'tableHeader',
   }));
 
-  const bodyRows = data.map((row) =>
+  const bodyRows = data.map((row, index) =>
     keys.map((key) => ({
       text: formatCellValue(row[key]),
       style: 'tableBody',
+      fillColor: index % 2 === 0 ? '#f9fafb' : '#ffffff', // Альтернативний колір рядків
     }))
   );
+
+  // Автоматичне визначення ширини колонок
+  const widths = keys.map((key) => {
+    const maxLength = Math.max(
+      formatHeaderName(key).length,
+      ...data.map((row) => String(formatCellValue(row[key])).length)
+    );
+    // Обмежуємо ширину від 50 до 120
+    return Math.min(Math.max(maxLength * 6, 50), 120);
+  });
 
   return {
     table: {
       headerRows: 1,
-      widths: Array(keys.length).fill('*'),
+      widths: widths.length <= 5 ? widths : Array(keys.length).fill('auto'), // Для великих таблиць використовуємо auto
       body: [headerRow, ...bodyRows],
+    },
+    layout: {
+      hLineWidth: function(i: number, node: any) {
+        return i === 0 || i === 1 || i === node.table.body.length ? 2 : 1;
+      },
+      vLineWidth: function() {
+        return 0.5;
+      },
+      hLineColor: function(i: number) {
+        return i === 0 || i === 1 ? '#1e40af' : '#e5e7eb';
+      },
+      vLineColor: function() {
+        return '#e5e7eb';
+      },
+      paddingLeft: function() { return 8; },
+      paddingRight: function() { return 8; },
+      paddingTop: function() { return 6; },
+      paddingBottom: function() { return 6; },
     },
   };
 }
