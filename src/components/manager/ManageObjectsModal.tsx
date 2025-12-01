@@ -13,6 +13,7 @@ import { Progress } from '@/components/ui/progress';
 import { Card } from '@/components/ui/card';
 import ObjectProcessesModal from './ObjectProcessesModal';
 import LogMaterialsModal from '../employee/LogMaterialsModal';
+import ObjectsQuickStats from './ObjectsQuickStats';
 import type { ObjectType } from '@/types';
 
 interface ManageObjectsModalProps {
@@ -30,6 +31,10 @@ export default function ManageObjectsModal({ open, onClose }: ManageObjectsModal
   const { toast } = useToast();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'low' | 'inactive'>('all');
+  const [filterManager, setFilterManager] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'name' | 'hours' | 'budget' | 'deadline'>('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [newObject, setNewObject] = useState<ExtendedObject>({
     id: '',
     name: '',
@@ -161,12 +166,55 @@ export default function ManageObjectsModal({ open, onClose }: ManageObjectsModal
     };
   }, [hours, processes, users]);
 
-  // Фільтрація об'єктів
+  // Фільтрація та сортування об'єктів
   const filteredObjects = useMemo(() => {
-    return objects.filter(obj =>
+    let filtered = objects.filter(obj =>
       obj.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [objects, searchQuery]);
+
+    // Фільтр за статусом
+    if (filterStatus !== 'all') {
+      filtered = filtered.filter(obj => {
+        const status = getObjectStatus(obj);
+        return status.status === filterStatus;
+      });
+    }
+
+    // Фільтр за менеджером
+    if (filterManager !== 'all') {
+      filtered = filtered.filter(obj => obj.managerId === filterManager);
+    }
+
+    // Сортування
+    filtered.sort((a, b) => {
+      let compareValue = 0;
+
+      switch (sortBy) {
+        case 'name':
+          compareValue = a.name.localeCompare(b.name);
+          break;
+        case 'hours':
+          const aHours = objectStats[a.name]?.hoursCount || 0;
+          const bHours = objectStats[b.name]?.hoursCount || 0;
+          compareValue = aHours - bHours;
+          break;
+        case 'budget':
+          const aBudget = (objectStats[a.name]?.earnings || 0) + (objectStats[a.name]?.materialsCost || 0);
+          const bBudget = (objectStats[b.name]?.earnings || 0) + (objectStats[b.name]?.materialsCost || 0);
+          compareValue = aBudget - bBudget;
+          break;
+        case 'deadline':
+          const aDate = (a as ExtendedObject).endDate || '9999-12-31';
+          const bDate = (b as ExtendedObject).endDate || '9999-12-31';
+          compareValue = aDate.localeCompare(bDate);
+          break;
+      }
+
+      return sortOrder === 'asc' ? compareValue : -compareValue;
+    });
+
+    return filtered;
+  }, [objects, searchQuery, filterStatus, filterManager, sortBy, sortOrder, objectStats]);
 
   // Менеджери для вибору
   const managers = users.filter(u => u.role === 'manager');
@@ -315,6 +363,9 @@ export default function ManageObjectsModal({ open, onClose }: ManageObjectsModal
           </DialogHeader>
 
           <div className="space-y-4">
+            {/* Швидка статистика */}
+            <ObjectsQuickStats objects={objects} objectStats={objectStats} />
+
             {/* Пошук */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -324,6 +375,67 @@ export default function ManageObjectsModal({ open, onClose }: ManageObjectsModal
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
+            </div>
+
+            {/* Фільтри та Сортування */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+              {/* Фільтр за статусом */}
+              <div>
+                <Label className="text-xs mb-1 block">Статус</Label>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value as any)}
+                  className="w-full px-2 py-1.5 text-sm border rounded-md bg-white dark:bg-slate-800"
+                >
+                  <option value="all">Всі</option>
+                  <option value="active">🟢 Активні</option>
+                  <option value="low">🟡 Низька активність</option>
+                  <option value="inactive">⚪ Неактивні</option>
+                </select>
+              </div>
+
+              {/* Фільтр за менеджером */}
+              <div>
+                <Label className="text-xs mb-1 block">Менеджер</Label>
+                <select
+                  value={filterManager}
+                  onChange={(e) => setFilterManager(e.target.value)}
+                  className="w-full px-2 py-1.5 text-sm border rounded-md bg-white dark:bg-slate-800"
+                >
+                  <option value="all">Всі менеджери</option>
+                  {managers.map(m => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Сортування */}
+              <div>
+                <Label className="text-xs mb-1 block">Сортувати за</Label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="w-full px-2 py-1.5 text-sm border rounded-md bg-white dark:bg-slate-800"
+                >
+                  <option value="name">Назвою</option>
+                  <option value="hours">Годинами</option>
+                  <option value="budget">Бюджетом</option>
+                  <option value="deadline">Дедлайном</option>
+                </select>
+              </div>
+
+              {/* Порядок сортування */}
+              <div>
+                <Label className="text-xs mb-1 block">Порядок</Label>
+                <select
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value as any)}
+                  className="w-full px-2 py-1.5 text-sm border rounded-md bg-white dark:bg-slate-800"
+                >
+                  <option value="asc">↑ Зростання</option>
+                  <option value="desc">↓ Спадання</option>
+                </select>
+              </div>
             </div>
 
             {/* Список об'єктів */}
