@@ -50,6 +50,14 @@ export interface ObjectType {
   id: string;
   name: string;
   isBusinessTrip?: boolean;
+  maxHours?: number;
+  address?: string;
+  managerId?: string;
+  startDate?: string;
+  endDate?: string;
+  plannedBudget?: number;
+  actualBudget?: number;
+  materialsCost?: number;
 }
 
 export interface ProcessType {
