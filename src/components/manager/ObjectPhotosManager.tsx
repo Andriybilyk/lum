@@ -103,7 +103,7 @@ export default function ObjectPhotosManager({
 
       toast({
         title: 'Успішно',
-        description: `Збережено ${photos.length} фото для об'єкта "${object.name}"`
+        description: `Збережено ${photos.length} фото для об\'єкта "${object.name}"`
       });
 
       onClose();
@@ -140,7 +140,7 @@ export default function ObjectPhotosManager({
           <Card className="p-4 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 border-indigo-200 dark:border-indigo-800">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Фото об'єкта</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Фото об\'єкта</p>
                 <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
                   {photos.length}
                 </p>
@@ -329,10 +329,10 @@ export default function ObjectPhotosManager({
             <Card className="p-8 text-center border-dashed">
               <Camera className="w-16 h-16 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
               <p className="text-slate-500 dark:text-slate-400 mb-2">
-                Немає фото для цього об'єкта
+                Немає фото для цього об\'єкта
               </p>
               <p className="text-sm text-slate-400 dark:text-slate-500">
-                Додайте фото об'єкта для звітності клієнтам
+                Додайте фото об\'єкта для звітності клієнтам
               </p>
             </Card>
           )}

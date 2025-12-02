@@ -157,11 +157,11 @@ export default function ObjectPhotosGallery({ open, onClose }: ObjectPhotosGalle
               <Camera className="w-16 h-16 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
               <p className="text-slate-500 dark:text-slate-400 mb-2">
                 {filterObject === 'all'
-                  ? 'Немає фото для об'єктів'
-                  : 'Немає фото для обраного об'єкта'}
+                  ? 'Немає фото для об\'єктів'
+                  : 'Немає фото для обраного об\'єкта'}
               </p>
               <p className="text-sm text-slate-400 dark:text-slate-500">
-                Додайте фото через "Керування Об'єктами" → кнопка "📸 Фото"
+                Додайте фото через "Керування Об\'єктами" → кнопка "📸 Фото"
               </p>
             </Card>
           ) : (
