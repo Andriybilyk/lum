@@ -50,13 +50,6 @@ export interface Level {
   hourlyRate: number;
 }
 
-export interface ObjectPhoto {
-  url: string;
-  label: string;
-  uploadedBy: string;
-  uploadedAt: string;
-}
-
 export interface ObjectType {
   id: string;
   name: string;
@@ -69,8 +62,6 @@ export interface ObjectType {
   plannedBudget?: number;
   actualBudget?: number;
   materialsCost?: number;
-  photos?: ObjectPhoto[];        // Масив фото об'єкта
-  photosUpdatedAt?: string;      // Час останнього оновлення фото
 }
 
 export interface ProcessType {
