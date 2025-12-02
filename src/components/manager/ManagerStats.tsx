@@ -14,9 +14,9 @@ import LogHoursModal from '../employee/LogHoursModal';
 import LogProcessModal from '../employee/LogProcessModal';
 import WorkReminders from '../employee/WorkReminders';
 import PayrollReport from './PayrollReport';
-import AnomaliesDetection from './AnomaliesDetection';
 import PhotoReportsModal from './PhotoReportsModal';
 import { useTeamStats } from '@/hooks/useTeamStats';
+import { useAnomaliesDetection } from '@/hooks/useAnomaliesDetection';
 
 interface ManagerStatsProps {
   setActiveTab: (tab: string) => void;
@@ -33,7 +33,6 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
   const [showLogProcess, setShowLogProcess] = useState(false);
   const [showAdditionalWorks, setShowAdditionalWorks] = useState(false);
   const [showPayroll, setShowPayroll] = useState(false);
-  const [showAnomalies, setShowAnomalies] = useState(false);
   const [showPhotoReports, setShowPhotoReports] = useState(false);
 
   const teamMembers = useMemo(
@@ -48,6 +47,9 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
   }, [teamMembers]);
 
   const stats = useTeamStats(teamMemberIds);
+
+  // Автоматична перевірка аномалій (надсилає сповіщення при виявленні проблем)
+  useAnomaliesDetection();
 
   // Забезпечуємо значення за замовчуванням для stats
   const safeStats = {
@@ -192,13 +194,6 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
         </Button>
 
         <Button
-          onClick={() => setShowAnomalies(true)}
-          className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-red-600 to-pink-500 hover:from-red-700 hover:to-pink-600 rounded-2xl shadow-lg"
-        >
-          <span>🔍 Перевірка Аномалій</span>
-        </Button>
-
-        <Button
           onClick={() => setShowPhotoReports(true)}
           className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-indigo-600 to-purple-500 hover:from-indigo-700 hover:to-purple-600 rounded-2xl shadow-lg"
         >
@@ -211,7 +206,6 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
       <ManageProcessesModal open={showManageProcesses} onClose={() => setShowManageProcesses(false)} />
       <AdditionalWorksModal open={showAdditionalWorks} onClose={() => setShowAdditionalWorks(false)} />
       <PayrollReport open={showPayroll} onClose={() => setShowPayroll(false)} />
-      <AnomaliesDetection open={showAnomalies} onClose={() => setShowAnomalies(false)} />
       <PhotoReportsModal open={showPhotoReports} onClose={() => setShowPhotoReports(false)} />
       <LogHoursModal open={showLogHours} onClose={() => setShowLogHours(false)} />
       <LogProcessModal open={showLogProcess} onClose={() => setShowLogProcess(false)} />
