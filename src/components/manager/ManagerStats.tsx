@@ -13,6 +13,8 @@ import AdditionalWorksModal from './AdditionalWorksModal';
 import LogHoursModal from '../employee/LogHoursModal';
 import LogProcessModal from '../employee/LogProcessModal';
 import WorkReminders from '../employee/WorkReminders';
+import PayrollReport from './PayrollReport';
+import AnomaliesDetection from './AnomaliesDetection';
 import { useTeamStats } from '@/hooks/useTeamStats';
 
 interface ManagerStatsProps {
@@ -29,6 +31,8 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
   const [showLogHours, setShowLogHours] = useState(false);
   const [showLogProcess, setShowLogProcess] = useState(false);
   const [showAdditionalWorks, setShowAdditionalWorks] = useState(false);
+  const [showPayroll, setShowPayroll] = useState(false);
+  const [showAnomalies, setShowAnomalies] = useState(false);
 
   const teamMembers = useMemo(
     () => {
@@ -177,12 +181,28 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
             </span>
           )}
         </Button>
+
+        <Button
+          onClick={() => setShowPayroll(true)}
+          className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 rounded-2xl shadow-lg"
+        >
+          <span>💰 Зарплатна Відомість</span>
+        </Button>
+
+        <Button
+          onClick={() => setShowAnomalies(true)}
+          className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-red-600 to-pink-500 hover:from-red-700 hover:to-pink-600 rounded-2xl shadow-lg"
+        >
+          <span>🔍 Перевірка Аномалій</span>
+        </Button>
       </div>
 
       <AssignWorkModal open={showAssignWork} onClose={() => setShowAssignWork(false)} />
       <ManageObjectsModal open={showManageObjects} onClose={() => setShowManageObjects(false)} />
       <ManageProcessesModal open={showManageProcesses} onClose={() => setShowManageProcesses(false)} />
       <AdditionalWorksModal open={showAdditionalWorks} onClose={() => setShowAdditionalWorks(false)} />
+      <PayrollReport open={showPayroll} onClose={() => setShowPayroll(false)} />
+      <AnomaliesDetection open={showAnomalies} onClose={() => setShowAnomalies(false)} />
       <LogHoursModal open={showLogHours} onClose={() => setShowLogHours(false)} />
       <LogProcessModal open={showLogProcess} onClose={() => setShowLogProcess(false)} />
       </div>
