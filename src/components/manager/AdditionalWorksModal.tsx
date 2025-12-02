@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -105,8 +106,9 @@ export default function AdditionalWorksModal({ open, onClose }: AdditionalWorksM
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            ⭐ Додаткові Роботи
+          <DialogTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
+            <Star className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />
+            Додаткові Роботи
             {pendingWorks.length > 0 && (
               <span className="ml-auto px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full text-sm font-semibold">
                 {pendingWorks.length} нових

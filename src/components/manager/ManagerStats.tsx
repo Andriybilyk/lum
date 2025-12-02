@@ -72,10 +72,10 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
       <div className="p-4 space-y-4">
         <div className="pt-4 pb-2 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-800 dark:text-white">
             Вітаємо, {user?.name}! 👋
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">
+          <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm mt-1">
             Панель керування командою
           </p>
         </div>
@@ -133,48 +133,48 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
         <div className="grid grid-cols-2 gap-3">
           <Button
             onClick={() => setShowLogHours(true)}
-            className="h-14 text-base font-semibold bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 rounded-2xl shadow-lg"
+            className="h-12 sm:h-14 text-sm sm:text-base font-semibold bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 rounded-2xl shadow-lg"
           >
-            <Clock className="w-5 h-5 mr-2" />
-            Подати Години
+            <Clock className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
+            <span className="text-xs sm:text-base">Подати Години</span>
           </Button>
 
           <Button
             onClick={() => setShowLogProcess(true)}
-            className="h-14 text-base font-semibold bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 rounded-2xl shadow-lg"
+            className="h-12 sm:h-14 text-sm sm:text-base font-semibold bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 rounded-2xl shadow-lg"
           >
-            <Briefcase className="w-5 h-5 mr-2" />
-            Подати Процес
+            <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
+            <span className="text-xs sm:text-base">Подати Процес</span>
           </Button>
         </div>
 
         <Button
           onClick={() => setShowAssignWork(true)}
-          className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 rounded-2xl shadow-lg"
+          className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 rounded-2xl shadow-lg"
         >
-          <Plus className="w-5 h-5 mr-2" />
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
           Призначити Роботу
         </Button>
 
         <Button
           onClick={() => setShowManageObjects(true)}
-          className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 rounded-2xl shadow-lg"
+          className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 rounded-2xl shadow-lg"
         >
-          <Plus className="w-5 h-5 mr-2" />
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
           Керувати Об'єктами
         </Button>
 
         <Button
           onClick={() => setShowManageProcesses(true)}
-          className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-orange-600 to-red-500 hover:from-orange-700 hover:to-red-600 rounded-2xl shadow-lg"
+          className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-orange-600 to-red-500 hover:from-orange-700 hover:to-red-600 rounded-2xl shadow-lg"
         >
-          <Plus className="w-5 h-5 mr-2" />
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
           Керувати Процесами
         </Button>
 
         <Button
           onClick={() => setShowAdditionalWorks(true)}
-          className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-amber-600 to-orange-500 hover:from-amber-700 hover:to-orange-600 rounded-2xl shadow-lg relative"
+          className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-amber-600 to-orange-500 hover:from-amber-700 hover:to-orange-600 rounded-2xl shadow-lg relative"
         >
           <span>⭐ Додаткові Роботи</span>
           {pendingAdditionalWorks > 0 && (
@@ -186,21 +186,21 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
 
         <Button
           onClick={() => setShowPayroll(true)}
-          className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 rounded-2xl shadow-lg"
+          className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 rounded-2xl shadow-lg"
         >
           <span>💰 Зарплатна Відомість</span>
         </Button>
 
         <Button
           onClick={() => setShowAnomalies(true)}
-          className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-red-600 to-pink-500 hover:from-red-700 hover:to-pink-600 rounded-2xl shadow-lg"
+          className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-red-600 to-pink-500 hover:from-red-700 hover:to-pink-600 rounded-2xl shadow-lg"
         >
           <span>🔍 Перевірка Аномалій</span>
         </Button>
 
         <Button
           onClick={() => setShowPhotoReports(true)}
-          className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-indigo-600 to-purple-500 hover:from-indigo-700 hover:to-purple-600 rounded-2xl shadow-lg"
+          className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-indigo-600 to-purple-500 hover:from-indigo-700 hover:to-purple-600 rounded-2xl shadow-lg"
         >
           <span>📸 Фото Процесів</span>
         </Button>

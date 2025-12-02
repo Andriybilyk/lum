@@ -356,8 +356,8 @@ export default function ManageObjectsModal({ open, onClose }: ManageObjectsModal
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent className="w-[95vw] max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl flex items-center gap-2">
-              <Activity className="w-5 h-5" />
+            <DialogTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
+              <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
               Керування Об'єктами
             </DialogTitle>
           </DialogHeader>
