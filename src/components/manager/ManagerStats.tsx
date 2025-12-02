@@ -15,6 +15,8 @@ import LogProcessModal from '../employee/LogProcessModal';
 import WorkReminders from '../employee/WorkReminders';
 import PayrollReport from './PayrollReport';
 import AnomaliesDetection from './AnomaliesDetection';
+import PhotoReportsModal from './PhotoReportsModal';
+import ObjectPhotosGallery from './ObjectPhotosGallery';
 import { useTeamStats } from '@/hooks/useTeamStats';
 
 interface ManagerStatsProps {
@@ -33,6 +35,8 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
   const [showAdditionalWorks, setShowAdditionalWorks] = useState(false);
   const [showPayroll, setShowPayroll] = useState(false);
   const [showAnomalies, setShowAnomalies] = useState(false);
+  const [showPhotoReports, setShowPhotoReports] = useState(false);
+  const [showObjectPhotos, setShowObjectPhotos] = useState(false);
 
   const teamMembers = useMemo(
     () => {
@@ -195,6 +199,20 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
         >
           <span>🔍 Перевірка Аномалій</span>
         </Button>
+
+        <Button
+          onClick={() => setShowPhotoReports(true)}
+          className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-indigo-600 to-purple-500 hover:from-indigo-700 hover:to-purple-600 rounded-2xl shadow-lg"
+        >
+          <span>📸 Фото Процесів</span>
+        </Button>
+
+        <Button
+          onClick={() => setShowObjectPhotos(true)}
+          className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 rounded-2xl shadow-lg"
+        >
+          <span>🏗️ Фото Об'єктів</span>
+        </Button>
       </div>
 
       <AssignWorkModal open={showAssignWork} onClose={() => setShowAssignWork(false)} />
@@ -203,6 +221,8 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
       <AdditionalWorksModal open={showAdditionalWorks} onClose={() => setShowAdditionalWorks(false)} />
       <PayrollReport open={showPayroll} onClose={() => setShowPayroll(false)} />
       <AnomaliesDetection open={showAnomalies} onClose={() => setShowAnomalies(false)} />
+      <PhotoReportsModal open={showPhotoReports} onClose={() => setShowPhotoReports(false)} />
+      <ObjectPhotosGallery open={showObjectPhotos} onClose={() => setShowObjectPhotos(false)} />
       <LogHoursModal open={showLogHours} onClose={() => setShowLogHours(false)} />
       <LogProcessModal open={showLogProcess} onClose={() => setShowLogProcess(false)} />
       </div>

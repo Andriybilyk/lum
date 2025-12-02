@@ -28,6 +28,10 @@ export interface Process {
   unit: string;
   rate: number;
   salary: number;
+  photoBefore?: string;    // URL фото перед початком роботи
+  photoDuring?: string;    // URL фото під час виконання
+  photoAfter?: string;     // URL фото після завершення
+  photosUploadedAt?: string; // Час останнього оновлення фото
 }
 
 export interface Assignment {
@@ -46,6 +50,13 @@ export interface Level {
   hourlyRate: number;
 }
 
+export interface ObjectPhoto {
+  url: string;
+  label: string;
+  uploadedBy: string;
+  uploadedAt: string;
+}
+
 export interface ObjectType {
   id: string;
   name: string;
@@ -58,6 +69,8 @@ export interface ObjectType {
   plannedBudget?: number;
   actualBudget?: number;
   materialsCost?: number;
+  photos?: ObjectPhoto[];        // Масив фото об'єкта
+  photosUpdatedAt?: string;      // Час останнього оновлення фото
 }
 
 export interface ProcessType {

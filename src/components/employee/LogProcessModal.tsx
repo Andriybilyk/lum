@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useUser } from '@/contexts/UserContext';
 import { useData } from '@/contexts/DataContext';
 import { useToast } from '@/components/ui/use-toast';
+import PhotoUpload from '@/components/shared/PhotoUpload';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface LogProcessModalProps {
   open: boolean;
@@ -27,7 +29,10 @@ export default function LogProcessModal({ open, onClose }: LogProcessModalProps)
     processName: '',
     volume: '',
     unit: '',
-    rate: ''
+    rate: '',
+    photoBefore: null as string | null,
+    photoDuring: null as string | null,
+    photoAfter: null as string | null
   });
 
   const [additionalWorkData, setAdditionalWorkData] = useState({
@@ -128,7 +133,7 @@ export default function LogProcessModal({ open, onClose }: LogProcessModalProps)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const volume = parseFloat(formData.volume);
     const rate = parseFloat(formData.rate);
     const salary = volume * rate;
@@ -141,15 +146,21 @@ export default function LogProcessModal({ open, onClose }: LogProcessModalProps)
       volume,
       unit: formData.unit,
       rate: parseFloat(formData.rate),
-      salary
+      salary,
+      photoBefore: formData.photoBefore || undefined,
+      photoDuring: formData.photoDuring || undefined,
+      photoAfter: formData.photoAfter || undefined
     });
 
     // Даємо час на запис в Google Sheets (запит вже відправлено)
     await new Promise(resolve => setTimeout(resolve, 1000));
 
+    const photoCount = [formData.photoBefore, formData.photoDuring, formData.photoAfter].filter(Boolean).length;
+    const photoText = photoCount > 0 ? ` з ${photoCount} фото` : '';
+
     toast({
       title: 'Успішно',
-      description: `Процес записано на ${formData.object}. Заробіток: ₴${salary.toFixed(2)}`
+      description: `Процес записано на ${formData.object}${photoText}. Заробіток: ₴${salary.toFixed(2)}`
     });
 
     setFormData({
@@ -158,7 +169,10 @@ export default function LogProcessModal({ open, onClose }: LogProcessModalProps)
       processName: '',
       volume: '',
       unit: '',
-      rate: ''
+      rate: '',
+      photoBefore: null,
+      photoDuring: null,
+      photoAfter: null
     });
     onClose();
   };
@@ -294,6 +308,37 @@ export default function LogProcessModal({ open, onClose }: LogProcessModalProps)
                   </p>
                 </div>
               )}
+
+              {/* Секція фото - опціонально */}
+              <Accordion type="single" collapsible className="w-full border rounded-lg">
+                <AccordionItem value="photos" className="border-0">
+                  <AccordionTrigger className="px-4 hover:no-underline text-sm sm:text-base font-semibold">
+                    📸 Додати Фото (не обов'язково)
+                  </AccordionTrigger>
+                  <AccordionContent className="px-4 pb-4">
+                    <div className="space-y-4">
+                      <PhotoUpload
+                        label="Фото ПЕРЕД початком роботи"
+                        photoUrl={formData.photoBefore || undefined}
+                        onPhotoChange={(url) => setFormData({ ...formData, photoBefore: url })}
+                      />
+                      <PhotoUpload
+                        label="Фото ПІД ЧАС виконання"
+                        photoUrl={formData.photoDuring || undefined}
+                        onPhotoChange={(url) => setFormData({ ...formData, photoDuring: url })}
+                      />
+                      <PhotoUpload
+                        label="Фото ПІСЛЯ завершення"
+                        photoUrl={formData.photoAfter || undefined}
+                        onPhotoChange={(url) => setFormData({ ...formData, photoAfter: url })}
+                      />
+                      <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
+                        💡 Фото допомагають контролювати якість робіт
+                      </p>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </>
           )}
 

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Trash2, Plus, Edit2, FileText, Plane, MapPin, Calendar, User, Package, Search, Activity, DollarSign, Users, Clock, Wrench, TrendingUp } from 'lucide-react';
+import { Trash2, Plus, Edit2, FileText, Plane, MapPin, Calendar, User, Package, Search, Activity, DollarSign, Users, Clock, Wrench, TrendingUp, Camera } from 'lucide-react';
 import { useData } from '@/contexts/DataContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +14,8 @@ import { Card } from '@/components/ui/card';
 import ObjectProcessesModal from './ObjectProcessesModal';
 import LogMaterialsModal from '../employee/LogMaterialsModal';
 import ObjectsQuickStats from './ObjectsQuickStats';
-import type { ObjectType } from '@/types';
+import ObjectPhotosManager from './ObjectPhotosManager';
+import type { ObjectType, ObjectPhoto } from '@/types';
 
 interface ManageObjectsModalProps {
   open: boolean;
@@ -64,6 +65,7 @@ export default function ManageObjectsModal({ open, onClose }: ManageObjectsModal
   const [detailsObject, setDetailsObject] = useState<{ id: string; name: string } | null>(null);
   const [materialsObject, setMaterialsObject] = useState<{ id: string; name: string } | null>(null);
   const [showWorkers, setShowWorkers] = useState<string | null>(null);
+  const [photosObject, setPhotosObject] = useState<ObjectType | null>(null);
 
   // Статистика по об'єктах
   const objectStats = useMemo(() => {
@@ -349,6 +351,19 @@ export default function ManageObjectsModal({ open, onClose }: ManageObjectsModal
     });
 
     setDeleteConfirm(null);
+  };
+
+  const handleSaveObjectPhotos = async (photos: ObjectPhoto[]) => {
+    if (!photosObject) return;
+
+    await updateObject(photosObject.id, { photos });
+
+    toast({
+      title: 'Успішно',
+      description: `Фото об'єкта "${photosObject.name}" оновлено`
+    });
+
+    setPhotosObject(null);
   };
 
   return (
@@ -714,6 +729,15 @@ export default function ManageObjectsModal({ open, onClose }: ManageObjectsModal
                               <Button
                                 size="sm"
                                 variant="outline"
+                                onClick={() => setPhotosObject(obj)}
+                                className="text-xs bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800"
+                              >
+                                <Camera className="w-3 h-3 mr-1" />
+                                Фото {obj.photos && obj.photos.length > 0 && `(${obj.photos.length})`}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
                                 onClick={() => handleStartEdit(obj)}
                                 className="text-xs"
                               >
@@ -867,6 +891,15 @@ export default function ManageObjectsModal({ open, onClose }: ManageObjectsModal
           open={!!materialsObject}
           onClose={() => setMaterialsObject(null)}
           preselectedObject={materialsObject.name}
+        />
+      )}
+
+      {photosObject && (
+        <ObjectPhotosManager
+          open={!!photosObject}
+          onClose={() => setPhotosObject(null)}
+          object={photosObject}
+          onSave={handleSaveObjectPhotos}
         />
       )}
     </>

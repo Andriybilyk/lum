@@ -5,11 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Briefcase, Save, X } from 'lucide-react';
+import { Briefcase, Save, X, Camera } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useData } from '@/contexts/DataContext';
 import { useUser } from '@/contexts/UserContext';
 import MemoizedProcessCard from '@/components/memoized/MemoizedProcessCard';
+import PhotoGallery from '@/components/shared/PhotoGallery';
 
 interface ProcessDetailsModalProps {
   open: boolean;
@@ -153,7 +154,8 @@ export default function ProcessDetailsModal({ open, onClose, month, year }: Proc
               {userProcesses.length === 0 ? (
                 <p className="text-center text-slate-500 py-8">Немає записів процесів</p>
               ) : (
-                userProcesses.map((entry) => (
+                <>
+                  {userProcesses.map((entry) => (
                   editingProcess === entry.id ? (
                     <Card key={entry.id} className="p-4 sm:p-5 border-2 border-purple-200 dark:border-purple-700">
                       <div className="space-y-4">
@@ -247,7 +249,49 @@ export default function ProcessDetailsModal({ open, onClose, month, year }: Proc
                       isLoading={isLoading}
                     />
                   )
-                ))
+                  ))}
+
+                  {/* Галерея фото з усіх процесів */}
+                  {(() => {
+                    const allPhotos: Array<{ url: string; label: string; timestamp?: string }> = [];
+                    userProcesses.forEach((entry) => {
+                      if (entry.photoBefore) {
+                        allPhotos.push({
+                          url: entry.photoBefore,
+                          label: `${entry.processName} - До початку (${new Date(entry.date).toLocaleDateString('uk-UA')})`,
+                          timestamp: entry.photosUploadedAt
+                        });
+                      }
+                      if (entry.photoDuring) {
+                        allPhotos.push({
+                          url: entry.photoDuring,
+                          label: `${entry.processName} - Під час (${new Date(entry.date).toLocaleDateString('uk-UA')})`,
+                          timestamp: entry.photosUploadedAt
+                        });
+                      }
+                      if (entry.photoAfter) {
+                        allPhotos.push({
+                          url: entry.photoAfter,
+                          label: `${entry.processName} - Після (${new Date(entry.date).toLocaleDateString('uk-UA')})`,
+                          timestamp: entry.photosUploadedAt
+                        });
+                      }
+                    });
+
+                    if (allPhotos.length > 0) {
+                      return (
+                        <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
+                          <h3 className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+                            <Camera className="w-5 h-5 text-purple-600" />
+                            Фото Звіти ({allPhotos.length})
+                          </h3>
+                          <PhotoGallery photos={allPhotos} />
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+                </>
               )}
             </div>
           </div>
