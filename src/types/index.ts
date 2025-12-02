@@ -126,6 +126,8 @@ export interface Material {
   materialName: string;
   quantity: number;
   unit: string;
+  price?: number;          // Ціна за одиницю (опціонально)
+  totalCost?: number;      // Загальна вартість (quantity × price, автоматично)
   notes?: string;
   createdAt: string;
   updatedAt: string;

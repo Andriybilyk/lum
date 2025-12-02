@@ -273,6 +273,8 @@ export async function getAllMaterials(): Promise<Material[]> {
       materialName: row.material_name,
       quantity: Number(row.quantity),
       unit: row.unit,
+      price: row.price ? Number(row.price) : undefined,
+      totalCost: row.total_cost ? Number(row.total_cost) : undefined,
       notes: row.notes || undefined,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
@@ -295,6 +297,8 @@ export async function createMaterial(material: Omit<Material, 'id' | 'createdAt'
       material_name: material.materialName,
       quantity: material.quantity,
       unit: material.unit,
+      price: material.price || null,
+      // total_cost буде розраховано автоматично тригером в БД
       notes: material.notes || null,
     });
 

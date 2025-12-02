@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,32 +8,45 @@ import { Textarea } from '@/components/ui/textarea';
 import { useUser } from '@/contexts/UserContext';
 import { useData } from '@/contexts/DataContext';
 import { useToast } from '@/components/ui/use-toast';
-import { Package } from 'lucide-react';
+import { Package, DollarSign } from 'lucide-react';
 
 interface LogMaterialsModalProps {
   open: boolean;
   onClose: () => void;
+  preselectedObject?: string;
 }
 
-export default function LogMaterialsModal({ open, onClose }: LogMaterialsModalProps) {
+export default function LogMaterialsModal({ open, onClose, preselectedObject }: LogMaterialsModalProps) {
   const { user } = useUser();
   const { objects, addMaterial } = useData();
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
-    object: '',
+    object: preselectedObject || '',
     materialName: '',
     quantity: '',
     unit: '',
+    price: '',
     notes: ''
   });
+
+  // Автоматичний розрахунок загальної вартості
+  const totalCost = useMemo(() => {
+    const quantity = parseFloat(formData.quantity);
+    const price = parseFloat(formData.price);
+
+    if (!isNaN(quantity) && !isNaN(price) && quantity > 0 && price > 0) {
+      return quantity * price;
+    }
+    return null;
+  }, [formData.quantity, formData.price]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      await addMaterial({
+      const materialData: any = {
         userId: user?.id || '',
         date: formData.date,
         object: formData.object,
@@ -41,19 +54,31 @@ export default function LogMaterialsModal({ open, onClose }: LogMaterialsModalPr
         quantity: parseFloat(formData.quantity),
         unit: formData.unit,
         notes: formData.notes
-      });
+      };
+
+      // Додаємо ціну, якщо вказана
+      if (formData.price && !isNaN(parseFloat(formData.price))) {
+        materialData.price = parseFloat(formData.price);
+      }
+
+      await addMaterial(materialData);
+
+      const costText = totalCost !== null
+        ? ` (₴${totalCost.toFixed(2)})`
+        : '';
 
       toast({
         title: 'Успішно',
-        description: `Матеріал "${formData.materialName}" записано: ${formData.quantity} ${formData.unit}`
+        description: `Матеріал "${formData.materialName}" записано: ${formData.quantity} ${formData.unit}${costText}`
       });
 
       setFormData({
         date: new Date().toISOString().split('T')[0],
-        object: '',
+        object: preselectedObject || '',
         materialName: '',
         quantity: '',
         unit: '',
+        price: '',
         notes: ''
       });
       onClose();
@@ -163,6 +188,28 @@ export default function LogMaterialsModal({ open, onClose }: LogMaterialsModalPr
           </div>
 
           <div>
+            <Label htmlFor="price" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">
+              Ціна за одиницю (₴) - не обов'язково
+            </Label>
+            <div className="relative mt-1.5">
+              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Input
+                id="price"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                placeholder="0.00"
+                className="h-11 sm:h-12 text-sm sm:text-base pl-10"
+              />
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              💡 Вкажіть ціну для автоматичного розрахунку вартості
+            </p>
+          </div>
+
+          <div>
             <Label htmlFor="notes" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">
               Примітки (не обов'язково)
             </Label>
@@ -175,11 +222,43 @@ export default function LogMaterialsModal({ open, onClose }: LogMaterialsModalPr
             />
           </div>
 
+          {/* Інфо картка з автоматичним розрахунком */}
           {formData.materialName && formData.quantity && formData.unit && (
-            <div className="p-3 sm:p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg border-2 border-amber-200 dark:border-amber-800">
-              <p className="text-sm sm:text-base font-bold text-amber-800 dark:text-amber-200">
-                📦 {formData.materialName}: {formData.quantity} {formData.unit}
-              </p>
+            <div className="p-3 sm:p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 rounded-lg border-2 border-amber-200 dark:border-amber-800">
+              <div className="space-y-2">
+                <p className="text-sm sm:text-base font-bold text-amber-900 dark:text-amber-100">
+                  📦 {formData.materialName}
+                </p>
+                <div className="flex items-center justify-between text-xs sm:text-sm">
+                  <span className="text-amber-700 dark:text-amber-300">Кількість:</span>
+                  <span className="font-semibold text-amber-900 dark:text-amber-100">
+                    {formData.quantity} {formData.unit}
+                  </span>
+                </div>
+                {formData.price && (
+                  <>
+                    <div className="flex items-center justify-between text-xs sm:text-sm">
+                      <span className="text-amber-700 dark:text-amber-300">Ціна за {formData.unit}:</span>
+                      <span className="font-semibold text-amber-900 dark:text-amber-100">
+                        ₴{parseFloat(formData.price).toFixed(2)}
+                      </span>
+                    </div>
+                    {totalCost !== null && (
+                      <div className="pt-2 mt-2 border-t border-amber-300 dark:border-amber-700">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold text-amber-800 dark:text-amber-200 flex items-center gap-1">
+                            <DollarSign className="w-4 h-4" />
+                            Загальна вартість:
+                          </span>
+                          <span className="text-lg font-bold text-green-700 dark:text-green-400">
+                            ₴{totalCost.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           )}
 
