@@ -3,7 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Camera, Calendar, User, MapPin, Filter, Plus, Edit2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Camera, Calendar, User, MapPin, Filter, Plus, Edit2, Image } from 'lucide-react';
 import { useData } from '@/contexts/DataContext';
 import { useToast } from '@/components/ui/use-toast';
 import PhotoGallery from '@/components/shared/PhotoGallery';
@@ -168,11 +169,23 @@ export default function PhotoReportsModal({ open, onClose }: PhotoReportsModalPr
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl font-bold">
               <Camera className="w-6 h-6 text-purple-600" />
-              Фото Звіти Процесів
+              Фото Робіт
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <Tabs defaultValue="processes" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="processes" className="flex items-center gap-2">
+                <Camera className="w-4 h-4" />
+                Фото Процесів
+              </TabsTrigger>
+              <TabsTrigger value="general" className="flex items-center gap-2">
+                <Image className="w-4 h-4" />
+                Загальні Фото
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="processes" className="space-y-4">
             {/* Статистика */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
               <Card className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 text-white">
@@ -399,7 +412,23 @@ export default function PhotoReportsModal({ open, onClose }: PhotoReportsModalPr
                 </p>
               </Card>
             )}
-          </div>
+            </TabsContent>
+
+            <TabsContent value="general" className="space-y-4">
+              <Card className="p-8 text-center">
+                <Image className="w-16 h-16 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
+                <p className="text-slate-700 dark:text-slate-300 font-semibold mb-2">
+                  Загальні Фото Робіт
+                </p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                  Тут будуть відображатися загальні фото з об'єктів, які не прив'язані до конкретних процесів
+                </p>
+                <p className="text-xs text-slate-400 dark:text-slate-500">
+                  💡 Працівники зможуть завантажувати фото загального стану роботи, прогресу, проблем тощо
+                </p>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
 

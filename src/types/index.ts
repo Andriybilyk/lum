@@ -176,3 +176,15 @@ export interface Notification {
     onClick: () => void;
   };
 }
+
+export interface WorkPhoto {
+  id: string;
+  userId: string;
+  object: string;
+  date: string;
+  photoUrl: string;
+  description?: string;
+  photoType: 'general' | 'progress' | 'issue' | 'completion';
+  createdAt: string;
+  updatedAt: string;
+}

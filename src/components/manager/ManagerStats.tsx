@@ -188,7 +188,7 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
           onClick={() => setShowPhotoReports(true)}
           className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-indigo-600 to-purple-500 hover:from-indigo-700 hover:to-purple-600 rounded-2xl shadow-lg"
         >
-          <span>📸 Фото Процесів</span>
+          <span>📸 Фото Робіт</span>
         </Button>
       </div>
 
