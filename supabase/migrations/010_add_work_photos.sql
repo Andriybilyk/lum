@@ -25,7 +25,7 @@ CREATE POLICY "Users can view their own work photos"
   ON work_photos
   FOR SELECT
   TO authenticated
-  USING (user_id = auth.uid());
+  USING (user_id = auth.uid()::text);
 
 -- Менеджери можуть бачити фото своїх працівників
 CREATE POLICY "Managers can view their employees work photos"
@@ -36,7 +36,7 @@ CREATE POLICY "Managers can view their employees work photos"
     EXISTS (
       SELECT 1 FROM users
       WHERE users.id = work_photos.user_id
-      AND users.manager_id = auth.uid()
+      AND users.manager_id = auth.uid()::text
     )
   );
 
@@ -45,22 +45,22 @@ CREATE POLICY "Users can create their own work photos"
   ON work_photos
   FOR INSERT
   TO authenticated
-  WITH CHECK (user_id = auth.uid());
+  WITH CHECK (user_id = auth.uid()::text);
 
 -- Користувачі можуть оновлювати свої фото
 CREATE POLICY "Users can update their own work photos"
   ON work_photos
   FOR UPDATE
   TO authenticated
-  USING (user_id = auth.uid())
-  WITH CHECK (user_id = auth.uid());
+  USING (user_id = auth.uid()::text)
+  WITH CHECK (user_id = auth.uid()::text);
 
 -- Користувачі можуть видаляти свої фото
 CREATE POLICY "Users can delete their own work photos"
   ON work_photos
   FOR DELETE
   TO authenticated
-  USING (user_id = auth.uid());
+  USING (user_id = auth.uid()::text);
 
 -- Менеджери можуть видаляти фото своїх працівників
 CREATE POLICY "Managers can delete their employees work photos"
@@ -71,7 +71,7 @@ CREATE POLICY "Managers can delete their employees work photos"
     EXISTS (
       SELECT 1 FROM users
       WHERE users.id = work_photos.user_id
-      AND users.manager_id = auth.uid()
+      AND users.manager_id = auth.uid()::text
     )
   );
 
