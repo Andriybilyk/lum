@@ -1,7 +1,7 @@
 -- Таблиця для загальних фото роботи (не прив'язані до конкретного процесу)
 CREATE TABLE IF NOT EXISTS work_photos (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   object TEXT NOT NULL,
   date DATE NOT NULL,
   photo_url TEXT NOT NULL,
