@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useUser } from '@/contexts/UserContext';
 import { useNotification } from '@/contexts/NotificationContext';
@@ -30,6 +30,7 @@ export function useAnomaliesDetection(): AnomaliesStats {
   const { users, hours } = useData();
   const { user } = useUser();
   const { warning, error } = useNotification();
+  const notifiedAnomaliesRef = useRef<Set<string>>(new Set());
 
   const anomalies = useMemo(() => {
     const detected: Anomaly[] = [];
@@ -146,9 +147,12 @@ export function useAnomaliesDetection(): AnomaliesStats {
       a.severity === 'high' && a.date >= yesterdayStr
     );
 
-    if (recentCritical.length > 0) {
-      const excessiveHours = recentCritical.filter(a => a.type === 'excessive_hours');
-      const duplicates = recentCritical.filter(a => a.type === 'duplicate');
+    // Перевіряємо тільки нові аномалії, про які ще не повідомляли
+    const newAnomalies = recentCritical.filter(a => !notifiedAnomaliesRef.current.has(a.id));
+
+    if (newAnomalies.length > 0) {
+      const excessiveHours = newAnomalies.filter(a => a.type === 'excessive_hours');
+      const duplicates = newAnomalies.filter(a => a.type === 'duplicate');
 
       if (excessiveHours.length > 0) {
         error(
@@ -156,6 +160,8 @@ export function useAnomaliesDetection(): AnomaliesStats {
           `${excessiveHours.length} ${excessiveHours.length === 1 ? 'працівник має' : 'працівників мають'} понад 14 годин за день. Перевірте записи в розділі "Звіти".`,
           10000
         );
+        // Відмічаємо, що вже повідомили про ці аномалії
+        excessiveHours.forEach(a => notifiedAnomaliesRef.current.add(a.id));
       }
 
       if (duplicates.length > 0) {
@@ -164,6 +170,8 @@ export function useAnomaliesDetection(): AnomaliesStats {
           `Виявлено ${duplicates.length} ${duplicates.length === 1 ? 'дублікат' : 'дублікатів'} у записах годин. Перевірте розділ "Звіти".`,
           8000
         );
+        // Відмічаємо, що вже повідомили про ці аномалії
+        duplicates.forEach(a => notifiedAnomaliesRef.current.add(a.id));
       }
     }
   }, [anomalies, user, error, warning]);
