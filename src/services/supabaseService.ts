@@ -10,6 +10,7 @@ import type {
   ObjectType,
   ProcessType,
   AdditionalWork,
+  WorkPhoto,
 } from '@/types';
 
 // Initialize context for current user
@@ -684,5 +685,87 @@ export async function updateAdditionalWork(
     logger.debug('AdditionalWork updated:', id, 'Supabase');
   } catch (error) {
     handleSupabaseError(error, 'updateAdditionalWork');
+  }
+}
+
+// ============= WORK PHOTOS =============
+
+export async function getAllWorkPhotos(): Promise<WorkPhoto[]> {
+  try {
+    const { data, error } = await supabase
+      .from('work_photos')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    return (data || []).map(row => ({
+      id: row.id,
+      userId: row.user_id,
+      object: row.object,
+      date: row.date,
+      photoUrl: row.photo_url,
+      description: row.description || undefined,
+      photoType: row.photo_type as 'general' | 'progress' | 'issue' | 'completion',
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    }));
+  } catch (error) {
+    handleSupabaseError(error, 'getAllWorkPhotos');
+    return [];
+  }
+}
+
+export async function createWorkPhoto(photo: Omit<WorkPhoto, 'id' | 'createdAt' | 'updatedAt'>): Promise<void> {
+  try {
+    const { error } = await supabase.from('work_photos').insert({
+      user_id: photo.userId,
+      object: photo.object,
+      date: photo.date,
+      photo_url: photo.photoUrl,
+      description: photo.description || null,
+      photo_type: photo.photoType,
+    });
+
+    if (error) throw error;
+    logger.debug('WorkPhoto created', 'Supabase');
+  } catch (error) {
+    handleSupabaseError(error, 'createWorkPhoto');
+  }
+}
+
+export async function updateWorkPhoto(id: string, updates: Partial<Omit<WorkPhoto, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>): Promise<void> {
+  try {
+    const updateData: Record<string, any> = {};
+
+    if (updates.object !== undefined) updateData.object = updates.object;
+    if (updates.date !== undefined) updateData.date = updates.date;
+    if (updates.photoUrl !== undefined) updateData.photo_url = updates.photoUrl;
+    if (updates.description !== undefined) updateData.description = updates.description;
+    if (updates.photoType !== undefined) updateData.photo_type = updates.photoType;
+
+    const { error } = await supabase
+      .from('work_photos')
+      .update(updateData)
+      .eq('id', id);
+
+    if (error) throw error;
+    logger.debug('WorkPhoto updated:', id, 'Supabase');
+  } catch (error) {
+    handleSupabaseError(error, 'updateWorkPhoto');
+  }
+}
+
+export async function deleteWorkPhoto(id: string): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('work_photos')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    logger.debug('WorkPhoto deleted:', id, 'Supabase');
+  } catch (error) {
+    handleSupabaseError(error, 'deleteWorkPhoto');
   }
 }

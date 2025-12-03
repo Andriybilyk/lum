@@ -15,6 +15,7 @@ import type {
   ProcessType,
   AdditionalWork,
   Material,
+  WorkPhoto,
 } from '@/types';
 
 /**
@@ -32,7 +33,8 @@ export async function loadAllData() {
     processTypes,
     assignments,
     additionalWorks,
-    materials
+    materials,
+    workPhotos
   ] = await Promise.all([
     supabaseService.getAllUsers(),
     supabaseService.getAllHours(),
@@ -43,6 +45,7 @@ export async function loadAllData() {
     supabaseService.getAllAssignments(),
     supabaseService.getAllAdditionalWorks(),
     supabaseService.getAllMaterials(),
+    supabaseService.getAllWorkPhotos(),
   ]);
 
   return {
@@ -55,6 +58,7 @@ export async function loadAllData() {
     assignments,
     additionalWorks,
     materials,
+    workPhotos,
   };
 }
 
@@ -176,4 +180,22 @@ export async function createMaterial(material: Omit<Material, 'id' | 'createdAt'
 
 export async function deleteMaterial(id: string) {
   await supabaseService.deleteMaterial(id);
+}
+
+
+// ============= WORK PHOTOS =============
+
+export async function createWorkPhoto(photo: Omit<WorkPhoto, 'id' | 'createdAt' | 'updatedAt'>) {
+  await supabaseService.createWorkPhoto(photo);
+}
+
+export async function updateWorkPhoto(
+  id: string,
+  updates: Partial<Omit<WorkPhoto, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>
+) {
+  await supabaseService.updateWorkPhoto(id, updates);
+}
+
+export async function deleteWorkPhoto(id: string) {
+  await supabaseService.deleteWorkPhoto(id);
 }

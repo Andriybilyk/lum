@@ -12,6 +12,7 @@ import type {
   ProcessType,
   AdditionalWork,
   Material,
+  WorkPhoto,
   TeamReport,
   EmployeeReport
 } from '../types';
@@ -27,6 +28,7 @@ interface DataContextType {
   processTypes: ProcessType[];
   additionalWorks: AdditionalWork[];
   materials: Material[];
+  workPhotos: WorkPhoto[];
   
   // Actions
   addUser: (user: Omit<User, 'id'> | User) => Promise<void>;
@@ -53,6 +55,9 @@ interface DataContextType {
   updateAdditionalWork: (id: string, updates: Partial<Omit<AdditionalWork, 'id' | 'userId' | 'managerId' | 'createdAt' | 'updatedAt'>>) => Promise<void>;
   addMaterial: (material: Omit<Material, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   deleteMaterial: (id: string) => Promise<void>;
+  addWorkPhoto: (photo: Omit<WorkPhoto, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateWorkPhoto: (id: string, updates: Partial<Omit<WorkPhoto, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>) => Promise<void>;
+  deleteWorkPhoto: (id: string) => Promise<void>;
 
   // Reports
   getTeamReport: (month: string) => TeamReport[];
@@ -78,6 +83,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [processTypes, setProcessTypes] = useState<ProcessType[]>([]);
   const [additionalWorks, setAdditionalWorks] = useState<AdditionalWork[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
+  const [workPhotos, setWorkPhotos] = useState<WorkPhoto[]>([]);
 
 
   // Initialize and load data
@@ -105,6 +111,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setAssignments(data.assignments);
           setAdditionalWorks(data.additionalWorks);
           setMaterials(data.materials || []);
+          setWorkPhotos(data.workPhotos || []);
 
           const loadTime = performance.now() - startTime;
           logger.info(`Data loaded successfully in ${loadTime.toFixed(0)}ms`, 'DataContext');
@@ -805,6 +812,83 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const addWorkPhoto = async (photo: Omit<WorkPhoto, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newPhoto: WorkPhoto = {
+      ...photo,
+      id: `temp-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Optimistic update
+    setWorkPhotos(prev => [newPhoto, ...prev]);
+
+    if (isConfigured) {
+      try {
+        await dataAdapter.createWorkPhoto(photo);
+        logger.debug('WorkPhoto added successfully', 'DataContext');
+        // Reload to get actual ID from server
+        const data = await dataAdapter.loadAllData();
+        setWorkPhotos(data.workPhotos || []);
+      } catch (error) {
+        logger.error('Failed to add work photo:', error, 'DataContext');
+        // Rollback on error
+        setWorkPhotos(prev => prev.filter(p => p.id !== newPhoto.id));
+        throw error;
+      }
+    }
+  };
+
+  const updateWorkPhoto = async (id: string, updates: Partial<Omit<WorkPhoto, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>) => {
+    const photoToUpdate = workPhotos.find(p => p.id === id);
+    if (!photoToUpdate) {
+      logger.error('WorkPhoto not found:', id, 'DataContext');
+      return;
+    }
+
+    // Optimistic update
+    setWorkPhotos(prev =>
+      prev.map(p => (p.id === id ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p))
+    );
+
+    if (isConfigured) {
+      try {
+        await dataAdapter.updateWorkPhoto(id, updates);
+        logger.debug('WorkPhoto updated successfully', 'DataContext');
+      } catch (error) {
+        logger.error('Failed to update work photo:', error, 'DataContext');
+        // Rollback on error
+        setWorkPhotos(prev =>
+          prev.map(p => (p.id === id ? photoToUpdate : p))
+        );
+        throw error;
+      }
+    }
+  };
+
+  const deleteWorkPhoto = async (id: string) => {
+    const photoToDelete = workPhotos.find(p => p.id === id);
+    if (!photoToDelete) {
+      logger.error('WorkPhoto not found:', id, 'DataContext');
+      return;
+    }
+
+    // Optimistic update
+    setWorkPhotos(prev => prev.filter(p => p.id !== id));
+
+    if (isConfigured) {
+      try {
+        await dataAdapter.deleteWorkPhoto(id);
+        logger.debug('WorkPhoto deleted successfully', 'DataContext');
+      } catch (error) {
+        logger.error('Failed to delete work photo:', error, 'DataContext');
+        // Rollback on error
+        setWorkPhotos(prev => [...prev, photoToDelete]);
+        throw error;
+      }
+    }
+  };
+
   const value: DataContextType = {
     isLoading,
     isConfigured,
@@ -817,6 +901,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     processTypes,
     additionalWorks,
     materials,
+    workPhotos,
     addUser,
     addHours,
     updateHours,
@@ -841,6 +926,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updateAdditionalWork,
     addMaterial,
     deleteMaterial,
+    addWorkPhoto,
+    updateWorkPhoto,
+    deleteWorkPhoto,
     getTeamReport,
     getEmployeeReport,
   };
