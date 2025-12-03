@@ -421,10 +421,29 @@ export default function PhotoReportsModal({ open, onClose }: PhotoReportsModalPr
                   Загальні Фото Робіт
                 </p>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-                  Тут будуть відображатися загальні фото з об'єктів, які не прив'язані до конкретних процесів
+                  Фото загального стану роботи на об'єктах (прогрес, проблеми, завершення)
                 </p>
+                <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4 mb-4">
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mb-2">
+                    📍 Кожне фото прив'язано до конкретного об'єкта
+                  </p>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                      Загальне
+                    </span>
+                    <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded">
+                      Прогрес
+                    </span>
+                    <span className="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded">
+                      Проблема
+                    </span>
+                    <span className="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">
+                      Завершення
+                    </span>
+                  </div>
+                </div>
                 <p className="text-xs text-slate-400 dark:text-slate-500">
-                  💡 Працівники зможуть завантажувати фото загального стану роботи, прогресу, проблем тощо
+                  💡 Працівники зможуть завантажувати фото з будь-якого об'єкта, додаючи опис та тип фото
                 </p>
               </Card>
             </TabsContent>
