@@ -7,9 +7,8 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useData } from '@/contexts/DataContext';
 import { useToast } from '@/components/ui/use-toast';
-import { Calendar, DollarSign, Download, FileText, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { Calendar, DollarSign, Download, FileText, CheckCircle, Clock } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import { exportToPDF } from '@/services/dataExport';
 
 interface PayrollModalProps {
   open: boolean;

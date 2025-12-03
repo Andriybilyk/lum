@@ -4,8 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Camera, Calendar, User, MapPin, Filter, Plus, Edit2, Image } from 'lucide-react';
 import { useData } from '@/contexts/DataContext';
+import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/components/ui/use-toast';
 import PhotoGallery from '@/components/shared/PhotoGallery';
 import PhotoUpload from '@/components/shared/PhotoUpload';
@@ -17,7 +21,8 @@ interface PhotoReportsModalProps {
 }
 
 export default function PhotoReportsModal({ open, onClose }: PhotoReportsModalProps) {
-  const { processes, users, objects, updateProcess } = useData();
+  const { processes, users, objects, workPhotos, updateProcess, addWorkPhoto } = useData();
+  const { user } = useUser();
   const { toast } = useToast();
 
   // Фільтри
@@ -30,6 +35,16 @@ export default function PhotoReportsModal({ open, onClose }: PhotoReportsModalPr
   const [photoBefore, setPhotoBefore] = useState<string | null>(null);
   const [photoDuring, setPhotoDuring] = useState<string | null>(null);
   const [photoAfter, setPhotoAfter] = useState<string | null>(null);
+
+  // Стан для додавання загального фото
+  const [showAddWorkPhoto, setShowAddWorkPhoto] = useState(false);
+  const [newWorkPhoto, setNewWorkPhoto] = useState({
+    object: '',
+    date: new Date().toISOString().split('T')[0],
+    photoUrl: '',
+    description: '',
+    photoType: 'general' as 'general' | 'progress' | 'issue' | 'completion',
+  });
 
   // Отримуємо всі процеси (з фото та без)
   const filteredProcesses = useMemo(() => {
@@ -161,6 +176,97 @@ export default function PhotoReportsModal({ open, onClose }: PhotoReportsModalPr
     setPhotoDuring(null);
     setPhotoAfter(null);
   };
+
+  // Фільтровані загальні фото
+  const filteredWorkPhotos = useMemo(() => {
+    const now = new Date();
+    const periodDays = parseInt(filterPeriod);
+    const cutoffDate = new Date(now.getTime() - periodDays * 24 * 60 * 60 * 1000);
+
+    return workPhotos.filter(p => {
+      // Фільтр по об'єкту
+      if (filterObject !== 'all' && p.object !== filterObject) return false;
+
+      // Фільтр по користувачу
+      if (filterUser !== 'all' && p.userId !== filterUser) return false;
+
+      // Фільтр по періоду
+      const photoDate = new Date(p.date);
+      if (photoDate < cutoffDate) return false;
+
+      return true;
+    }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [workPhotos, filterObject, filterUser, filterPeriod]);
+
+  // Галерея загальних фото
+  const workPhotoGallery = useMemo(() => {
+    return filteredWorkPhotos.map(p => {
+      const photoUser = users.find(u => u.id === p.userId);
+      const userName = photoUser?.name || 'Невідомий';
+      const photoDate = new Date(p.date).toLocaleDateString('uk-UA', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+
+      const typeLabels = {
+        general: '🏗️ Загальне',
+        progress: '📈 Прогрес',
+        issue: '⚠️ Проблема',
+        completion: '✅ Завершення'
+      };
+
+      return {
+        url: p.photoUrl,
+        label: `${typeLabels[p.photoType]} | 📍 ${p.object} | 👤 ${userName} | ${photoDate}${p.description ? ' | ' + p.description : ''}`,
+        timestamp: p.createdAt
+      };
+    });
+  }, [filteredWorkPhotos, users]);
+
+  const handleSaveWorkPhoto = async () => {
+    if (!newWorkPhoto.object || !newWorkPhoto.photoUrl || !user) {
+      toast({
+        title: 'Помилка',
+        description: 'Заповніть всі обов\'язкові поля',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    try {
+      await addWorkPhoto({
+        userId: user.id,
+        object: newWorkPhoto.object,
+        date: newWorkPhoto.date,
+        photoUrl: newWorkPhoto.photoUrl,
+        description: newWorkPhoto.description || undefined,
+        photoType: newWorkPhoto.photoType,
+      });
+
+      toast({
+        title: 'Успішно',
+        description: 'Загальне фото додано'
+      });
+
+      setShowAddWorkPhoto(false);
+      setNewWorkPhoto({
+        object: '',
+        date: new Date().toISOString().split('T')[0],
+        photoUrl: '',
+        description: '',
+        photoType: 'general',
+      });
+    } catch (error) {
+      console.error('Error saving work photo:', error);
+      toast({
+        title: 'Помилка',
+        description: 'Не вдалося зберегти фото',
+        variant: 'destructive'
+      });
+    }
+  };
+
 
   return (
     <>
@@ -415,41 +521,217 @@ export default function PhotoReportsModal({ open, onClose }: PhotoReportsModalPr
             </TabsContent>
 
             <TabsContent value="general" className="space-y-4">
-              <Card className="p-8 text-center">
-                <Image className="w-16 h-16 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
-                <p className="text-slate-700 dark:text-slate-300 font-semibold mb-2">
-                  Загальні Фото Робіт
-                </p>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-                  Фото загального стану роботи на об'єктах (прогрес, проблеми, завершення)
-                </p>
-                <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4 mb-4">
-                  <p className="text-xs text-slate-600 dark:text-slate-400 mb-2">
-                    📍 Кожне фото прив'язано до конкретного об'єкта
-                  </p>
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
-                      Загальне
-                    </span>
-                    <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded">
-                      Прогрес
-                    </span>
-                    <span className="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded">
-                      Проблема
-                    </span>
-                    <span className="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">
-                      Завершення
-                    </span>
+              {/* Кнопка додавання */}
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => setShowAddWorkPhoto(true)}
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Додати Загальне Фото
+                </Button>
+              </div>
+
+              {filteredWorkPhotos.length > 0 ? (
+                <>
+                  {/* Статистика */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+                    <Card className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
+                      <Image className="w-5 h-5 mb-1 opacity-80" />
+                      <p className="text-2xl font-bold">{filteredWorkPhotos.filter(p => p.photoType === 'general').length}</p>
+                      <p className="text-xs opacity-90">Загальні</p>
+                    </Card>
+                    <Card className="p-3 bg-gradient-to-br from-green-500 to-emerald-500 text-white">
+                      <Calendar className="w-5 h-5 mb-1 opacity-80" />
+                      <p className="text-2xl font-bold">{filteredWorkPhotos.filter(p => p.photoType === 'progress').length}</p>
+                      <p className="text-xs opacity-90">Прогрес</p>
+                    </Card>
+                    <Card className="p-3 bg-gradient-to-br from-yellow-500 to-orange-500 text-white">
+                      <MapPin className="w-5 h-5 mb-1 opacity-80" />
+                      <p className="text-2xl font-bold">{filteredWorkPhotos.filter(p => p.photoType === 'issue').length}</p>
+                      <p className="text-xs opacity-90">Проблеми</p>
+                    </Card>
+                    <Card className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+                      <Camera className="w-5 h-5 mb-1 opacity-80" />
+                      <p className="text-2xl font-bold">{filteredWorkPhotos.filter(p => p.photoType === 'completion').length}</p>
+                      <p className="text-xs opacity-90">Завершення</p>
+                    </Card>
                   </div>
-                </div>
-                <p className="text-xs text-slate-400 dark:text-slate-500">
-                  💡 Працівники зможуть завантажувати фото з будь-якого об'єкта, додаючи опис та тип фото
-                </p>
-              </Card>
+
+                  {/* Галерея */}
+                  <Card className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                        Всі Фото ({workPhotoGallery.length})
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Натисніть для збільшення
+                      </p>
+                    </div>
+                    <PhotoGallery photos={workPhotoGallery} />
+                  </Card>
+                </>
+              ) : (
+                <Card className="p-8 text-center">
+                  <Image className="w-16 h-16 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
+                  <p className="text-slate-700 dark:text-slate-300 font-semibold mb-2">
+                    Загальні Фото Робіт
+                  </p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                    Фото загального стану роботи на об'єктах (прогрес, проблеми, завершення)
+                  </p>
+                  <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4 mb-4">
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mb-2">
+                      📍 Кожне фото прив'язано до конкретного об'єкта
+                    </p>
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
+                        Загальне
+                      </span>
+                      <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded">
+                        Прогрес
+                      </span>
+                      <span className="text-xs px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded">
+                        Проблема
+                      </span>
+                      <span className="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">
+                        Завершення
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">
+                    💡 Працівники зможуть завантажувати фото з будь-якого об'єкта, додаючи опис та тип фото
+                  </p>
+                  <Button
+                    onClick={() => setShowAddWorkPhoto(true)}
+                    variant="outline"
+                    className="mt-4"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Додати Перше Фото
+                  </Button>
+                </Card>
+              )}
             </TabsContent>
           </Tabs>
         </DialogContent>
       </Dialog>
+
+      {/* Модальне вікно додавання загального фото */}
+      {showAddWorkPhoto && (
+        <Dialog open={true} onOpenChange={() => setShowAddWorkPhoto(false)}>
+          <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
+                <Image className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600" />
+                Додати Загальне Фото
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              {/* Об'єкт */}
+              <div>
+                <Label htmlFor="work-photo-object" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  Об'єкт *
+                </Label>
+                <Select
+                  value={newWorkPhoto.object}
+                  onValueChange={(value) => setNewWorkPhoto(prev => ({ ...prev, object: value }))}
+                >
+                  <SelectTrigger id="work-photo-object" className="mt-1.5 h-11 sm:h-12">
+                    <SelectValue placeholder="Оберіть об'єкт" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {objects.map((obj) => (
+                      <SelectItem key={obj.id} value={obj.name}>
+                        {obj.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Дата */}
+              <div>
+                <Label htmlFor="work-photo-date" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  Дата
+                </Label>
+                <Input
+                  id="work-photo-date"
+                  type="date"
+                  value={newWorkPhoto.date}
+                  onChange={(e) => setNewWorkPhoto(prev => ({ ...prev, date: e.target.value }))}
+                  className="mt-1.5 h-11 sm:h-12"
+                />
+              </div>
+
+              {/* Тип фото */}
+              <div>
+                <Label htmlFor="work-photo-type" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  Тип Фото
+                </Label>
+                <Select
+                  value={newWorkPhoto.photoType}
+                  onValueChange={(value: any) => setNewWorkPhoto(prev => ({ ...prev, photoType: value }))}
+                >
+                  <SelectTrigger id="work-photo-type" className="mt-1.5 h-11 sm:h-12">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">🏗️ Загальне</SelectItem>
+                    <SelectItem value="progress">📈 Прогрес</SelectItem>
+                    <SelectItem value="issue">⚠️ Проблема</SelectItem>
+                    <SelectItem value="completion">✅ Завершення</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Фото */}
+              <PhotoUpload
+                label="Фото *"
+                photoUrl={newWorkPhoto.photoUrl || undefined}
+                onPhotoChange={(url) => setNewWorkPhoto(prev => ({ ...prev, photoUrl: url || '' }))}
+              />
+
+              {/* Опис */}
+              <div>
+                <Label htmlFor="work-photo-description" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  Опис (опціонально)
+                </Label>
+                <Textarea
+                  id="work-photo-description"
+                  value={newWorkPhoto.description}
+                  onChange={(e) => setNewWorkPhoto(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Додайте опис до фото..."
+                  className="mt-1.5 min-h-[80px]"
+                />
+              </div>
+
+              {/* Підказка */}
+              <p className="text-xs text-center text-slate-500 dark:text-slate-400">
+                💡 Загальні фото допомагають відстежувати прогрес та фіксувати важливі моменти на об'єктах
+              </p>
+
+              {/* Кнопки */}
+              <div className="flex gap-3 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowAddWorkPhoto(false)}
+                  className="flex-1 h-11 sm:h-12"
+                >
+                  Скасувати
+                </Button>
+                <Button
+                  onClick={handleSaveWorkPhoto}
+                  className="flex-1 h-11 sm:h-12 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                >
+                  Зберегти Фото
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Модальне вікно редагування фото процесу */}
       {editingProcess && (

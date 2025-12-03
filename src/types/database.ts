@@ -322,6 +322,41 @@ export interface Database {
           updated_at?: string
         }
       }
+      work_photos: {
+        Row: {
+          id: string
+          user_id: string
+          object: string
+          date: string
+          photo_url: string
+          description: string | null
+          photo_type: 'general' | 'progress' | 'issue' | 'completion'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          object: string
+          date: string
+          photo_url: string
+          description?: string | null
+          photo_type?: 'general' | 'progress' | 'issue' | 'completion'
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          object?: string
+          date?: string
+          photo_url?: string
+          description?: string | null
+          photo_type?: 'general' | 'progress' | 'issue' | 'completion'
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

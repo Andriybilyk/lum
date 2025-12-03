@@ -16,7 +16,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isConfigured, setIsConfigured] = useState(true); // Always configured with Supabase
+  const [isConfigured] = useState(true); // Always configured with Supabase
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
