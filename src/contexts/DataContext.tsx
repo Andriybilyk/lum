@@ -103,8 +103,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           logger.info('Loading data from Supabase', 'DataContext');
           const startTime = performance.now();
 
-          // Load all data using dataAdapter
-          const data = await dataAdapter.loadAllData();
+          // Load all data using dataAdapter з фільтрацією по departmentId
+          const departmentId = user?.departmentId;
+          const data = await dataAdapter.loadAllData(departmentId);
 
           // Set all data
           setDepartments(data.departments || []);
@@ -120,7 +121,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setWorkPhotos(data.workPhotos || []);
 
           const loadTime = performance.now() - startTime;
-          logger.info(`Data loaded successfully in ${loadTime.toFixed(0)}ms`, 'DataContext');
+
+          // Логування розміру даних для моніторингу продуктивності
+          const dataSize = new TextEncoder().encode(JSON.stringify(data)).length;
+          logger.info(`📊 Data loaded in ${loadTime.toFixed(0)}ms, size: ${(dataSize / 1024).toFixed(2)} KB${departmentId ? ` (department: ${departmentId})` : ''}`, 'DataContext');
+          logger.info(`📈 Records count: users=${data.users.length}, objects=${data.objects.length}, hours=${data.hours.length}, processes=${data.processes.length}`, 'DataContext');
         } else {
           logger.warn('Supabase not configured', 'DataContext');
         }
@@ -559,104 +564,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const getTeamReport = (month: string) => {
-    // Include all users (both employees and managers)
-    const allUsers = users;
-
-    return allUsers.map(emp => {
-      // Filter hours for the month
-      const empHours = hours.filter(h =>
-        h.userId === emp.id && h.date && h.date.startsWith(month)
-      );
-
-      // Filter processes for the month
-      const empProcesses = processes.filter(p =>
-        p.userId === emp.id && p.date && p.date.startsWith(month)
-      );
-
-      // Calculate total hours
-      const totalHours = empHours.reduce((sum, h) => sum + h.hours, 0);
-
-      // Calculate total earnings
-      const hoursEarnings = empHours.reduce((sum, h) => sum + h.salary, 0);
-      const processEarnings = empProcesses.reduce((sum, p) => sum + p.salary, 0);
-      const totalEarnings = hoursEarnings + processEarnings;
-
-      return {
-        employeeId: emp.id,
-        name: emp.name,
-        hours: totalHours,
-        earnings: totalEarnings,
-      };
-    });
-  };
-
-  const getEmployeeReport = (userId: string, month: string) => {
-    // Filter hours for the month
-    const empHours = hours.filter(h =>
-      h.userId === userId && h.date && h.date.startsWith(month)
-    );
-
-    // Filter processes for the month
-    const empProcesses = processes.filter(p =>
-      p.userId === userId && p.date && p.date.startsWith(month)
-    );
-
-    // Filter materials for the month
-    const empMaterials = materials.filter(m =>
-      m.userId === userId && m.date && m.date.startsWith(month)
-    );
-
-    // Format hours
-    const formattedHours = empHours.map(h => ({
-      id: h.id,
-      date: h.date,
-      object: h.object,
-      hours: h.hours,
-      businessTrip: h.isBusinessTrip,
-      earnings: h.salary,
-    }));
-
-    // Format processes
-    const formattedProcesses = empProcesses.map(p => ({
-      id: p.id,
-      date: p.date,
-      name: p.processName,
-      object: p.object || '',
-      volume: p.volume,
-      unit: p.unit,
-      rate: p.rate,
-      earnings: p.salary,
-    }));
-
-    // Format materials
-    const formattedMaterials = empMaterials.map(m => ({
-      id: m.id,
-      date: m.date,
-      object: m.object,
-      materialName: m.materialName,
-      quantity: m.quantity,
-      unit: m.unit,
-      notes: m.notes,
-    }));
-
-    // Calculate total hours
-    const totalHours = empHours.reduce((sum, h) => sum + h.hours, 0);
-
-    // Calculate total earnings
-    const hoursEarnings = empHours.reduce((sum, h) => sum + h.salary, 0);
-    const processEarnings = empProcesses.reduce((sum, p) => sum + p.salary, 0);
-    const totalEarnings = hoursEarnings + processEarnings;
-
-    return {
-      hours: formattedHours,
-      processes: formattedProcesses,
-      materials: formattedMaterials,
-      totalHours,
-      totalEarnings,
-    };
-  };
-
   const addAdditionalWork = async (work: Omit<AdditionalWork, 'id' | 'createdAt' | 'updatedAt'>) => {
     const id = Date.now().toString();
     const now = new Date().toISOString();
@@ -908,6 +815,106 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw error;
       }
     }
+  };
+
+  // Фільтрація тепер відбувається на рівні бази даних через dataAdapter.loadAllData(departmentId)
+  // Тому всі дані в users, hours, processes і т.д. вже відфільтровані по підрозділу
+
+  // Функції звітів
+  const getTeamReport = (month: string) => {
+    // Include all users from current department (both employees and managers)
+    return users.map(emp => {
+      // Filter hours for the month
+      const empHours = hours.filter(h =>
+        h.userId === emp.id && h.date && h.date.startsWith(month)
+      );
+
+      // Filter processes for the month
+      const empProcesses = processes.filter(p =>
+        p.userId === emp.id && p.date && p.date.startsWith(month)
+      );
+
+      // Calculate total hours
+      const totalHours = empHours.reduce((sum, h) => sum + h.hours, 0);
+
+      // Calculate total earnings
+      const hoursEarnings = empHours.reduce((sum, h) => sum + h.salary, 0);
+      const processEarnings = empProcesses.reduce((sum, p) => sum + p.salary, 0);
+      const totalEarnings = hoursEarnings + processEarnings;
+
+      return {
+        employeeId: emp.id,
+        name: emp.name,
+        hours: totalHours,
+        earnings: totalEarnings,
+      };
+    });
+  };
+
+  const getEmployeeReport = (userId: string, month: string) => {
+    // Filter hours for the month
+    const empHours = hours.filter(h =>
+      h.userId === userId && h.date && h.date.startsWith(month)
+    );
+
+    // Filter processes for the month
+    const empProcesses = processes.filter(p =>
+      p.userId === userId && p.date && p.date.startsWith(month)
+    );
+
+    // Filter materials for the month
+    const empMaterials = materials.filter(m =>
+      m.userId === userId && m.date && m.date.startsWith(month)
+    );
+
+    // Format hours
+    const formattedHours = empHours.map(h => ({
+      id: h.id,
+      date: h.date,
+      object: h.object,
+      hours: h.hours,
+      businessTrip: h.isBusinessTrip,
+      earnings: h.salary,
+    }));
+
+    // Format processes
+    const formattedProcesses = empProcesses.map(p => ({
+      id: p.id,
+      date: p.date,
+      name: p.processName,
+      object: p.object || '',
+      volume: p.volume,
+      unit: p.unit,
+      rate: p.rate,
+      earnings: p.salary,
+    }));
+
+    // Format materials
+    const formattedMaterials = empMaterials.map(m => ({
+      id: m.id,
+      date: m.date,
+      object: m.object,
+      materialName: m.materialName,
+      quantity: m.quantity,
+      unit: m.unit,
+      notes: m.notes,
+    }));
+
+    // Calculate total hours
+    const totalHours = empHours.reduce((sum, h) => sum + h.hours, 0);
+
+    // Calculate total earnings
+    const hoursEarnings = empHours.reduce((sum, h) => sum + h.salary, 0);
+    const processEarnings = empProcesses.reduce((sum, p) => sum + p.salary, 0);
+    const totalEarnings = hoursEarnings + processEarnings;
+
+    return {
+      hours: formattedHours,
+      processes: formattedProcesses,
+      materials: formattedMaterials,
+      totalHours,
+      totalEarnings,
+    };
   };
 
   const value: DataContextType = {

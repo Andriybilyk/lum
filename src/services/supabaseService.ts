@@ -30,7 +30,7 @@ export async function getAllDepartments(): Promise<Department[]> {
 
     if (error) throw error;
 
-    return (data || []).map(row => ({
+    return (data || []).map((row: any) => ({
       id: row.id,
       name: row.name,
       description: row.description || undefined,
@@ -45,16 +45,23 @@ export async function getAllDepartments(): Promise<Department[]> {
 
 // ============= USERS =============
 
-export async function getAllUsers(): Promise<User[]> {
+export async function getAllUsers(departmentId?: string): Promise<User[]> {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('users')
       .select('*')
       .order('name');
 
+    // Фільтрація по підрозділу на рівні бази даних
+    if (departmentId) {
+      query = query.eq('department_id', departmentId);
+    }
+
+    const { data, error } = await query;
+
     if (error) throw error;
 
-    return (data || []).map(row => ({
+    return (data || []).map((row: any) => ({
       id: row.id,
       name: row.name,
       role: row.role as 'employee' | 'manager',
@@ -115,16 +122,23 @@ export async function updateUser(userId: string, updates: Partial<Omit<User, 'id
 
 // ============= HOURS =============
 
-export async function getAllHours(): Promise<Hours[]> {
+export async function getAllHours(departmentUserIds?: string[]): Promise<Hours[]> {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('hours')
       .select('*')
       .order('date', { ascending: false });
 
+    // Фільтрація по користувачах з підрозділу
+    if (departmentUserIds && departmentUserIds.length > 0) {
+      query = query.in('user_id', departmentUserIds);
+    }
+
+    const { data, error } = await query;
+
     if (error) throw error;
 
-    return (data || []).map(row => ({
+    return (data || []).map((row: any) => ({
       id: row.id,
       userId: row.user_id,
       date: row.date,
@@ -197,16 +211,23 @@ export async function deleteHours(id: string): Promise<void> {
 
 // ============= PROCESSES =============
 
-export async function getAllProcesses(): Promise<Process[]> {
+export async function getAllProcesses(departmentUserIds?: string[]): Promise<Process[]> {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('processes')
       .select('*')
       .order('date', { ascending: false });
 
+    // Фільтрація по користувачах з підрозділу
+    if (departmentUserIds && departmentUserIds.length > 0) {
+      query = query.in('user_id', departmentUserIds);
+    }
+
+    const { data, error } = await query;
+
     if (error) throw error;
 
-    return (data || []).map(row => ({
+    return (data || []).map((row: any) => ({
       id: row.id,
       userId: row.user_id,
       date: row.date,
@@ -285,16 +306,23 @@ export async function deleteProcess(id: string): Promise<void> {
 
 // ============= MATERIALS =============
 
-export async function getAllMaterials(): Promise<Material[]> {
+export async function getAllMaterials(departmentUserIds?: string[]): Promise<Material[]> {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('materials')
       .select('*')
       .order('date', { ascending: false });
 
+    // Фільтрація по користувачах з підрозділу
+    if (departmentUserIds && departmentUserIds.length > 0) {
+      query = query.in('user_id', departmentUserIds);
+    }
+
+    const { data, error } = await query;
+
     if (error) throw error;
 
-    return (data || []).map(row => ({
+    return (data || []).map((row: any) => ({
       id: row.id,
       userId: row.user_id,
       date: row.date,
@@ -355,16 +383,23 @@ export async function deleteMaterial(id: string): Promise<void> {
 // ============= LEVELS, OBJECTS, PROCESS TYPES =============
 // These will be similar patterns - I'll add the key ones
 
-export async function getAllLevels(): Promise<Level[]> {
+export async function getAllLevels(departmentId?: string): Promise<Level[]> {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('levels')
       .select('*')
       .order('name');
 
+    // Фільтрація по підрозділу на рівні бази даних
+    if (departmentId) {
+      query = query.eq('department_id', departmentId);
+    }
+
+    const { data, error } = await query;
+
     if (error) throw error;
 
-    return (data || []).map(row => ({
+    return (data || []).map((row: any) => ({
       id: row.id,
       name: row.name,
       hourlyRate: Number(row.hourly_rate),
@@ -424,16 +459,23 @@ export async function deleteLevel(id: string): Promise<void> {
   }
 }
 
-export async function getAllObjects(): Promise<ObjectType[]> {
+export async function getAllObjects(departmentId?: string): Promise<ObjectType[]> {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('objects')
       .select('*')
       .order('name');
 
+    // Фільтрація по підрозділу на рівні бази даних
+    if (departmentId) {
+      query = query.eq('department_id', departmentId);
+    }
+
+    const { data, error } = await query;
+
     if (error) throw error;
 
-    return (data || []).map(row => ({
+    return (data || []).map((row: any) => ({
       id: row.id,
       name: row.name,
       isBusinessTrip: row.is_business_trip,
@@ -493,16 +535,23 @@ export async function deleteObject(id: string): Promise<void> {
   }
 }
 
-export async function getAllProcessTypes(): Promise<ProcessType[]> {
+export async function getAllProcessTypes(departmentId?: string): Promise<ProcessType[]> {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('process_types')
       .select('*')
       .order('name');
 
+    // Фільтрація по підрозділу на рівні бази даних
+    if (departmentId) {
+      query = query.eq('department_id', departmentId);
+    }
+
+    const { data, error } = await query;
+
     if (error) throw error;
 
-    return (data || []).map(row => ({
+    return (data || []).map((row: any) => ({
       id: row.id,
       name: row.name,
       object: row.object || undefined,
@@ -571,16 +620,23 @@ export async function deleteProcessType(id: string): Promise<void> {
   }
 }
 
-export async function getAllAssignments(): Promise<Assignment[]> {
+export async function getAllAssignments(departmentUserIds?: string[]): Promise<Assignment[]> {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('assignments')
       .select('*')
       .order('date', { ascending: false });
 
+    // Фільтрація по користувачах з підрозділу (employee_id або manager_id)
+    if (departmentUserIds && departmentUserIds.length > 0) {
+      query = query.or(`employee_id.in.(${departmentUserIds.join(',')}),manager_id.in.(${departmentUserIds.join(',')})`);
+    }
+
+    const { data, error } = await query;
+
     if (error) throw error;
 
-    return (data || []).map(row => ({
+    return (data || []).map((row: any) => ({
       id: row.id,
       employeeId: row.employee_id,
       managerId: row.manager_id,
@@ -635,16 +691,23 @@ export async function updateAssignment(id: string, updates: { status?: string })
   }
 }
 
-export async function getAllAdditionalWorks(): Promise<AdditionalWork[]> {
+export async function getAllAdditionalWorks(departmentUserIds?: string[]): Promise<AdditionalWork[]> {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('additional_works')
       .select('*')
-      .order('date', { ascending: false });
+      .order('date', { ascending: false});
+
+    // Фільтрація по користувачах з підрозділу (user_id або manager_id)
+    if (departmentUserIds && departmentUserIds.length > 0) {
+      query = query.or(`user_id.in.(${departmentUserIds.join(',')}),manager_id.in.(${departmentUserIds.join(',')})`);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
 
-    return (data || []).map(row => ({
+    return (data || []).map((row: any) => ({
       id: row.id,
       userId: row.user_id,
       managerId: row.manager_id,
@@ -724,16 +787,23 @@ export async function updateAdditionalWork(
 
 // ============= WORK PHOTOS =============
 
-export async function getAllWorkPhotos(): Promise<WorkPhoto[]> {
+export async function getAllWorkPhotos(departmentUserIds?: string[]): Promise<WorkPhoto[]> {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('work_photos')
       .select('*')
       .order('created_at', { ascending: false });
 
+    // Фільтрація по користувачах з підрозділу
+    if (departmentUserIds && departmentUserIds.length > 0) {
+      query = query.in('user_id', departmentUserIds);
+    }
+
+    const { data, error } = await query;
+
     if (error) throw error;
 
-    return (data || []).map(row => ({
+    return (data || []).map((row: any) => ({
       id: row.id,
       userId: row.user_id,
       object: row.object,

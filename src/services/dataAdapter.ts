@@ -20,14 +20,20 @@ import type {
 } from '@/types';
 
 /**
- * Завантажує всі дані з Supabase
+ * Завантажує всі дані з Supabase з фільтрацією по підрозділу
  */
-export async function loadAllData() {
-  logger.info('Loading all data from Supabase', 'DataAdapter');
+export async function loadAllData(departmentId?: string) {
+  logger.info(`Loading data from Supabase${departmentId ? ` for department: ${departmentId}` : ''}`, 'DataAdapter');
 
+  // Спочатку завантажуємо departments та users
+  const departments = await supabaseService.getAllDepartments();
+  const users = await supabaseService.getAllUsers(departmentId);
+
+  // Створюємо список ID користувачів для фільтрації залежних даних
+  const userIds = users.map(u => u.id);
+
+  // Завантажуємо решту даних паралельно з фільтрацією
   const [
-    departments,
-    users,
     hours,
     processes,
     levels,
@@ -38,17 +44,15 @@ export async function loadAllData() {
     materials,
     workPhotos
   ] = await Promise.all([
-    supabaseService.getAllDepartments(),
-    supabaseService.getAllUsers(),
-    supabaseService.getAllHours(),
-    supabaseService.getAllProcesses(),
-    supabaseService.getAllLevels(),
-    supabaseService.getAllObjects(),
-    supabaseService.getAllProcessTypes(),
-    supabaseService.getAllAssignments(),
-    supabaseService.getAllAdditionalWorks(),
-    supabaseService.getAllMaterials(),
-    supabaseService.getAllWorkPhotos(),
+    supabaseService.getAllHours(userIds),
+    supabaseService.getAllProcesses(userIds),
+    supabaseService.getAllLevels(departmentId),
+    supabaseService.getAllObjects(departmentId),
+    supabaseService.getAllProcessTypes(departmentId),
+    supabaseService.getAllAssignments(userIds),
+    supabaseService.getAllAdditionalWorks(userIds),
+    supabaseService.getAllMaterials(userIds),
+    supabaseService.getAllWorkPhotos(userIds),
   ]);
 
   return {
