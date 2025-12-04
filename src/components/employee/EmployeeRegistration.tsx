@@ -26,7 +26,7 @@ interface EmployeeRegistrationProps {
 
 export default function EmployeeRegistration({ onBack, isTelegramMiniApp = false, telegramUser: propTelegramUser }: EmployeeRegistrationProps = {}) {
   const { setUser } = useUser();
-  const { users, levels, addUser, isLoading, isConfigured } = useData();
+  const { users, levels, departments, addUser, isLoading, isConfigured } = useData();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -37,7 +37,8 @@ export default function EmployeeRegistration({ onBack, isTelegramMiniApp = false
     name: '',
     level: '',
     hourlyRate: '',
-    managerId: 'none'
+    managerId: 'none',
+    departmentId: ''
   });
 
   // Отримати Telegram ID при завантаженні
@@ -239,7 +240,8 @@ export default function EmployeeRegistration({ onBack, isTelegramMiniApp = false
       role: 'employee' as const,
       level: formData.level,
       hourlyRate: parseFloat(formData.hourlyRate),
-      managerId: formData.managerId && formData.managerId !== 'none' ? formData.managerId : undefined
+      managerId: formData.managerId && formData.managerId !== 'none' ? formData.managerId : undefined,
+      departmentId: formData.departmentId
     };
 
     const { success, data: validatedUser, error } = validateData(UserSchema, userData);
@@ -392,6 +394,22 @@ export default function EmployeeRegistration({ onBack, isTelegramMiniApp = false
                   required
                   className="mt-1.5 h-12 rounded-xl"
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="department" className="text-slate-700 dark:text-slate-300">Підрозділ *</Label>
+                <Select value={formData.departmentId} onValueChange={(value) => setFormData({ ...formData, departmentId: value })}>
+                  <SelectTrigger id="department" className="mt-1.5 h-12 rounded-xl">
+                    <SelectValue placeholder="Оберіть підрозділ" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.map((dept) => (
+                      <SelectItem key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>

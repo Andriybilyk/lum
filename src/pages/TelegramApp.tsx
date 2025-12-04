@@ -55,6 +55,7 @@ export default function TelegramApp() {
             role: 'employee',
             level: 'junior',
             hourlyRate: 0,
+            departmentId: 'facade',
           });
         }
 

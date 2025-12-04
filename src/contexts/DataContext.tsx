@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { logger } from '@/utils/logger';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import * as dataAdapter from '../services/dataAdapter';
+import { useUser } from './UserContext';
 import type {
   User,
   Hours,
@@ -13,12 +14,14 @@ import type {
   AdditionalWork,
   Material,
   WorkPhoto,
+  Department,
   TeamReport,
   EmployeeReport
 } from '../types';
 
 interface DataContextType {
   // Data
+  departments: Department[];
   users: User[];
   hours: Hours[];
   processes: Process[];
@@ -40,13 +43,13 @@ interface DataContextType {
   deleteProcess: (id: string) => Promise<void>;
   addAssignment: (assignment: Omit<Assignment, 'id'>) => Promise<void>;
   updateAssignment: (id: string, status: 'confirmed' | 'declined' | 'employee_confirmed' | 'manager_confirmed') => Promise<void>;
-  addLevel: (level: Omit<Level, 'id'>) => Promise<void>;
+  addLevel: (level: Omit<Level, 'id' | 'departmentId'> & { departmentId?: string }) => Promise<void>;
   updateLevel: (id: string, updates: { name?: string; rate?: number }) => Promise<void>;
   deleteLevel: (id: string) => Promise<void>;
-  addObject: (object: Omit<ObjectType, 'id'>) => Promise<void>;
+  addObject: (object: Omit<ObjectType, 'id' | 'departmentId'> & { departmentId?: string }) => Promise<void>;
   updateObject: (id: string, updates: Partial<Omit<ObjectType, 'id'>>) => Promise<void>;
   deleteObject: (id: string) => Promise<void>;
-  addProcessType: (processType: Omit<ProcessType, 'id'>) => Promise<void>;
+  addProcessType: (processType: Omit<ProcessType, 'id' | 'departmentId'> & { departmentId?: string }) => Promise<void>;
   updateProcessType: (id: string, updates: Partial<Omit<ProcessType, 'id'>>) => Promise<void>;
   deleteProcessType: (id: string) => Promise<void>;
   updateUserLevel: (userId: string, level: string, hourlyRate: number) => Promise<void>;
@@ -71,9 +74,11 @@ interface DataContextType {
 export const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useUser();
   const [isLoading, setIsLoading] = useState(true);
   const [isConfigured, setIsConfigured] = useState(false);
 
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [hours, setHours] = useState<Hours[]>([]);
   const [processes, setProcesses] = useState<Process[]>([]);
@@ -102,6 +107,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const data = await dataAdapter.loadAllData();
 
           // Set all data
+          setDepartments(data.departments || []);
           setUsers(data.users);
           setHours(data.hours);
           setProcesses(data.processes);
@@ -320,15 +326,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const addLevel = async (level: Omit<Level, 'id'>) => {
-    const newLevel = { ...level, id: Date.now().toString() };
+  const addLevel = async (level: Omit<Level, 'id' | 'departmentId'> & { departmentId?: string }) => {
+    // Додаємо departmentId з поточного користувача або використовуємо переданий
+    const levelWithDepartment = {
+      ...level,
+      departmentId: level.departmentId || user?.departmentId || 'facade' // fallback to facade if no user
+    };
+    const newLevel = { ...levelWithDepartment, id: Date.now().toString() };
 
     // Optimistic update
     setLevels([...levels, newLevel]);
 
     if (isConfigured) {
       try {
-        await dataAdapter.createLevel(level);
+        await dataAdapter.createLevel(levelWithDepartment);
         logger.debug('Level saved successfully', 'DataContext');
       } catch (error) {
         // Rollback
@@ -386,15 +397,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const addObject = async (object: Omit<ObjectType, 'id'>) => {
-    const newObject = { ...object, id: Date.now().toString() };
+  const addObject = async (object: Omit<ObjectType, 'id' | 'departmentId'> & { departmentId?: string }) => {
+    // Додаємо departmentId з поточного користувача або використовуємо переданий
+    const objectWithDepartment = {
+      ...object,
+      departmentId: object.departmentId || user?.departmentId || 'facade' // fallback to facade if no user
+    };
+    const newObject = { ...objectWithDepartment, id: Date.now().toString() };
 
     // Optimistic update
     setObjects([...objects, newObject]);
 
     if (isConfigured) {
       try {
-        await dataAdapter.createObject(object);
+        await dataAdapter.createObject(objectWithDepartment);
         logger.debug('Object saved successfully', 'DataContext');
       } catch (error) {
         // Rollback
@@ -443,15 +459,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const addProcessType = async (processType: Omit<ProcessType, 'id'>) => {
-    const newProcessType = { ...processType, id: Date.now().toString() };
+  const addProcessType = async (processType: Omit<ProcessType, 'id' | 'departmentId'> & { departmentId?: string }) => {
+    // Додаємо departmentId з поточного користувача або використовуємо переданий
+    const processTypeWithDepartment = {
+      ...processType,
+      departmentId: processType.departmentId || user?.departmentId || 'facade' // fallback to facade if no user
+    };
+    const newProcessType = { ...processTypeWithDepartment, id: Date.now().toString() };
 
     // Optimistic update
     setProcessTypes([...processTypes, newProcessType]);
 
     if (isConfigured) {
       try {
-        await dataAdapter.createProcessType(processType);
+        await dataAdapter.createProcessType(processTypeWithDepartment);
         logger.debug('Process type saved successfully', 'DataContext');
       } catch (error) {
         // Rollback
@@ -892,6 +913,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const value: DataContextType = {
     isLoading,
     isConfigured,
+    departments,
     users,
     hours,
     processes,

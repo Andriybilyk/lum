@@ -25,7 +25,7 @@ interface ManagerRegistrationProps {
 
 export default function ManagerRegistration({ onBack, isTelegramMiniApp = false, telegramUser: propTelegramUser }: ManagerRegistrationProps = {}) {
   const { setUser } = useUser();
-  const { users, levels, addUser, isLoading } = useData();
+  const { users, levels, departments, addUser, isLoading } = useData();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -36,7 +36,8 @@ export default function ManagerRegistration({ onBack, isTelegramMiniApp = false,
     name: '',
     level: '',
     hourlyRate: '',
-    password: ''
+    password: '',
+    departmentId: ''
   });
 
   useEffect(() => {
@@ -213,7 +214,8 @@ export default function ManagerRegistration({ onBack, isTelegramMiniApp = false,
       role: 'manager' as const,
       level: formData.level,
       hourlyRate: parseFloat(formData.hourlyRate),
-      telegramId: telegramId || undefined
+      telegramId: telegramId || undefined,
+      departmentId: formData.departmentId
     };
 
     logger.info('Manager registration - telegramId: ' + telegramId + ', userId: ' + user.id, 'ManagerRegistration');
@@ -338,6 +340,22 @@ export default function ManagerRegistration({ onBack, isTelegramMiniApp = false,
                   required
                   className="mt-1.5 h-12 rounded-xl"
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="department" className="text-slate-700 dark:text-slate-300">Підрозділ *</Label>
+                <Select value={formData.departmentId} onValueChange={(value) => setFormData({ ...formData, departmentId: value })}>
+                  <SelectTrigger id="department" className="mt-1.5 h-12 rounded-xl">
+                    <SelectValue placeholder="Оберіть підрозділ" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.map((dept) => (
+                      <SelectItem key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>

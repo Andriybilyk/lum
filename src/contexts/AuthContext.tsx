@@ -50,6 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         level: user.level,
         hourlyRate: user.hourlyRate,
         managerId: user.managerId,
+        departmentId: user.departmentId,
       };
 
       setUsers(prev => [...prev, newUser]);

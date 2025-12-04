@@ -45,7 +45,8 @@ export default function ManageObjectsModal({ open, onClose }: ManageObjectsModal
     startDate: '',
     endDate: '',
     plannedBudget: 0,
-    materialsCost: 0
+    materialsCost: 0,
+    departmentId: ''
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingObject, setEditingObject] = useState<ExtendedObject>({
@@ -58,7 +59,8 @@ export default function ManageObjectsModal({ open, onClose }: ManageObjectsModal
     startDate: '',
     endDate: '',
     plannedBudget: 0,
-    materialsCost: 0
+    materialsCost: 0,
+    departmentId: ''
   });
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null);
   const [detailsObject, setDetailsObject] = useState<{ id: string; name: string } | null>(null);
@@ -288,7 +290,8 @@ export default function ManageObjectsModal({ open, onClose }: ManageObjectsModal
       startDate: '',
       endDate: '',
       plannedBudget: 0,
-      materialsCost: 0
+      materialsCost: 0,
+      departmentId: ''
     });
   };
 
@@ -304,7 +307,8 @@ export default function ManageObjectsModal({ open, onClose }: ManageObjectsModal
       startDate: obj.startDate || '',
       endDate: obj.endDate || '',
       plannedBudget: obj.plannedBudget || 0,
-      materialsCost: obj.materialsCost || 0
+      materialsCost: obj.materialsCost || 0,
+      departmentId: obj.departmentId || ''
     });
   };
 
