@@ -47,7 +47,7 @@ export default function WorkReminders() {
     userAssignments.forEach(assignment => {
       const assignedByUser = users.find(u => u.id === assignment.managerId);
       const assignedToUser = users.find(u => u.id === assignment.employeeId);
-      
+
       let type: 'today' | 'tomorrow' | 'upcoming' = 'upcoming';
       if (assignment.date === today) {
         type = 'today';
@@ -69,6 +69,15 @@ export default function WorkReminders() {
         employeeConfirmed = true;
       } else if (assignment.status === 'manager_confirmed') {
         managerConfirmed = true;
+      }
+
+      // Приховуємо підтверджені або відхилені завдання після їх дати
+      const isPastDate = assignment.date < today;
+      const isConfirmedOrDeclined = assignment.status === 'confirmed' || assignment.status === 'declined';
+
+      // Якщо дата пройшла і завдання підтверджене/відхилене - не показуємо
+      if (isPastDate && isConfirmedOrDeclined) {
+        return;
       }
 
       const reminder: Reminder = {
