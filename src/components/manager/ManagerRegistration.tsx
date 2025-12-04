@@ -182,6 +182,16 @@ export default function ManagerRegistration({ onBack, isTelegramMiniApp = false,
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Перевіряємо чи обрано підрозділ
+    if (!formData.departmentId) {
+      toast({
+        title: 'Помилка',
+        description: 'Будь ласка, оберіть підрозділ',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     // Перевіряємо чи користувач з таким Telegram ID вже існує
     if (telegramId) {
       const userWithSameTelegramId = users.find(u => u.telegramId === telegramId);

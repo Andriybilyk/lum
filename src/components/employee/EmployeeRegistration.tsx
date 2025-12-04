@@ -220,6 +220,16 @@ export default function EmployeeRegistration({ onBack, isTelegramMiniApp = false
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Перевіряємо чи обрано підрозділ
+    if (!formData.departmentId) {
+      toast({
+        title: 'Помилка',
+        description: 'Будь ласка, оберіть підрозділ',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     // Перевіряємо чи користувач з таким Telegram ID вже існує
     if (telegramId) {
       const userWithSameTelegramId = users.find(u => u.telegramId === telegramId);
@@ -227,7 +237,7 @@ export default function EmployeeRegistration({ onBack, isTelegramMiniApp = false
         logger.warn('⚠️ User with this Telegram ID already exists:', userWithSameTelegramId);
         toast({
           title: 'Користувач вже існує',
-          description: `Акаунт "${userWithSameTelegramId.name}" (роль: ${userWithSameTelegramId.role === 'employee' ? 'Працівник' : 'Менеджер'}) вже зареєстровано з цим Telegram ID. Вийдіть та виберіть правильну роль.`,
+          description: `Акаунт "${userWithSameTelegramId.name}" (роль: ${userWithSameTelegramId.role === 'employee' ? 'Працівник' : 'Менеджер'}) вже зареєстровано з цим Telegram ID. Війдіть та виберіть правильну роль.`,
           variant: 'destructive',
           duration: 6000
         });

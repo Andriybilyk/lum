@@ -13,6 +13,7 @@ export const UserSchema = z.object({
   level: z.string().min(1, 'Рівень обов\'язковий'),
   hourlyRate: z.number().positive('Почасова ставка повинна бути більше 0'),
   managerId: z.string().optional().nullable(),
+  departmentId: z.string().min(1, 'Підрозділ обов\'язковий'),
 });
 
 export type User = z.infer<typeof UserSchema>;
