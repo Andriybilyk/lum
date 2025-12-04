@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
-import { Check, X, Edit2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Check, X, Edit2, ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
 import { useData } from '@/contexts/DataContext';
 import { useToast } from '@/components/ui/use-toast';
 import { useUser } from '@/contexts/UserContext';
@@ -106,15 +106,25 @@ export default function AdditionalWorksModal({ open, onClose }: AdditionalWorksM
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
-            <Star className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />
-            Додаткові Роботи
-            {pendingWorks.length > 0 && (
-              <span className="ml-auto px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full text-sm font-semibold">
-                {pendingWorks.length} нових
-              </span>
-            )}
-          </DialogTitle>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="h-8 w-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <DialogTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
+              <Star className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />
+              Додаткові Роботи
+              {pendingWorks.length > 0 && (
+                <span className="ml-auto px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full text-sm font-semibold">
+                  {pendingWorks.length} нових
+                </span>
+              )}
+            </DialogTitle>
+          </div>
         </DialogHeader>
 
         <div className="space-y-4">

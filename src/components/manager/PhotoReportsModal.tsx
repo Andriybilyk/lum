@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Camera, Calendar, User, MapPin, Filter, Plus, Edit2, Image } from 'lucide-react';
+import { Camera, Calendar, User, MapPin, Filter, Plus, Edit2, Image, ArrowLeft } from 'lucide-react';
 import { useData } from '@/contexts/DataContext';
 import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/components/ui/use-toast';
@@ -273,10 +273,20 @@ export default function PhotoReportsModal({ open, onClose }: PhotoReportsModalPr
       <Dialog open={open && !editingProcess} onOpenChange={onClose}>
         <DialogContent className="w-[95vw] max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl font-bold">
-              <Camera className="w-6 h-6 text-purple-600" />
-              Фото Робіт
-            </DialogTitle>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="h-8 w-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl font-bold">
+                <Camera className="w-6 h-6 text-purple-600" />
+                Фото Робіт
+              </DialogTitle>
+            </div>
           </DialogHeader>
 
           <Tabs defaultValue="processes" className="w-full">
@@ -622,10 +632,20 @@ export default function PhotoReportsModal({ open, onClose }: PhotoReportsModalPr
         <Dialog open={true} onOpenChange={() => setShowAddWorkPhoto(false)}>
           <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
-                <Image className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600" />
-                Додати Загальне Фото
-              </DialogTitle>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowAddWorkPhoto(false)}
+                  className="h-8 w-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+                <DialogTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
+                  <Image className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600" />
+                  Додати Загальне Фото
+                </DialogTitle>
+              </div>
             </DialogHeader>
 
             <div className="space-y-4">
@@ -738,9 +758,19 @@ export default function PhotoReportsModal({ open, onClose }: PhotoReportsModalPr
         <Dialog open={true} onOpenChange={handleCancelEdit}>
           <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-lg font-bold">
-                📸 Фото для Процесу
-              </DialogTitle>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleCancelEdit}
+                  className="h-8 w-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </Button>
+                <DialogTitle className="text-lg font-bold">
+                  📸 Фото для Процесу
+                </DialogTitle>
+              </div>
             </DialogHeader>
 
             <div className="space-y-4">

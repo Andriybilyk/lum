@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useUser } from '@/contexts/UserContext';
 import { useData } from '@/contexts/DataContext';
 import { useNotification } from '@/contexts/NotificationContext';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { calculateEarnings, calculateDailyHours, getCurrentDate } from '@/utils/calculations';
 import { WORK_HOURS, MESSAGES } from '@/utils/constants';
 
@@ -86,7 +86,17 @@ export default function LogHoursModal({ open, onClose }: LogHoursModalProps) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="w-[95vw] max-w-md mx-auto max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl font-bold">📅 Записати Робочі Години</DialogTitle>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="h-8 w-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <DialogTitle className="text-lg sm:text-xl font-bold">📅 Записати Робочі Години</DialogTitle>
+          </div>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div>

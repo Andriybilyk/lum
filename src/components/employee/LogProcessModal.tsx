@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useUser } from '@/contexts/UserContext';
 import { useData } from '@/contexts/DataContext';
 import { useToast } from '@/components/ui/use-toast';
+import { ArrowLeft } from 'lucide-react';
 
 interface LogProcessModalProps {
   open: boolean;
@@ -167,7 +168,17 @@ export default function LogProcessModal({ open, onClose }: LogProcessModalProps)
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl font-bold">📋 Записати Процес</DialogTitle>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="h-8 w-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <DialogTitle className="text-lg sm:text-xl font-bold">📋 Записати Процес</DialogTitle>
+          </div>
         </DialogHeader>
 
         <div className="flex gap-2 mb-4">

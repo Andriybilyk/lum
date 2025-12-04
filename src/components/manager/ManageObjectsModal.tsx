@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Trash2, Plus, Edit2, FileText, Plane, MapPin, Calendar, User, Package, Search, Activity, DollarSign, Users, Clock, Wrench, TrendingUp } from 'lucide-react';
+import { Trash2, Plus, Edit2, FileText, Plane, MapPin, Calendar, User, Package, Search, Activity, DollarSign, Users, Clock, Wrench, TrendingUp, ArrowLeft } from 'lucide-react';
 import { useData } from '@/contexts/DataContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -356,10 +356,20 @@ export default function ManageObjectsModal({ open, onClose }: ManageObjectsModal
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent className="w-[95vw] max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
-              <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
-              Керування Об'єктами
-            </DialogTitle>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="h-8 w-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <DialogTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
+                <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
+                Керування Об'єктами
+              </DialogTitle>
+            </div>
           </DialogHeader>
 
           <div className="space-y-4">

@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useUser } from '@/contexts/UserContext';
 import { useData } from '@/contexts/DataContext';
 import { useToast } from '@/components/ui/use-toast';
-import { Package, DollarSign } from 'lucide-react';
+import { Package, DollarSign, ArrowLeft } from 'lucide-react';
 
 interface LogMaterialsModalProps {
   open: boolean;
@@ -95,10 +95,20 @@ export default function LogMaterialsModal({ open, onClose, preselectedObject }: 
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
-            <Package className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
-            📦 Записати Матеріали
-          </DialogTitle>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="h-8 w-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <DialogTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
+              <Package className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
+              📦 Записати Матеріали
+            </DialogTitle>
+          </div>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">

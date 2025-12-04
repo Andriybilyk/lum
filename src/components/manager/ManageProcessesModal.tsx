@@ -4,7 +4,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Trash2, Plus, Edit2, Settings } from 'lucide-react';
+import { Trash2, Plus, Edit2, Settings, ArrowLeft } from 'lucide-react';
 import { useData } from '@/contexts/DataContext';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -116,10 +116,20 @@ export default function ManageProcessesModal({ open, onClose }: ManageProcessesM
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
-              <Settings className="w-5 h-5 sm:w-6 sm:h-6" />
-              Стандартні Процеси
-            </DialogTitle>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="h-8 w-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <DialogTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
+                <Settings className="w-5 h-5 sm:w-6 sm:h-6" />
+                Стандартні Процеси
+              </DialogTitle>
+            </div>
           </DialogHeader>
 
           <div className="space-y-4">
