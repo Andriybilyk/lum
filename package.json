@@ -103,6 +103,8 @@
     "terser": "^5.44.1",
     "typescript": "^5.8.2",
     "vite": "^6.2.3",
-    "vitest": "^0.34.6"
+    "vite-plugin-pwa": "^1.2.0",
+    "vitest": "^0.34.6",
+    "workbox-window": "^7.4.0"
   }
 }
