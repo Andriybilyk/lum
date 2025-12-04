@@ -359,11 +359,15 @@ export default function ManagerRegistration({ onBack, isTelegramMiniApp = false,
                     <SelectValue placeholder="Оберіть підрозділ" />
                   </SelectTrigger>
                   <SelectContent>
-                    {departments.map((dept) => (
-                      <SelectItem key={dept.id} value={dept.id}>
-                        {dept.name}
-                      </SelectItem>
-                    ))}
+                    {departments.length === 0 ? (
+                      <div className="px-2 py-1.5 text-sm text-slate-500">Завантаження підрозділів...</div>
+                    ) : (
+                      departments.map((dept) => (
+                        <SelectItem key={dept.id} value={dept.id}>
+                          {dept.name}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
