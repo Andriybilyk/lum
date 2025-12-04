@@ -1,3 +1,11 @@
+export interface Department {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -6,6 +14,7 @@ export interface User {
   hourlyRate: number;
   managerId?: string;
   telegramId?: string;
+  departmentId: string;
 }
 
 export interface Hours {
@@ -48,6 +57,7 @@ export interface Level {
   id: string;
   name: string;
   hourlyRate: number;
+  departmentId: string;
 }
 
 export interface ObjectType {
@@ -62,6 +72,7 @@ export interface ObjectType {
   plannedBudget?: number;
   actualBudget?: number;
   materialsCost?: number;
+  departmentId: string;
 }
 
 export interface ProcessType {
@@ -71,6 +82,7 @@ export interface ProcessType {
   rate: number;
   unit: string;
   plannedVolume?: number;
+  departmentId: string;
 }
 
 export interface EditHourData {

@@ -10,6 +10,29 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      departments: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          name: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
       users: {
         Row: {
           id: string
@@ -19,6 +42,7 @@ export interface Database {
           hourly_rate: number
           manager_id: string | null
           telegram_id: string | null
+          department_id: string
           created_at: string
           updated_at: string
         }
@@ -30,6 +54,7 @@ export interface Database {
           hourly_rate: number
           manager_id?: string | null
           telegram_id?: string | null
+          department_id: string
           created_at?: string
           updated_at?: string
         }
@@ -41,6 +66,7 @@ export interface Database {
           hourly_rate?: number
           manager_id?: string | null
           telegram_id?: string | null
+          department_id?: string
           created_at?: string
           updated_at?: string
         }
@@ -50,6 +76,7 @@ export interface Database {
           id: string
           name: string
           hourly_rate: number
+          department_id: string
           created_at: string
           updated_at: string
         }
@@ -57,6 +84,7 @@ export interface Database {
           id: string
           name: string
           hourly_rate: number
+          department_id: string
           created_at?: string
           updated_at?: string
         }
@@ -64,6 +92,7 @@ export interface Database {
           id?: string
           name?: string
           hourly_rate?: number
+          department_id?: string
           created_at?: string
           updated_at?: string
         }
@@ -73,6 +102,7 @@ export interface Database {
           id: string
           name: string
           is_business_trip: boolean
+          department_id: string
           created_at: string
           updated_at: string
         }
@@ -80,6 +110,7 @@ export interface Database {
           id: string
           name: string
           is_business_trip?: boolean
+          department_id: string
           created_at?: string
           updated_at?: string
         }
@@ -87,6 +118,7 @@ export interface Database {
           id?: string
           name?: string
           is_business_trip?: boolean
+          department_id?: string
           created_at?: string
           updated_at?: string
         }
@@ -99,6 +131,7 @@ export interface Database {
           rate: number
           unit: string
           planned_volume: number | null
+          department_id: string
           created_at: string
           updated_at: string
         }
@@ -109,6 +142,7 @@ export interface Database {
           rate: number
           unit: string
           planned_volume?: number | null
+          department_id: string
           created_at?: string
           updated_at?: string
         }
@@ -119,6 +153,7 @@ export interface Database {
           rate?: number
           unit?: string
           planned_volume?: number | null
+          department_id?: string
           created_at?: string
           updated_at?: string
         }

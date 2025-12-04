@@ -16,6 +16,7 @@ import type {
   AdditionalWork,
   Material,
   WorkPhoto,
+  Department,
 } from '@/types';
 
 /**
@@ -25,6 +26,7 @@ export async function loadAllData() {
   logger.info('Loading all data from Supabase', 'DataAdapter');
 
   const [
+    departments,
     users,
     hours,
     processes,
@@ -36,6 +38,7 @@ export async function loadAllData() {
     materials,
     workPhotos
   ] = await Promise.all([
+    supabaseService.getAllDepartments(),
     supabaseService.getAllUsers(),
     supabaseService.getAllHours(),
     supabaseService.getAllProcesses(),
@@ -49,6 +52,7 @@ export async function loadAllData() {
   ]);
 
   return {
+    departments,
     users,
     hours,
     processes,

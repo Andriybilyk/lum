@@ -11,11 +11,36 @@ import type {
   ProcessType,
   AdditionalWork,
   WorkPhoto,
+  Department,
 } from '@/types';
 
 // Initialize context for current user
 export async function initializeUserContext(userId: string) {
   await setCurrentUserContext(userId);
+}
+
+// ============= DEPARTMENTS =============
+
+export async function getAllDepartments(): Promise<Department[]> {
+  try {
+    const { data, error } = await supabase
+      .from('departments')
+      .select('*')
+      .order('name');
+
+    if (error) throw error;
+
+    return (data || []).map(row => ({
+      id: row.id,
+      name: row.name,
+      description: row.description || undefined,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    }));
+  } catch (error) {
+    handleSupabaseError(error, 'getAllDepartments');
+    return [];
+  }
 }
 
 // ============= USERS =============
@@ -37,6 +62,7 @@ export async function getAllUsers(): Promise<User[]> {
       hourlyRate: Number(row.hourly_rate),
       managerId: row.manager_id || undefined,
       telegramId: row.telegram_id || undefined,
+      departmentId: row.department_id,
     }));
   } catch (error) {
     handleSupabaseError(error, 'getAllUsers');
@@ -56,6 +82,7 @@ export async function createUser(user: Omit<User, 'id'> | User): Promise<void> {
       hourly_rate: user.hourlyRate,
       manager_id: user.managerId || null,
       telegram_id: user.telegramId || null,
+      department_id: user.departmentId,
     });
 
     if (error) throw error;
@@ -71,6 +98,7 @@ export async function updateUser(userId: string, updates: Partial<Omit<User, 'id
     if (updates.name !== undefined) updateData.name = updates.name;
     if (updates.level !== undefined) updateData.level = updates.level;
     if (updates.hourlyRate !== undefined) updateData.hourly_rate = updates.hourlyRate;
+    if (updates.departmentId !== undefined) updateData.department_id = updates.departmentId;
     if (updates.managerId !== undefined) updateData.manager_id = updates.managerId || null;
 
     const { error } = await supabase
@@ -340,6 +368,7 @@ export async function getAllLevels(): Promise<Level[]> {
       id: row.id,
       name: row.name,
       hourlyRate: Number(row.hourly_rate),
+      departmentId: row.department_id,
     }));
   } catch (error) {
     handleSupabaseError(error, 'getAllLevels');
@@ -353,6 +382,7 @@ export async function createLevel(level: Level): Promise<void> {
       id: level.id,
       name: level.name,
       hourly_rate: level.hourlyRate,
+      department_id: level.departmentId,
     });
 
     if (error) throw error;
@@ -407,6 +437,7 @@ export async function getAllObjects(): Promise<ObjectType[]> {
       id: row.id,
       name: row.name,
       isBusinessTrip: row.is_business_trip,
+      departmentId: row.department_id,
     }));
   } catch (error) {
     handleSupabaseError(error, 'getAllObjects');
@@ -420,6 +451,7 @@ export async function createObject(object: ObjectType): Promise<void> {
       id: object.id,
       name: object.name,
       is_business_trip: object.isBusinessTrip,
+      department_id: object.departmentId,
     });
 
     if (error) throw error;
@@ -477,6 +509,7 @@ export async function getAllProcessTypes(): Promise<ProcessType[]> {
       rate: Number(row.rate),
       unit: row.unit,
       plannedVolume: row.planned_volume ? Number(row.planned_volume) : undefined,
+      departmentId: row.department_id,
     }));
   } catch (error) {
     handleSupabaseError(error, 'getAllProcessTypes');
@@ -486,13 +519,14 @@ export async function getAllProcessTypes(): Promise<ProcessType[]> {
 
 export async function createProcessType(processType: ProcessType): Promise<void> {
   try {
-    const { error } = await supabase.from('process_types').insert({
+    const { error} = await supabase.from('process_types').insert({
       id: processType.id,
       name: processType.name,
       object: processType.object || null,
       rate: processType.rate,
       unit: processType.unit,
       planned_volume: processType.plannedVolume || null,
+      department_id: processType.departmentId,
     });
 
     if (error) throw error;
