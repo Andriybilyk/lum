@@ -180,7 +180,7 @@ export function useOfflineSync() {
 
 // Helper функція для отримання відповідного сервісу
 async function getServiceForType(type: QueuedAction['type']) {
-  const { default: supabaseService } = await import('@/services/supabaseService');
+  const supabaseService = await import('@/services/supabaseService');
 
   switch (type) {
     case 'hours':
@@ -198,7 +198,7 @@ async function getServiceForType(type: QueuedAction['type']) {
     case 'material':
       return {
         create: supabaseService.createMaterial,
-        update: (data: any) => Promise.resolve(), // TODO: додати update для materials
+        update: (_data: any) => Promise.resolve(), // TODO: додати update для materials
         delete: supabaseService.deleteMaterial
       };
     case 'photo':
@@ -211,13 +211,13 @@ async function getServiceForType(type: QueuedAction['type']) {
       return {
         create: supabaseService.createAssignment,
         update: supabaseService.updateAssignment,
-        delete: (id: string) => Promise.resolve() // TODO: додати delete для assignments
+        delete: (_id: string) => Promise.resolve() // TODO: додати delete для assignments
       };
     case 'additional_work':
       return {
         create: supabaseService.createAdditionalWork,
         update: supabaseService.updateAdditionalWork,
-        delete: (id: string) => Promise.resolve() // TODO: додати delete для additional works
+        delete: (_id: string) => Promise.resolve() // TODO: додати delete для additional works
       };
     default:
       throw new Error(`Unknown action type: ${type}`);

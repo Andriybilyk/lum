@@ -50,13 +50,13 @@ export function useTelegramFeatures() {
   const showPopup = useCallback((params: {
     title?: string;
     message: string;
-    buttons?: Array<{ id?: string; type: 'default' | 'ok' | 'close' | 'cancel' | 'destructive'; text?: string }>;
+    buttons?: Array<{ id?: string; type?: string; text?: string }>;
   }): Promise<string | null> => {
     return new Promise((resolve) => {
       try {
         if (WebApp?.showPopup) {
-          WebApp.showPopup(params, (buttonId) => {
-            resolve(buttonId);
+          WebApp.showPopup(params as any, (buttonId?: string) => {
+            resolve(buttonId || null);
           });
         } else {
           // Fallback до browser alert
@@ -148,9 +148,9 @@ export function useTelegramFeatures() {
     return new Promise((resolve) => {
       try {
         if (WebApp?.requestContact) {
-          WebApp.requestContact((sent, contact) => {
+          WebApp.requestContact((sent: any, contact: any) => {
             if (sent && contact) {
-              resolve(contact as TelegramContact);
+              resolve(contact as unknown as TelegramContact);
             } else {
               resolve(null);
             }
@@ -171,32 +171,22 @@ export function useTelegramFeatures() {
   const requestLocation = useCallback((): Promise<TelegramLocation | null> => {
     return new Promise((resolve) => {
       try {
-        if (WebApp?.requestLocation) {
-          WebApp.requestLocation((sent, location) => {
-            if (sent && location) {
-              resolve(location as TelegramLocation);
-            } else {
+        // requestLocation not available in current SDK version - use browser geolocation API
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              resolve({
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+              });
+            },
+            () => {
               resolve(null);
             }
-          });
+          );
         } else {
-          // Fallback до browser geolocation API
-          if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-              (position) => {
-                resolve({
-                  latitude: position.coords.latitude,
-                  longitude: position.coords.longitude
-                });
-              },
-              () => {
-                resolve(null);
-              }
-            );
-          } else {
-            logger.warn('Location request not available', 'TelegramFeatures');
-            resolve(null);
-          }
+          logger.warn('Location request not available', 'TelegramFeatures');
+          resolve(null);
         }
       } catch (error) {
         logger.error('Failed to request location:', error, 'TelegramFeatures');
@@ -270,7 +260,7 @@ export function useTelegramFeatures() {
   const openLink = useCallback((url: string, options?: { try_instant_view?: boolean }) => {
     try {
       if (WebApp?.openLink) {
-        WebApp.openLink(url, options);
+        WebApp.openLink(url, options as any);
       } else {
         window.open(url, '_blank');
       }
