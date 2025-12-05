@@ -7,8 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Users, TrendingUp, Clock, Briefcase, Plus, LogOut } from 'lucide-react';
 import { FeatureErrorBoundary } from '@/components/providers/FeatureErrorBoundary';
 import AssignWorkModal from './AssignWorkModal';
-import ManageObjectsModal from './ManageObjectsModal';
-import ManageProcessesModal from './ManageProcessesModal';
+import ManageObjectsAndProcessesModal from './ManageObjectsAndProcessesModal';
 import AdditionalWorksModal from './AdditionalWorksModal';
 import LogHoursModal from '../employee/LogHoursModal';
 import LogProcessModal from '../employee/LogProcessModal';
@@ -26,8 +25,7 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
   const { users, additionalWorks } = useData();
   const navigate = useNavigate();
   const [showAssignWork, setShowAssignWork] = useState(false);
-  const [showManageObjects, setShowManageObjects] = useState(false);
-  const [showManageProcesses, setShowManageProcesses] = useState(false);
+  const [showManageObjectsAndProcesses, setShowManageObjectsAndProcesses] = useState(false);
   const [showLogHours, setShowLogHours] = useState(false);
   const [showLogProcess, setShowLogProcess] = useState(false);
   const [showAdditionalWorks, setShowAdditionalWorks] = useState(false);
@@ -157,19 +155,11 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
         </Button>
 
         <Button
-          onClick={() => setShowManageObjects(true)}
-          className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 rounded-2xl shadow-lg"
+          onClick={() => setShowManageObjectsAndProcesses(true)}
+          className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-500 hover:from-blue-700 hover:via-purple-700 hover:to-pink-600 rounded-2xl shadow-lg"
         >
           <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-          Керувати Об'єктами
-        </Button>
-
-        <Button
-          onClick={() => setShowManageProcesses(true)}
-          className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-orange-600 to-red-500 hover:from-orange-700 hover:to-red-600 rounded-2xl shadow-lg"
-        >
-          <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-          Керувати Процесами
+          Об'єкти та Процеси
         </Button>
 
         <Button
@@ -193,8 +183,7 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
       </div>
 
       <AssignWorkModal open={showAssignWork} onClose={() => setShowAssignWork(false)} />
-      <ManageObjectsModal open={showManageObjects} onClose={() => setShowManageObjects(false)} />
-      <ManageProcessesModal open={showManageProcesses} onClose={() => setShowManageProcesses(false)} />
+      <ManageObjectsAndProcessesModal open={showManageObjectsAndProcesses} onClose={() => setShowManageObjectsAndProcesses(false)} />
       <AdditionalWorksModal open={showAdditionalWorks} onClose={() => setShowAdditionalWorks(false)} />
       <PhotoReportsModal open={showPhotoReports} onClose={() => setShowPhotoReports(false)} />
       <LogHoursModal open={showLogHours} onClose={() => setShowLogHours(false)} />
