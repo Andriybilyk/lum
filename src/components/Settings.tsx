@@ -1,13 +1,15 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import { useData } from '@/contexts/DataContext';
-import { Moon, Sun, User, LogOut, AlertCircle } from 'lucide-react';
+import { Moon, Sun, User, LogOut, AlertCircle, Settings as SettingsIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import ManageProcessesModal from './manager/ManageProcessesModal';
 
 interface SettingsProps {
   onLogout?: () => void;
@@ -18,6 +20,7 @@ export default function Settings({ onLogout }: SettingsProps = {}) {
   const { user, logout } = useUser();
   const { isConfigured } = useData();
   const navigate = useNavigate();
+  const [showManageProcesses, setShowManageProcesses] = useState(false);
 
   const handleLogout = () => {
     if (onLogout) {
@@ -108,6 +111,30 @@ export default function Settings({ onLogout }: SettingsProps = {}) {
           </CardContent>
         </Card>
 
+        {/* Глобальні процеси - тільки для менеджерів */}
+        {user?.role === 'manager' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <SettingsIcon className="w-5 h-5" />
+                Стандартні Процеси
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Керуйте глобальними процесами, які можна використовувати як шаблони для всіх об'єктів
+              </p>
+              <Button
+                onClick={() => setShowManageProcesses(true)}
+                className="w-full bg-gradient-to-r from-orange-600 to-red-500 hover:from-orange-700 hover:to-red-600"
+              >
+                <SettingsIcon className="w-4 h-4 mr-2" />
+                Керувати Стандартними Процесами
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Тема */}
         <Card>
           <CardHeader>
@@ -147,6 +174,12 @@ export default function Settings({ onLogout }: SettingsProps = {}) {
           Вийти з Акаунту
         </Button>
       </div>
+
+      {/* Модальне вікно стандартних процесів */}
+      <ManageProcessesModal
+        open={showManageProcesses}
+        onClose={() => setShowManageProcesses(false)}
+      />
     </div>
   );
 }

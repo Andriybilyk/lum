@@ -8,6 +8,7 @@ import { Users, TrendingUp, Clock, Briefcase, Plus, LogOut } from 'lucide-react'
 import { FeatureErrorBoundary } from '@/components/providers/FeatureErrorBoundary';
 import AssignWorkModal from './AssignWorkModal';
 import ManageObjectsAndProcessesModal from './ManageObjectsAndProcessesModal';
+import CopyProcessesModal from './CopyProcessesModal';
 import AdditionalWorksModal from './AdditionalWorksModal';
 import LogHoursModal from '../employee/LogHoursModal';
 import LogProcessModal from '../employee/LogProcessModal';
@@ -26,6 +27,7 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
   const navigate = useNavigate();
   const [showAssignWork, setShowAssignWork] = useState(false);
   const [showManageObjectsAndProcesses, setShowManageObjectsAndProcesses] = useState(false);
+  const [showCopyProcesses, setShowCopyProcesses] = useState(false);
   const [showLogHours, setShowLogHours] = useState(false);
   const [showLogProcess, setShowLogProcess] = useState(false);
   const [showAdditionalWorks, setShowAdditionalWorks] = useState(false);
@@ -162,17 +164,26 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
           Об'єкти та Процеси
         </Button>
 
-        <Button
-          onClick={() => setShowAdditionalWorks(true)}
-          className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold bg-gradient-to-r from-amber-600 to-orange-500 hover:from-amber-700 hover:to-orange-600 rounded-2xl shadow-lg relative"
-        >
-          <span>⭐ Додаткові Роботи</span>
-          {pendingAdditionalWorks > 0 && (
-            <span className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
-              {pendingAdditionalWorks}
-            </span>
-          )}
-        </Button>
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            onClick={() => setShowCopyProcesses(true)}
+            className="h-12 sm:h-14 text-sm sm:text-base font-semibold bg-gradient-to-r from-teal-600 to-emerald-500 hover:from-teal-700 hover:to-emerald-600 rounded-2xl shadow-lg"
+          >
+            <span className="text-xs sm:text-base">📋 Копіювати Процеси</span>
+          </Button>
+
+          <Button
+            onClick={() => setShowAdditionalWorks(true)}
+            className="h-12 sm:h-14 text-sm sm:text-base font-semibold bg-gradient-to-r from-amber-600 to-orange-500 hover:from-amber-700 hover:to-orange-600 rounded-2xl shadow-lg relative"
+          >
+            <span className="text-xs sm:text-base">⭐ Додаткові Роботи</span>
+            {pendingAdditionalWorks > 0 && (
+              <span className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                {pendingAdditionalWorks}
+              </span>
+            )}
+          </Button>
+        </div>
 
         <Button
           onClick={() => setShowPhotoReports(true)}
@@ -184,6 +195,7 @@ export default function ManagerStats({ setActiveTab }: ManagerStatsProps) {
 
       <AssignWorkModal open={showAssignWork} onClose={() => setShowAssignWork(false)} />
       <ManageObjectsAndProcessesModal open={showManageObjectsAndProcesses} onClose={() => setShowManageObjectsAndProcesses(false)} />
+      <CopyProcessesModal open={showCopyProcesses} onClose={() => setShowCopyProcesses(false)} />
       <AdditionalWorksModal open={showAdditionalWorks} onClose={() => setShowAdditionalWorks(false)} />
       <PhotoReportsModal open={showPhotoReports} onClose={() => setShowPhotoReports(false)} />
       <LogHoursModal open={showLogHours} onClose={() => setShowLogHours(false)} />
